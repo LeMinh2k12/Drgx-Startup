@@ -1,0 +1,1496 @@
+<!doctype html>
+<html lang="vi" data-skin="obsidian" data-view="playbook" data-filter="all">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DrgX — Cẩm Nang & Kịch Bản Thuyết Trình Vòng Chung Kết (Word-for-Word Playbook)</title>
+<meta name="description" content="Tài liệu kịch bản thuyết trình nguyên văn (Word-for-Word), thẻ cầm tay sân khấu (Cue Cards), phân bổ thời gian giây-theo-giây và chiến thuật phản biện Q&A cho dự án DrgX.">
+<link rel="icon" href="../web/assets/logo-64.png" type="image/png">
+<style>
+/* ==========================================================================
+   DrgX CHAMPIONSHIP STAGE PLAYBOOK & CUE CARDS — DESIGN SYSTEM V3.5
+   ========================================================================== */
+:root, [data-skin="obsidian"] {
+  --bg-0: #05070e;
+  --bg-1: #0b1020;
+  --bg-2: #11182d;
+  --surface: rgba(15, 22, 42, 0.78);
+  --surface-2: rgba(22, 32, 58, 0.92);
+  --border: rgba(148, 163, 184, 0.18);
+  --border-hi: rgba(56, 189, 248, 0.48);
+  --text-0: #f8fafc;
+  --text-1: #cbd5e1;
+  --text-2: #94a3b8;
+  --primary: #38bdf8;
+  --accent: #a855f7;
+  --gold: #fbbf24;
+  --emerald: #34d399;
+  --rose: #fb7185;
+  --shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.75);
+}
+[data-skin="nebula"] {
+  --bg-0: #080514;
+  --bg-1: #130b29;
+  --bg-2: #1d123c;
+  --surface: rgba(25, 15, 52, 0.78);
+  --surface-2: rgba(38, 22, 74, 0.92);
+  --border-hi: rgba(192, 132, 252, 0.52);
+  --primary: #c084fc;
+  --accent: #f472b6;
+  --gold: #facc15;
+}
+[data-skin="tokyo"] {
+  --bg-0: #090612;
+  --bg-1: #151026;
+  --bg-2: #21193b;
+  --surface: rgba(24, 18, 44, 0.8);
+  --surface-2: rgba(35, 27, 64, 0.92);
+  --border-hi: rgba(251, 113, 133, 0.52);
+  --primary: #fb7185;
+  --accent: #38bdf8;
+  --gold: #fbbf24;
+}
+[data-skin="matrix"] {
+  --bg-0: #030b07;
+  --bg-1: #071910;
+  --bg-2: #0c291b;
+  --surface: rgba(8, 28, 18, 0.8);
+  --surface-2: rgba(14, 42, 27, 0.92);
+  --border-hi: rgba(52, 211, 153, 0.52);
+  --primary: #34d399;
+  --accent: #22d3ee;
+  --gold: #a3e635;
+}
+[data-skin="dawn"] {
+  --bg-0: #f8fafc;
+  --bg-1: #f1f5f9;
+  --bg-2: #e2e8f0;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-2: rgba(241, 245, 249, 0.98);
+  --border: rgba(15, 23, 42, 0.14);
+  --border-hi: rgba(2, 132, 199, 0.45);
+  --text-0: #0f172a;
+  --text-1: #1e293b;
+  --text-2: #475569;
+  --primary: #0284c7;
+  --accent: #7c3aed;
+  --gold: #b45309;
+  --emerald: #047857;
+  --rose: #be123c;
+  --shadow: 0 16px 36px -12px rgba(15, 23, 42, 0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.12), transparent 38%),
+    radial-gradient(circle at 88% 15%, rgba(168, 85, 247, 0.12), transparent 40%),
+    linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
+  color: var(--text-0);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+.mono {
+  font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  font-variant-ligatures: none;
+}
+
+/* Top Sticky Command Bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 24px;
+  background: var(--surface-2);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-hi);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-0);
+}
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 13px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #05070e;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+}
+.brand-title {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+.brand-sub {
+  font-size: 11px;
+  color: var(--text-2);
+  display: block;
+}
+
+/* Rehearsal Timer Widget */
+.timer-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid var(--border-hi);
+}
+[data-skin="dawn"] .timer-box { background: #fff; }
+.timer-display {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold);
+  min-width: 96px;
+  text-align: center;
+}
+.timer-target {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+}
+.btn-sm {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-0);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.18s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-sm:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+.btn-sm.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #05070e;
+  border-color: transparent;
+}
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Layout Grid: Sidebar TOC + Main Content */
+.layout {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.sidebar {
+  position: sticky;
+  top: 76px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.sidebar h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.toc-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.toc-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: var(--text-1);
+  text-decoration: none;
+  transition: 0.15s;
+}
+.toc-list a:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--primary);
+}
+.toc-time {
+  font-size: 10.5px;
+  color: var(--text-2);
+  font-family: monospace;
+}
+
+/* Hero Banner */
+.hero-doc {
+  padding: 32px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(56, 189, 248, 0.18), transparent 45%),
+    radial-gradient(circle at 12% 85%, rgba(168, 85, 247, 0.15), transparent 45%),
+    var(--surface);
+  border: 1px solid var(--border-hi);
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.55);
+  color: var(--text-1);
+}
+[data-skin="dawn"] .pill { background: #fff; }
+.pill-cyan { color: var(--primary); border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1); }
+.pill-gold { color: var(--gold); border-color: rgba(251, 191, 36, 0.45); background: rgba(251, 191, 36, 0.12); }
+.pill-emerald { color: var(--emerald); border-color: rgba(52, 211, 153, 0.45); background: rgba(52, 211, 153, 0.12); }
+.pill-rose { color: var(--rose); border-color: rgba(251, 113, 133, 0.45); background: rgba(251, 113, 133, 0.12); }
+
+.hero-doc h1 {
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+.grad {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 55%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-doc p {
+  font-size: 15px;
+  color: var(--text-1);
+  max-width: 900px;
+}
+.hero-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+.kpi-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.48);
+  border: 1px solid var(--border);
+}
+[data-skin="dawn"] .kpi-card { background: #fff; }
+.kpi-num {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--primary);
+}
+.kpi-lbl {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+/* Section Headers */
+.doc-section {
+  margin-bottom: 34px;
+}
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-head h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Speaker Role Cards */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.role-card {
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-top: 3px solid var(--primary);
+}
+.role-card.r2 { border-top-color: var(--accent); }
+.role-card.r3 { border-top-color: var(--emerald); }
+.role-card.r4 { border-top-color: var(--gold); }
+.role-tag {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.role-card.r2 .role-tag { color: var(--accent); }
+.role-card.r3 .role-tag { color: var(--emerald); }
+.role-card.r4 .role-tag { color: var(--gold); }
+.role-card h3 { font-size: 17px; margin-bottom: 8px; }
+.role-card p, .role-card li { font-size: 13.5px; color: var(--text-1); }
+.role-card ul { padding-left: 18px; margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+
+/* Slide Script Card */
+.script-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+[data-view="cuecards"] .script-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(440px, 100%), 1fr));
+  gap: 20px;
+}
+[data-filter="core5m"] .script-card[data-core="false"] {
+  display: none;
+}
+[data-filter="fast2m"] .script-card[data-fast="false"] {
+  display: none;
+}
+
+.script-card {
+  padding: 24px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.script-card:hover {
+  border-color: var(--border-hi);
+}
+.script-card.active-rehearsal {
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 32px rgba(251, 191, 36, 0.28);
+}
+.sc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.sc-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sc-num, .sc-meta .pill, .sc-footer .mono, .toc-time, .hero-kpis {
+  display: none !important;
+}
+.sc-title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.sc-sub {
+  font-size: 12px;
+  color: var(--text-2);
+}
+.sc-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Visual Preview Box inside Script Card */
+.sc-visual {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.45);
+  border-left: 3px solid var(--primary);
+  font-size: 13px;
+  color: var(--text-1);
+  margin-bottom: 14px;
+}
+[data-skin="dawn"] .sc-visual { background: #f1f5f9; }
+[data-view="cuecards"] .sc-visual { display: none; }
+
+/* Speech Verbatim Block */
+.sc-speech {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.65), rgba(2, 6, 23, 0.75));
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-0);
+  margin-bottom: 12px;
+}
+[data-skin="dawn"] .sc-speech {
+  background: #ffffff;
+  border-color: rgba(2, 132, 199, 0.35);
+}
+[data-view="cuecards"] .sc-speech {
+  font-size: 18.5px;
+  line-height: 1.8;
+  font-weight: 500;
+}
+.cue-click {
+  display: inline-block;
+  padding: 1px 8px;
+  margin: 0 3px;
+  border-radius: 6px;
+  background: rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  color: var(--gold);
+  font-family: monospace;
+  font-size: 0.82em;
+  font-weight: 800;
+}
+.cue-num {
+  color: var(--primary);
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: rgba(56, 189, 248, 0.4);
+  text-underline-offset: 3px;
+}
+.cue-act {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: rgba(52, 211, 153, 0.16);
+  color: var(--emerald);
+  font-size: 0.85em;
+  font-weight: 700;
+}
+
+.sc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  flex-wrap: wrap;
+}
+
+/* Tables */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+table.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.doc-table th, .doc-table td {
+  padding: 11px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.doc-table th {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--primary);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.doc-table tr:hover td {
+  background: rgba(56, 189, 248, 0.04);
+}
+
+/* Checklist */
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.check-item input {
+  margin-top: 4px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--emerald);
+}
+.check-item.done {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(52, 211, 153, 0.07);
+}
+
+@media (max-width: 1024px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .layout > * { min-width: 0; }
+  .sidebar { position: static; max-height: none; }
+  .role-grid, .hero-kpis, .checklist-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+  body { background: #fff !important; color: #0f172a !important; }
+  .topbar, .sidebar { display: none !important; }
+  .layout { display: block; padding: 0; max-width: 100%; }
+  .script-card, .role-card, .hero-doc {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    background: #fff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    margin-bottom: 14px;
+  }
+  .sc-speech {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid #94a3b8 !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP STICKY COMMAND BAR -->
+<header class="topbar" role="banner">
+  <a href="index.html" class="brand" title="Quay lại Slide Thuyết trình 23 trang">
+    <span class="brand-mark mono">DrgX</span>
+    <span>
+      <span class="brand-title">Cẩm Nang &amp; Kịch Bản Thuyết Trình</span>
+      <span class="brand-sub">Kế hoạch 153/KH-SGDĐT · 23 Slide · Word-for-Word Stage Playbook</span>
+    </span>
+  </a>
+
+  <!-- Live Rehearsal Stopwatch -->
+  <div class="timer-box" role="region" aria-label="Đồng hồ bấm giờ tập dượt thuyết trình">
+    <span class="mono timer-display" id="rehClock">00:00 / 05:00</span>
+    <span class="timer-target" id="rehTargetSlide">Chuẩn bị: S01</span>
+    <button type="button" class="btn-sm" id="btnRehToggle" onclick="toggleRehearsal()">▶ Bắt đầu tập</button>
+    <button type="button" class="btn-sm" onclick="resetRehearsal()">↺ Reset</button>
+  </div>
+
+  <!-- View Mode, Filter, Skin & Export Controls -->
+  <div class="toolbar-group">
+    <button type="button" class="btn-sm active" id="btnViewPlaybook" onclick="setViewMode('playbook')">📖 Cẩm nang đầy đủ</button>
+    <button type="button" class="btn-sm" id="btnViewCue" onclick="setViewMode('cuecards')">🃏 Thẻ cầm tay (Cue Cards)</button>
+    <button type="button" class="btn-sm active" id="btnFilterAll" onclick="setSlideFilter('all')">23 Slide</button>
+    <button type="button" class="btn-sm" id="btnFilter5m" onclick="setSlideFilter('core5m')">⚡ Bản 5 Phút (14 Slide)</button>
+    <button type="button" class="btn-sm" onclick="cycleSkin()" title="Đổi giao diện Sáng/Tối">🎨 Skin</button>
+    <button type="button" class="btn-sm" onclick="window.print()" title="In ra A4 hoặc xuất PDF">🖨️ In A4 / PDF</button>
+    <a href="Loi-thoai-thuyet-trinh-2-phut-DrgX.docx" class="btn-sm active" download>📥 Tải Word 2 Phút (≤50 từ/slide)</a>
+    <a href="Kich-ban-thuyet-trinh-DrgX.docx" class="btn-sm" download>📥 Tải Cẩm Nang .DOCX</a>
+    <a href="https://drgx-web.netlify.app/" target="_blank" rel="noopener" class="btn-sm">🌐 App Main (drgx-web.netlify.app)</a>
+    <a href="index.html" class="btn-sm active">🎬 Mở Slide (24)</a>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- STICKY SIDEBAR TOC -->
+  <aside class="sidebar" aria-label="Mục lục kịch bản thuyết trình">
+    <h3>Cấu trúc tài liệu</h3>
+    <ul class="toc-list">
+      <li><a href="#sec-overview"><span>1. Chiến lược &amp; Phân vai</span><span class="toc-time">3 người</span></a></li>
+      <li><a href="#sec-timing"><span>2. Bảng Phân bổ Thời gian</span><span class="toc-time">300s/420s</span></a></li>
+      <li><a href="#sec-scripts"><span>3. Kịch bản 18 Slide Chính</span><span class="toc-time">S01–S18</span></a></li>
+      <li><a href="#sec-demo"><span>4. Kịch bản 3 Phiên Demo</span><span class="toc-time">Zero-Crash</span></a></li>
+      <li><a href="#sec-qa"><span>5. Phụ lục Phản biện Q&amp;A</span><span class="toc-time">PL1–PL5</span></a></li>
+      <li><a href="#sec-checklist"><span>6. Checklist Trước Giờ G</span><span class="toc-time">15 phút</span></a></li>
+    </ul>
+
+    <h3>Đi nhanh tới Slide</h3>
+    <ul class="toc-list" id="slideTocList">
+      <li><a href="#sc-s0"><span>S00 · Giới thiệu Đội ngũ Lớp 9A2</span><span class="toc-time">25 từ</span></a></li>
+      <li><a href="#sc-s1"><span>S01 · Mở màn: Tới 2 giờ → 60s</span><span class="toc-time">25 từ</span></a></li>
+      <li><a href="#sc-s2"><span>S02 · Hệ sinh thái DrgX 5 Trụ cột</span><span class="toc-time">25 từ</span></a></li>
+      <li><a href="#sc-s3"><span>S03 · Ba con người &amp; Themis</span><span class="toc-time">26 từ</span></a></li>
+      <li><a href="#sc-s4"><span>S04 · Thế kẹt AI Học &amp; Thi</span><span class="toc-time">27 từ</span></a></li>
+      <li><a href="#sc-s5"><span>S05 · Kiến trúc Kép (Dev / CP)</span><span class="toc-time">27 từ</span></a></li>
+      <li><a href="#sc-s6"><span>S06 · Sản phẩm thật &amp; Web Lab</span><span class="toc-time">26 từ</span></a></li>
+      <li><a href="#sc-s7"><span>S07 · LIVE Demo 1: Stress Test</span><span class="toc-time">27 từ</span></a></li>
+      <li><a href="#sc-s8"><span>S08 · LIVE Demo 2: Winnowing</span><span class="toc-time">27 từ</span></a></li>
+      <li><a href="#sc-s9"><span>S09 · LIVE Demo 3: Phòng thi LAN</span><span class="toc-time">26 từ</span></a></li>
+      <li><a href="#sc-s10"><span>S10 · Công nghệ lõi &amp; STEM</span><span class="toc-time">26 từ</span></a></li>
+      <li><a href="#sc-s11"><span>S11 · Bằng chứng 68/68 PASS</span><span class="toc-time">27 từ</span></a></li>
+      <li><a href="#sc-s12"><span>S12 · So sánh &amp; 3 Hào bảo vệ</span><span class="toc-time">26 từ</span></a></li>
+      <li><a href="#sc-s13"><span>S13 · Bánh đà B2B2C &amp; GTM</span><span class="toc-time">26 từ</span></a></li>
+      <li><a href="#sc-s14"><span>S14 · Unit Economics (6,2x–7,9x)</span><span class="toc-time">28 từ</span></a></li>
+      <li><a href="#sc-s15"><span>S15 · Tài chính 3 năm &amp; Độ nhạy</span><span class="toc-time">27 từ</span></a></li>
+      <li><a href="#sc-s16"><span>S16 · Lộ trình &amp; Tác động XH</span><span class="toc-time">27 từ</span></a></li>
+      <li><a href="#sc-s17"><span>S17 · Đội ngũ 9A2 &amp; Đề xuất</span><span class="toc-time">28 từ</span></a></li>
+      <li><a href="#sc-s18"><span>S18 · Kết: 2 giờ ──► 60 giây</span><span class="toc-time">28 từ</span></a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- HERO OVERVIEW -->
+    <section class="hero-doc" id="sec-overview">
+      <div class="hero-badges">
+        <span class="pill pill-gold">🏆 HỒ SƠ CHUNG KẾT CẤP TỈNH PHÚ THỌ 2026–2027</span>
+        <span class="pill pill-cyan">Lĩnh vực 01: AI · STEM · EdTech (QĐ 1131/QĐ-TTg)</span>
+        <span class="pill pill-emerald">68/68 Health Gate PASS · 11/11 Smoke Test LAN</span>
+        <span class="pill pill-rose">Học có AI · Thi sạch AI · Tương thích 100% Themis</span>
+      </div>
+      <h1>Cẩm Nang &amp; Kịch Bản Thuyết Trình <span class="grad">DrgX: Lập Trình Đã Tiến Hóa</span></h1>
+      <p>
+        Tài liệu điều phối sân khấu toàn diện dành cho đội thi tại Vòng Chung kết Cuộc thi Học sinh, Sinh viên với Ý tưởng Khởi nghiệp tỉnh Phú Thọ (theo <strong>Kế hoạch số 153/KH-SGDĐT ngày 25/9/2026</strong>). Đồng bộ 100% từng slide, từng con số và từng nhịp bấm <span class="cue-click">[BẤM →]</span> với bản trình chiếu <a href="index.html" style="color:var(--primary);font-weight:700">presentation/index.html</a> (nhấn <code>F2</code> để ẩn thanh taskbar điều khiển, click chuột nửa trái/phải màn hình để lùi/tiến slide).
+      </p>
+      <div class="hero-kpis">
+        <div class="kpi-card">
+          <div class="kpi-num mono">5p00s / 6p20s</div>
+          <div class="kpi-lbl">3 chế độ thời lượng (Video 3′ · 5′ Core · 18 Slide Full + 5 Phụ lục)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num mono">100 / 100 đ</div>
+          <div class="kpi-lbl">Ánh xạ 1-1 toàn bộ 6 nhóm tiêu chí chấm điểm Phụ lục 06</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num mono">39 MB · 3,8 MB</div>
+          <div class="kpi-lbl">Tauri 2 Rust Shell &amp; Nhân chấm C++17</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num mono">6,2x – 7,9x</div>
+          <div class="kpi-lbl">LTV/CAC vượt gấp đôi chuẩn SaaS · Hòa vốn Quý 3/2028</div>
+        </div>
+      </div>
+
+      <!-- 2-MINUTE EXPRESS SCRIPT CALLOUT -->
+      <div style="margin-top:24px;padding:20px 26px;border-radius:18px;background:linear-gradient(90deg,rgba(56,189,248,0.14),rgba(168,85,247,0.12));border:1px solid var(--border-hi);display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap">
+        <div>
+          <span class="pill pill-gold" style="font-size:12px;padding:3px 10px">⚡ CHUẨN LỜI THOẠI 2 PHÚT · ≤ 50 TỪ / SLIDE</span>
+          <h3 style="font-size:20px;font-weight:900;margin:6px 0 4px">Kịch Bản Thuyết Trình 2 Phút Nói Trên 18 Slide (25–28 từ/slide) + Minh Họa (&lt; 3 phút)</h3>
+          <p style="color:var(--text-1);font-size:14.5px;max-width:850px">Dành riêng cho 4 bạn học sinh <strong>Lớp 9A2 — Trường THCS Sông Lô</strong>: Lê Tiến Dũng thuyết trình mở/kết, Lê Bình Minh chạy demo trực tiếp F9/Stress/LAN, Minh Quang &amp; Minh Đăng thuyết trình bằng chứng và tài chính.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn-sm active" href="Loi-thoai-thuyet-trinh-2-phut-DrgX.docx" download style="padding:10px 18px;font-size:14px">📥 Tải File Word Lời Thoại 2 Phút (.docx)</a>
+          <a class="btn-sm" href="KICH-BAN-2-PHUT.md" target="_blank" style="padding:10px 18px;font-size:14px">📖 Xem Bản .MD</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPEAKER ROLES -->
+    <section class="doc-section">
+      <div class="sec-head">
+        <h2>1. Phân Vai 4 Thành Viên Lớp 9A2 — Trường THCS Sông Lô</h2>
+        <span class="pill pill-cyan">Phối hợp nhịp nhàng · Tiêu chí 6.1 &amp; 6.3 (10 điểm)</span>
+      </div>
+      <div class="role-grid">
+        <article class="role-card r1">
+          <div class="role-tag">1 · Lê Tiến Dũng · Nhóm trưởng</div>
+          <h3>Dẫn dắt Mở đầu, Kiến trúc Kép &amp; Lời kết</h3>
+          <p>Lớp 9A2 — Trường THCS Sông Lô. Đứng vị trí trung tâm sân khấu.</p>
+          <ul>
+            <li>Phụ trách: <strong>S00 → S05</strong> và <strong>S16 → S18</strong> (25–28 từ/slide).</li>
+            <li>Phong thái: Tự nhiên, rõ ràng, đối lập <em>“2 giờ vs 60 giây”</em> và <em>“Học có AI — Thi sạch AI”</em>.</li>
+          </ul>
+        </article>
+        <article class="role-card r2">
+          <div class="role-tag">2 · Lê Bình Minh · Nhóm phó</div>
+          <h3>Điều khiển 3 Trạm Live Demo &amp; Công nghệ Lõi</h3>
+          <p>Lớp 9A2 — Trường THCS Sông Lô. Đứng cạnh máy tính trình chiếu.</p>
+          <ul>
+            <li>Phụ trách: <strong>S06 → S10</strong> (Sản phẩm thật, Demo Stress Test 3 cột, Demo Winnowing, Demo Phòng thi LAN 40 máy, 39 MB RAM &amp; STEM).</li>
+            <li>Phong thái: Bấm chạy Demo dứt khoát khớp từng câu nói.</li>
+          </ul>
+        </article>
+        <article class="role-card r3">
+          <div class="role-tag">3 · Minh Quang · Thành viên</div>
+          <h3>Bằng chứng 68/68 PASS, Themis &amp; Mạch STEM</h3>
+          <p>Lớp 9A2 — Trường THCS Sông Lô. Cầm mô hình mạch Arduino/Robot STEM.</p>
+          <ul>
+            <li>Phụ trách: <strong>S11 → S12</strong> (68/68 chốt chặn tự động, 47 bài tập + 42 bài giảng, tương thích 100% Themis) và giơ mạch STEM ở S10.</li>
+          </ul>
+        </article>
+        <article class="role-card r4">
+          <div class="role-tag">4 · Minh Đăng · Thành viên</div>
+          <h3>Bánh đà B2B2C, Chi phí 0 đồng &amp; Tài chính 3 Năm</h3>
+          <p>Lớp 9A2 — Trường THCS Sông Lô. Cầm bộ Hồ sơ in A4 trao BGK.</p>
+          <ul>
+            <li>Phụ trách: <strong>S13 → S15</strong> (Lan tỏa từ Giáo viên, chi phí máy chủ ≈ 0đ, Hòa vốn Năm 2 &amp; Độ nhạy hụt 30% vẫn có lãi).</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- TIMING TABLE -->
+    <section class="doc-section" id="sec-timing">
+      <div class="sec-head">
+        <h2>2. Bảng Phân Bổ Thời Gian &amp; Đối Chiếu Phụ Lục 06 (100 Điểm)</h2>
+        <span class="pill pill-gold">Chuẩn hóa từng giây · Khớp 100% bộ đếm trong index.html</span>
+      </div>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Chương</th>
+              <th>Slide</th>
+              <th>Nội dung trọng tâm</th>
+              <th>Tiêu chí Phụ lục 06</th>
+              <th>Bản 5 Phút (Core)</th>
+              <th>Bản Đầy đủ (Full)</th>
+              <th>Người nói</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>01 · Vấn đề</strong></td>
+              <td class="mono">S01 → S04</td>
+              <td>Cold Open 2 giờ → 60s, Hệ sinh thái 5 trụ cột, 3 Persona &amp; Điểm mù Themis, Thế kẹt AI</td>
+              <td><strong>1.1, 1.2, 1.3, 1.4</strong> (20 điểm)</td>
+              <td class="mono">65 giây</td>
+              <td class="mono">65 giây</td>
+              <td>Diễn giả 1 (CEO)</td>
+            </tr>
+            <tr>
+              <td><strong>02 · Giải pháp &amp; Demo</strong></td>
+              <td class="mono">S05 → S09</td>
+              <td>Kiến trúc Kép (Dev/CP), Sản phẩm thật, Demo Stress 3 cột, Demo Winnowing, Demo LAN 40 máy</td>
+              <td><strong>2.1, 2.4, 3.1, 3.3</strong> (25 điểm)</td>
+              <td class="mono">115 giây</td>
+              <td class="mono">135 giây</td>
+              <td>CEO + CTO</td>
+            </tr>
+            <tr>
+              <td><strong>03 · Bằng chứng</strong></td>
+              <td class="mono">S10 → S12</td>
+              <td>Kiến trúc lõi tự chủ &amp; STEM Arduino/ESP32, 67/67 Chốt chặn Xanh, Bảng so sánh IDE truyền thống + Themis / OJ</td>
+              <td><strong>1.4, 2.1, 3.2, 3.3, 6.2</strong> (15 điểm)</td>
+              <td class="mono">15 giây</td>
+              <td class="mono">55 giây</td>
+              <td>Diễn giả 2 (CTO)</td>
+            </tr>
+            <tr>
+              <td><strong>04 · Kinh doanh</strong></td>
+              <td class="mono">S13 → S15</td>
+              <td>Bánh đà B2B2C (55tr MKT), Unit Economics (GM 82–85%, LTV/CAC 6,2x–7,9x), Tài chính 3 năm &amp; Độ nhạy</td>
+              <td><strong>2.2, 2.3, 4.1, 4.2, 5.1, 5.2</strong> (20 điểm)</td>
+              <td class="mono">70 giây</td>
+              <td class="mono">70 giây</td>
+              <td>Diễn giả 3 (CFO)</td>
+            </tr>
+            <tr>
+              <td><strong>05 · Tác động &amp; Kết</strong></td>
+              <td class="mono">S16 → S18</td>
+              <td>Lộ trình Phú Thọ → Toàn quốc, Đội ngũ &amp; Vốn ươm tạo 300tr, Lời kết 2 giờ ──► 60 giây</td>
+              <td><strong>4.3, 4.4, 6.1, 6.3, 6.4</strong> (20 điểm)</td>
+              <td class="mono">35 giây</td>
+              <td class="mono">55 giây</td>
+              <td>Diễn giả 1 + Cả đội</td>
+            </tr>
+            <tr>
+              <td><strong>Tổng cộng</strong></td>
+              <td class="mono">18 Slide (+5 PL)</td>
+              <td><strong>Hoàn tất phần trình bày chính thức (bấm phím A để mở 5 Slide Phụ lục PL1–PL5)</strong></td>
+              <td><strong>100 / 100 điểm</strong></td>
+              <td class="mono"><strong>300s (5p00s)</strong></td>
+              <td class="mono"><strong>380s (6p20s)</strong></td>
+              <td><strong>Phối hợp 3 người</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+      <!-- 3. KỊCH BẢN TỪNG SLIDE -->
+    <section class="doc-section" id="sec-scripts">
+      <div class="sec-head">
+        <h2>3. Lời Thoại Từng Slide</h2>
+        <span class="pill pill-emerald">Bấm "🃏 Thẻ cầm tay" để phóng to chữ</span>
+      </div>
+
+      <div class="script-grid" id="scriptGrid">
+
+        <!-- S00 -->
+        <article class="script-card" id="sc-s0" data-core="true" data-start="0" data-end="7">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S00</div>
+              <div>
+                <h3 class="sc-title">Giới Thiệu Đội Ngũ Lớp 9A2 — Trường THCS Sông Lô</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#0" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Em chào Ban Giám khảo ạ! Chúng em gồm <strong>Tiến Dũng, Bình Minh, Minh Đăng, Minh Quang</strong> đến từ <strong>lớp 9A2, trường THCS Sông Lô</strong>.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Cả 4 bạn mỉm cười cúi chào và giơ tay khi được gọi tên.</span>
+          </div>
+        </article>
+
+        <!-- S01 -->
+        <article class="script-card" id="sc-s1" data-core="true" data-start="7" data-end="14">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S01</div>
+              <div>
+                <h3 class="sc-title">Mở Màn — Từ 2 Giờ Cài Đặt Xuống Còn 60 Giây</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#1" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Mỗi lần cài C++ để học, tụi em mất <span class="cue-num">gần hai tiếng</span> sửa lỗi. Với <strong>DrgX</strong>, mở máy <span class="cue-num">sáu mươi giây</span> là code được ngay.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Chỉ vào đồng hồ 60 giây màu xanh trên màn hình.</span>
+          </div>
+        </article>
+
+        <!-- S02 -->
+        <article class="script-card" id="sc-s2" data-core="true" data-start="14" data-end="21">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S02</div>
+              <div>
+                <h3 class="sc-title">Nhận Diện Thương Hiệu — Hệ Sinh Thái DrgX 5 Trụ Cột</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#2" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “DrgX gói trọn <strong>năm công cụ</strong> vào một ứng dụng chạy thật, đã vượt qua toàn bộ <span class="cue-num">sáu mươi tám bài kiểm định tự động</span>.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Hướng tay về khung Video Intro đang chạy.</span>
+          </div>
+        </article>
+
+        <!-- S03 -->
+        <article class="script-card" id="sc-s3" data-core="true" data-start="21" data-end="28">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S03</div>
+              <div>
+                <h3 class="sc-title">Ba Con Người, Cùng Một Phòng Máy &amp; Điểm Mù Themis</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#3" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Ở phòng máy, học sinh dễ bị <span class="cue-num">không điểm oan</span> vì sai tên file <strong>Themis</strong>, còn thầy cô mất <span class="cue-num">bốn mươi phút</span> gom bài qua USB.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Bấm hiện 3 thẻ Học sinh / Giáo viên / Nhà trường.</span>
+          </div>
+        </article>
+
+        <!-- S04 -->
+        <article class="script-card" id="sc-s4" data-core="true" data-start="28" data-end="35">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S04</div>
+              <div>
+                <h3 class="sc-title">Thế Kẹt AI — Mở Khi Thi Hay Cấm Hoàn Toàn?</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#4" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Về AI cũng rất khó: mở AI lúc thi thì các bạn <span class="cue-num">chép bài trong ba giây</span>, nhưng cấm hẳn thì lúc tự học thiếu người giảng.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Dang nhẹ hai tay minh họa hai lựa chọn đối lập.</span>
+          </div>
+        </article>
+
+        <!-- S05 -->
+        <article class="script-card" id="sc-s5" data-core="true" data-start="35" data-end="42">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S05</div>
+              <div>
+                <h3 class="sc-title">Kiến Trúc Kép: Học Có AI · Thi Sạch AI</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#5" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Vì vậy tụi em tách làm hai chế độ: giờ tự học mở <strong>Dev Studio</strong> có AI gợi mở; giờ thi bật <strong>CP Studio khóa sạch AI</strong>.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Chuyển giao:</strong> Nhường nhịp cho Lê Bình Minh trình diễn phần Kỹ thuật &amp; Demo.</span>
+          </div>
+        </article>
+
+        <!-- S06 -->
+        <article class="script-card" id="sc-s6" data-core="false" data-start="42" data-end="49">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S06</div>
+              <div>
+                <h3 class="sc-title">Sản Phẩm Thật &amp; Web Lab Không Cần Cài Đặt</h3>
+                <div class="sc-sub">Người nói: Lê Bình Minh (Nhóm phó)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#6" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Mọi tính năng đều chạy thật: bấm <strong>F9 chấm bài tức thì</strong>, còn phòng máy khóa quyền cài chỉ cần mở <strong>Web Lab</strong> trên trình duyệt.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Chỉ vào khung ảnh chụp IDE và Web Lab.</span>
+          </div>
+        </article>
+
+        <!-- S07 -->
+        <article class="script-card" id="sc-s7" data-core="true" data-start="49" data-end="60">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S07</div>
+              <div>
+                <h3 class="sc-title">⚡ TRẠM DEMO SỐNG 01 · Differential Stress Test 3 Cột</h3>
+                <div class="sc-sub">Người nói: Lê Bình Minh (Nhóm phó)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#7" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Khi code sai ở test ẩn, <strong>Stress Test ba cột</strong> tự sinh dữ liệu đối chiếu và bắt sống ngay <span class="cue-num">lỗi tràn số ở vòng thứ tư</span>.” <span class="cue-click">[BẤM → chạy Demo]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Bấm <code>→</code> để 4 vòng test chạy tự động và dừng ở dòng báo đỏ Vòng #04.</span>
+          </div>
+        </article>
+
+        <!-- S08 -->
+        <article class="script-card" id="sc-s8" data-core="true" data-start="60" data-end="71">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S08</div>
+              <div>
+                <h3 class="sc-title">🔍 TRẠM DEMO SỐNG 02 · Chống Đạo Văn Winnowing k-gram</h3>
+                <div class="sc-sub">Người nói: Lê Bình Minh (Nhóm phó)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#8" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Nếu có bạn chép bài rồi đổi hết tên biến, thuật toán <strong>Winnowing</strong> vẫn chuẩn hóa cấu trúc và phát hiện <span class="cue-num">trùng khớp một trăm phần trăm</span>.” <span class="cue-click">[BẤM → chạy Demo]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Bấm <code>→</code> để đồng hồ nhảy vọt lên <code>100%</code> và hiện luồng Token đỏ.</span>
+          </div>
+        </article>
+
+        <!-- S09 -->
+        <article class="script-card" id="sc-s9" data-core="true" data-start="71" data-end="82">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S09</div>
+              <div>
+                <h3 class="sc-title">🏫 TRẠM DEMO SỐNG 03 · Phòng Thi Mạng LAN 40 Máy</h3>
+                <div class="sc-sub">Người nói: Lê Bình Minh (Nhóm phó)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#9" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Cả lớp <span class="cue-num">bốn mươi máy</span> nộp bài qua mạng LAN không cần Internet chỉ mất <span class="cue-num">mười bảy giây</span>, và xuất ngay thư mục chuẩn cho <strong>Themis</strong>.” <span class="cue-click">[BẤM → chạy Demo]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Bấm <code>→</code> cho 40 hạt sáng bay về máy chủ Giáo viên.</span>
+          </div>
+        </article>
+
+        <!-- S10 -->
+        <article class="script-card" id="sc-s10" data-core="false" data-start="82" data-end="89">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S10</div>
+              <div>
+                <h3 class="sc-title">Công Nghệ Tự Làm Chủ (39 MB RAM) &amp; STEM Robotics</h3>
+                <div class="sc-sub">Người nói: Lê Bình Minh (Nhóm phó)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#10" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Nhờ viết bằng Rust và C++17, ứng dụng chỉ tốn <span class="cue-num">ba mươi chín mê-ga-bai RAM</span>, tích hợp sẵn mô phỏng nạp mạch <strong>Arduino và Robot STEM</strong>.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Minh Quang giơ mô hình mạch Arduino/ESP32 hoặc Robot STEM minh họa.</span>
+          </div>
+        </article>
+
+        <!-- S11 -->
+        <article class="script-card" id="sc-s11" data-core="true" data-start="89" data-end="96">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S11</div>
+              <div>
+                <h3 class="sc-title">Bằng Chứng Thực Nghiệm — 68/68 Chốt Chặn Xanh</h3>
+                <div class="sc-sub">Người nói: Minh Quang (Thành viên)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#11" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Toàn bộ hệ thống cùng kho <span class="cue-num">bốn mươi bảy bài tập</span> và <span class="cue-num">bốn mươi hai bài giảng</span> đều vượt qua <span class="cue-num">sáu mươi tám chốt chặn tự động</span>.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Chỉ vào màn hình Terminal báo <code>100% GREEN · 68/68 PASS</code>.</span>
+          </div>
+        </article>
+
+        <!-- S12 -->
+        <article class="script-card" id="sc-s12" data-core="false" data-start="96" data-end="103">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S12</div>
+              <div>
+                <h3 class="sc-title">So Sánh Đa Chiều &amp; Tương Thích 100% Themis</h3>
+                <div class="sc-sub">Người nói: Minh Quang (Thành viên)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#12" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “DrgX không thay thế <strong>Themis</strong> của thầy cô mà bổ sung bước <strong>tự chấm F9</strong> lúc đang code, thu bài qua LAN và chống đạo văn.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Chuyển giao:</strong> Nhường nhịp cho Minh Đăng trình bày phần Lan tỏa &amp; Tài chính.</span>
+          </div>
+        </article>
+
+        <!-- S13 -->
+        <article class="script-card" id="sc-s13" data-core="true" data-start="103" data-end="110">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S13</div>
+              <div>
+                <h3 class="sc-title">Bánh Đà Tăng Trưởng B2B2C &amp; Truyền Thông Học Đường</h3>
+                <div class="sc-sub">Người nói: Minh Đăng (Thành viên)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#13" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Chỉ cần <span class="cue-num">một giáo viên</span> dùng phòng thi LAN miễn phí sẽ kéo theo cả lớp cài đặt, kết hợp giải đấu <strong>Mini-Contest</strong> ngay tại trường.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Chỉ vào vòng tròn Bánh đà B2B2C.</span>
+          </div>
+        </article>
+
+        <!-- S14 -->
+        <article class="script-card" id="sc-s14" data-core="true" data-start="110" data-end="117">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S14</div>
+              <div>
+                <h3 class="sc-title">Unit Economics — Thêm Học Sinh, Chi Phí Máy Chủ ≈ 0 Đồng</h3>
+                <div class="sc-sub">Người nói: Minh Đăng (Thành viên)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#14" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Vì trình biên dịch chạy ngay trên máy học sinh nên <strong>chi phí máy chủ bằng không</strong>, giúp biên lợi nhuận gộp đạt <span class="cue-num">trên tám mươi phần trăm</span>.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Chỉ vào thẻ Biên lợi nhuận gộp 82–85% và LTV/CAC 6,2x–7,9x.</span>
+          </div>
+        </article>
+
+        <!-- S15 -->
+        <article class="script-card" id="sc-s15" data-core="true" data-start="117" data-end="124">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S15</div>
+              <div>
+                <h3 class="sc-title">Tài Chính 3 Năm, Hòa Vốn &amp; Kiểm Định Độ Nhạy</h3>
+                <div class="sc-sub">Người nói: Minh Đăng (Thành viên)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#15" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Dự án <strong>hòa vốn vào năm thứ hai</strong>; nhờ chi phí vận hành thấp, kể cả <span class="cue-num">doanh thu hụt ba mươi phần trăm</span> thì vẫn có lãi.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Chuyển giao:</strong> Lê Tiến Dũng bước lên trung tâm khép lại bài thuyết trình.</span>
+          </div>
+        </article>
+
+        <!-- S16 -->
+        <article class="script-card" id="sc-s16" data-core="false" data-start="124" data-end="131">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S16</div>
+              <div>
+                <h3 class="sc-title">Lộ Trình Mở Rộng &amp; Tác Động Xã Hội</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#16" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Tụi em bắt đầu thử nghiệm tại <strong>Phú Thọ</strong> rồi mở rộng ra các trường miền núi, giúp học sinh thiếu Internet vẫn luyện thi công bằng.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Chỉ vào lộ trình Phú Thọ → Miền Bắc → Toàn quốc.</span>
+          </div>
+        </article>
+
+        <!-- S17 -->
+        <article class="script-card" id="sc-s17" data-core="true" data-start="131" data-end="138">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S17</div>
+              <div>
+                <h3 class="sc-title">Đội Ngũ Lớp 9A2 THCS Sông Lô &amp; Đề Xuất Đồng Hành</h3>
+                <div class="sc-sub">Người nói: Lê Tiến Dũng (Nhóm trưởng)</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#17" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Bốn thành viên <strong>lớp 9A2 trường THCS Sông Lô</strong> mong được Sở Giáo dục kết nối <strong>chạy thử nghiệm tại trường</strong> và hỗ trợ cố vấn chuyên môn.” <span class="cue-click">[BẤM →]</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Thao tác:</strong> Cả 4 bạn đứng sát nhau chuẩn bị chào kết.</span>
+          </div>
+        </article>
+
+        <!-- S18 -->
+        <article class="script-card" id="sc-s18" data-core="true" data-start="138" data-end="146">
+          <div class="sc-header">
+            <div class="sc-title-wrap">
+              <div class="sc-num mono">S18</div>
+              <div>
+                <h3 class="sc-title">Kết Thúc — Từ 2 Giờ Xuống 60 Giây</h3>
+                <div class="sc-sub">Người nói: Cả 4 thành viên Lớp 9A2 THCS Sông Lô</div>
+              </div>
+            </div>
+            <div class="sc-meta">
+              <a href="index.html#18" class="btn-sm">Mở Slide ↗</a>
+            </div>
+          </div>
+          <div class="sc-speech">
+            “Từ <strong>hai giờ cài đặt</strong> nay chỉ còn <span class="cue-num">sáu mươi giây</span> — DrgX đã sẵn sàng cho mọi phòng máy. Chúng em cảm ơn Ban Giám khảo ạ!” <span class="cue-act">Cả 4 bạn cúi chào đều</span>
+          </div>
+          <div class="sc-footer">
+            <span>🎭 <strong>Khoảnh khắc kết:</strong> Bấm phím <code>A</code> ngay khi Giám khảo đặt câu hỏi đầu tiên!</span>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- 3 LIVE DEMO PLAYBOOK -->
+    <section class="doc-section" id="sec-demo">
+      <div class="sec-head">
+        <h2>4. Kịch Bản 3 Trạm Live Demo &amp; Phương Án Dự Phòng 3 Lớp (Zero-Crash)</h2>
+        <span class="pill pill-emerald">Đảm bảo 100% thành công trên sân khấu</span>
+      </div>
+      <div class="role-grid">
+        <article class="role-card r1">
+          <div class="role-tag">Lớp 1 · Trực tiếp trên Slide S07, S08, S09</div>
+          <h3>Tương tác 0 độ trễ ngay trong bài chiếu</h3>
+          <p>Cả 3 trạm Demo (Stress Test 3 cột ở <strong>S07</strong>, Winnowing k-gram ở <strong>S08</strong> và Phòng thi LAN 40 máy ở <strong>S09</strong>) đều chạy trực tiếp khi bấm phím <code>→</code> hoặc <code>Enter</code>.</p>
+          <ul>
+            <li>Không cần <code>Alt+Tab</code> chuyển cửa sổ khi đang tính giờ 5 phút.</li>
+            <li>Ô code trên Slide S08 cho phép gõ sửa trực tiếp để tính lại vân tay Winnowing tức thì.</li>
+          </ul>
+        </article>
+        <article class="role-card r2">
+          <div class="role-tag">Lớp 2 · Khi BGK yêu cầu trải nghiệm trực tiếp</div>
+          <h3>Mở Web App Chính Thức (Phím D)</h3>
+          <p>Nhấn phím <strong>D</strong> trên bàn phím (hoặc nút <strong>🌐 App Main</strong>) để mở trang <a href="https://drgx-web.netlify.app/" target="_blank" rel="noopener" style="color:var(--primary)">https://drgx-web.netlify.app/</a>.</p>
+          <ul>
+            <li>Cho phép trải nghiệm trực tuyến Web Lab IDE, Void-bit OJ 47 bài, STEM Sim và Learn Hub 42 bài.</li>
+            <li>Hỗ trợ đủ 5 bộ Giao diện (Skins) Chuyên nghiệp.</li>
+          </ul>
+        </article>
+        <article class="role-card r3">
+          <div class="role-tag">Lớp 3 · Khi BGK kiểm tra tiến trình hệ thống</div>
+          <h3>Chạy drgx.cmd &amp; Kiểm định Tự động</h3>
+          <p>Mở Terminal chạy trực tiếp bộ kiểm định tự động kiểm tra 5 trụ cột thật (<code>oj_server.exe</code>, <code>exam-server.py</code>, CP/Dev Studio, Website, Hồ sơ).</p>
+          <ul>
+            <li>Xuất báo cáo thực nghiệm <code>67/67 PASS (100% GREEN)</code> ngay trước mắt Hội đồng.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- Q&A APPENDIX PL1-PL5 -->
+    <section class="doc-section" id="sec-qa">
+      <div class="sec-head">
+        <h2>5. Chiến Thuật Phản Biện Q&amp;A &amp; 5 Slide Phụ Lục Phòng Thủ (PL1 → PL5)</h2>
+        <span class="pill pill-gold">Bấm phím A (hoặc phím O) trong bài chiếu để bật ngay Slide Phụ lục</span>
+      </div>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Phím / Slide</th>
+              <th>Câu hỏi hóc búa của Giám khảo</th>
+              <th>Slide bật lên</th>
+              <th>Luận điểm trả lời sắc bén (Công thức: Công nhận → Minh chứng → Chốt số)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono"><strong>Phím A · #19</strong></td>
+              <td>“Dự án làm chủ những công nghệ lõi nào? Vấn đề bản quyền phần mềm và bảo mật dữ liệu học sinh được xử lý ra sao?”</td>
+              <td><a href="index.html#19" class="btn-sm">PL1 · Bản quyền &amp; Dữ liệu</a></td>
+              <td>“Thưa BGK: ① Nhóm tự phát triển 100% lớp lõi: Vỏ ứng dụng <strong>Tauri 2 (Rust)</strong> siêu nhẹ (39 MB RAM), Nhân chấm C++17 <code>oj_server.cpp</code>, Stress Engine 3 cột, thuật toán Winnowing token, <code>exam-server.py</code>, bộ công cụ CP/Dev Studio và 5 Giao diện (Skins). ② Kiến trúc <strong>Zero-Telemetry</strong> không thu thập mã nguồn mặc định. ③ Mã nguồn và điểm thi lưu nội bộ tại trường, tuân thủ nghiêm <strong>Nghị định 13/2023/NĐ-CP</strong> (<code>PRIVACY.md</code>).”</td>
+            </tr>
+            <tr>
+              <td class="mono"><strong>Slide #20</strong></td>
+              <td>“Các trường THPT hiện nay đã có IDE truyền thống và chấm bài bằng phần mềm <strong>Themis</strong> rồi, tại sao lại cần DrgX?”</td>
+              <td><a href="index.html#20" class="btn-sm">PL2 · Vì sao cần DrgX khi có Themis?</a></td>
+              <td>“Thưa BGK, <strong>Themis</strong> rất tuyệt vời khi chấm tự động trên máy giáo viên <em>sau khi đã thu bài</em>, và <strong>DrgX tương thích 100% với Themis</strong> đồng thời giải quyết 4 điểm mù trước &amp; trong giờ thi: ① Lúc đang ngồi code, học sinh bấm <code>F9</code> chấm đa test <code>&lt; 0,5s</code> có bảng Diff trực quan và Stress Test 3 cột ngay trong IDE; ② Tự động kiểm tra tên file và <code>freopen</code> để <strong>xóa sổ cảnh học sinh bị 0 điểm oan trên Themis</strong>; ③ <strong>CP Studio khóa AI 100%</strong> trên máy học sinh trong giờ thi; ④ <strong>Exam Server LAN (<code>:8765</code>)</strong> gom 40 máy trong <code>&lt; 2 phút</code> (thay vì 30–45′ cầm USB), quét đạo văn cấu trúc Winnowing và <strong>xuất nguyên cây thư mục <code>$SBD\BAI1.CPP</code> chuẩn 100% để thầy cô nạp thẳng vào Themis</strong>!”</td>
+            </tr>
+            <tr>
+              <td class="mono"><strong>Slide #21</strong></td>
+              <td>“Phòng máy trường công lập thường khóa quyền Admin (Deep Freeze) hoặc học sinh tìm cách gian lận thì xử lý thế nào?”</td>
+              <td><a href="index.html#21" class="btn-sm">PL3 · Quản trị rủi ro</a></td>
+              <td>“Thưa BGK: ① Với phòng máy khóa quyền Admin: Giáo viên dùng bản Portable chạy ngay hoặc bật <strong>DrgX Web Lab (<code>:8123</code>)</strong> để cả lớp 40 máy code ngay trên trình duyệt không cần cài đặt. ② Về khảo thí: Chúng em thiết lập <strong>4 lớp khiên</strong> (Cách ly Profile tắt AI, Server Verdict, Mã phòng 6 ký tự + chặn gói &gt;512KB, và quét vân tay Winnowing token). ③ Về tài chính: Nhờ biên gộp 82–85%, dù doanh thu thận trọng (−30%) thì Năm 2 dự án vẫn lãi ròng <strong>+90,2 triệu đồng</strong>.”</td>
+            </tr>
+            <tr>
+              <td class="mono"><strong>Slide #22</strong></td>
+              <td>“Các chỉ số Unit Economics (LTV/CAC 6,2x–7,9x) và lộ trình hòa vốn Quý 3/2028 được tính trên cơ sở nào?”</td>
+              <td><a href="index.html#22" class="btn-sm">PL4 · Giả định Tài chính</a></td>
+              <td>“Thưa BGK: ① <strong>Gói Cá nhân DrgX Pro (B2C):</strong> ARPU <code>599.000 đ/năm</code>, biên gộp <code>85%</code>, gắn bó <code>2,2 năm</code> → <code>LTV = 1,12 triệu</code> vs <code>CAC = 180.000 đ</code> → <strong>LTV/CAC = 6,2x</strong>. ② <strong>Gói Trường học DrgX School (B2B):</strong> ACV <code>18.000.000 đ/trường/năm</code> (nằm dưới ngưỡng đấu thầu nên Hiệu trưởng phê duyệt dễ dàng), biên gộp <code>82%</code>, gắn bó <code>3,5 năm</code> → <code>LTV = 51,66 triệu</code> vs <code>CAC = 6,5 triệu</code> → <strong>LTV/CAC = 7,9x</strong>, thu hồi CAC dưới <code>5,3 tháng</code>.”</td>
+            </tr>
+            <tr>
+              <td class="mono"><strong>Slide #23</strong></td>
+              <td>“Hãy tổng kết ngắn gọn những giá trị cốt lõi tạo nên lợi thế bền vững của hệ sinh thái DrgX?”</td>
+              <td><a href="index.html#23" class="btn-sm">PL5 · 6 Giá trị Cốt lõi</a></td>
+              <td>“Thưa BGK, trên màn hình là <strong>Slide PL5</strong> tổng kết 6 trụ cột giá trị của DrgX kèm minh chứng định lượng trực tiếp. Chúng em cũng đã chuẩn bị sẵn <strong>Kiosk Trải nghiệm (phím D)</strong> để Quý Thầy Cô kiểm thử trực tiếp ạ!”</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 15-MINUTE PRE-STAGE CHECKLIST -->
+    <section class="doc-section" id="sec-checklist">
+      <div class="sec-head">
+        <h2>6. Checklist 15 Phút Trước Khi Lên Sân Khấu (Tích Chọn Lưu Tự Động)</h2>
+        <span class="pill pill-emerald">Đảm bảo 0% sai sót kỹ thuật</span>
+      </div>
+      <div class="checklist-grid" id="checklistGrid">
+        <label class="check-item"><input type="checkbox" data-chk="c1"> <span>Cắm sạc nguồn laptop và chuyển chế độ nguồn sang <strong>Best Performance</strong>, tắt hoàn toàn Sleep/Screensaver.</span></label>
+        <label class="check-item"><input type="checkbox" data-chk="c2"> <span>Bật chế độ Không làm phiền (<strong>Focus Assist / Do Not Disturb</strong>), thoát Zalo/Messenger/ Thông báo trình duyệt.</span></label>
+        <label class="check-item"><input type="checkbox" data-chk="c3"> <span>Chạy file <code>Mo-thuyet-trinh.cmd</code> hoặc mở <code>presentation/index.html</code>, nhấn <strong>F</strong> (hoặc <strong>F11</strong>) toàn màn hình và nhấn <strong>F2</strong> để <strong>ẩn thanh taskbar điều khiển dưới đáy</strong> cho sân khấu sạch 100%.</span></label>
+        <label class="check-item"><input type="checkbox" data-chk="c4"> <span>Kiểm tra ánh sáng hội trường: nếu hội trường nhiều đèn sáng chiếu vào màn chiếu, nhấn phím <strong>T</strong> chuyển sang giao diện <strong>Dawn (Sáng)</strong>.</span></label>
+        <label class="check-item"><input type="checkbox" data-chk="c5"> <span>Mở sẵn tab thứ 2 là <a href="https://drgx-web.netlify.app/" target="_blank" rel="noopener" style="color:var(--primary)">https://drgx-web.netlify.app/</a> (Web App chính thức) và thử <strong>click chuột vào nửa phải màn hình (tiến 1 slide) / nửa trái màn hình (lùi 1 slide)</strong>.</span></label>
+        <label class="check-item"><input type="checkbox" data-chk="c6"> <span>Nhấn phím <strong>R</strong> trên bàn phím ở giây đầu tiên bước lên bục để đồng hồ đếm ngược 5 phút bắt đầu chạy!</span></label>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  const SKINS = ['obsidian', 'nebula', 'tokyo', 'matrix', 'dawn'];
+  const savedSkin = localStorage.getItem('drgx_pitch_skin_v3');
+  if (savedSkin && SKINS.includes(savedSkin)) {
+    document.documentElement.setAttribute('data-skin', savedSkin);
+  }
+
+  window.cycleSkin = function() {
+    const cur = document.documentElement.getAttribute('data-skin') || 'obsidian';
+    const next = SKINS[(SKINS.indexOf(cur) + 1) % SKINS.length];
+    document.documentElement.setAttribute('data-skin', next);
+    localStorage.setItem('drgx_pitch_skin_v3', next);
+  };
+
+  window.setViewMode = function(mode) {
+    document.documentElement.setAttribute('data-view', mode);
+    document.getElementById('btnViewPlaybook').classList.toggle('active', mode === 'playbook');
+    document.getElementById('btnViewCue').classList.toggle('active', mode === 'cuecards');
+  };
+
+  window.setSlideFilter = function(filter) {
+    document.documentElement.setAttribute('data-filter', filter);
+    document.getElementById('btnFilterAll').classList.toggle('active', filter === 'all');
+    document.getElementById('btnFilter5m').classList.toggle('active', filter === 'core5m');
+  };
+
+  // Live Rehearsal Stopwatch
+  let rehSec = 0;
+  let rehRunning = false;
+  let rehInterval = null;
+
+  function formatMMSS(sec) {
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  function updateRehearsalUI() {
+    const clockEl = document.getElementById('rehClock');
+    const targetEl = document.getElementById('rehTargetSlide');
+    clockEl.textContent = formatMMSS(rehSec) + ' / 05:00';
+
+    const cards = document.querySelectorAll('.script-card');
+    let currentSlideId = 'S01';
+    cards.forEach(function(card) {
+      const st = parseInt(card.getAttribute('data-start') || '0', 10);
+      const en = parseInt(card.getAttribute('data-end') || '300', 10);
+      const isCurrent = rehRunning && rehSec >= st && rehSec < en;
+      card.classList.toggle('active-rehearsal', isCurrent);
+      if (isCurrent) {
+        currentSlideId = card.id.replace('sc-', '').toUpperCase();
+      }
+    });
+    targetEl.textContent = rehRunning ? ('Đang nói: ' + currentSlideId) : ('Chuẩn bị: ' + currentSlideId);
+  }
+
+  window.toggleRehearsal = function() {
+    const btn = document.getElementById('btnRehToggle');
+    rehRunning = !rehRunning;
+    if (rehRunning) {
+      btn.textContent = '⏸ Tạm dừng';
+      btn.classList.add('active');
+      rehInterval = setInterval(function() {
+        rehSec++;
+        updateRehearsalUI();
+      }, 1000);
+    } else {
+      btn.textContent = '▶ Tiếp tục';
+      btn.classList.remove('active');
+      clearInterval(rehInterval);
+    }
+    updateRehearsalUI();
+  };
+
+  window.resetRehearsal = function() {
+    rehRunning = false;
+    rehSec = 0;
+    clearInterval(rehInterval);
+    const btn = document.getElementById('btnRehToggle');
+    btn.textContent = '▶ Bắt đầu tập';
+    btn.classList.remove('active');
+    updateRehearsalUI();
+  };
+
+  // Checklist persistence
+  const chks = document.querySelectorAll('#checklistGrid input[type="checkbox"]');
+  chks.forEach(function(chk) {
+    const key = 'drgx_chk_' + chk.getAttribute('data-chk');
+    if (localStorage.getItem(key) === '1') {
+      chk.checked = true;
+      chk.closest('.check-item').classList.add('done');
+    }
+    chk.addEventListener('change', function() {
+      localStorage.setItem(key, chk.checked ? '1' : '0');
+      chk.closest('.check-item').classList.toggle('done', chk.checked);
+    });
+  });
+})();
+</script>
+</body>
+</html>

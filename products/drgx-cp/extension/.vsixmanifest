@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+		<Metadata>
+			<Identity Language="en-US" Id="drgx-cp" Version="1.0.0" Publisher="drgx" />
+			<DisplayName>DrgX CP Studio</DisplayName>
+			<Description xml:space="preserve">DrgX CP Studio — lập trình thi đấu có judge, exam server và Exam Integrity nhiều lớp.</Description>
+			<Tags>_</Tags>
+			<Categories>_</Categories>
+			<GalleryFlags>Public</GalleryFlags>
+
+			<Properties>
+				<Property Id="Microsoft.VisualStudio.Code.Engine" Value="^1.85.0" />
+				<Property Id="Microsoft.VisualStudio.Code.ExtensionDependencies" Value="" />
+				<Property Id="Microsoft.VisualStudio.Code.ExtensionPack" Value="" />
+				<Property Id="Microsoft.VisualStudio.Code.ExtensionKind" Value="workspace,web" />
+				<Property Id="Microsoft.VisualStudio.Code.LocalizedLanguages" Value="" />
+				<Property Id="Microsoft.VisualStudio.Code.EnabledApiProposals" Value="" />
+			</Properties>
+		</Metadata>
+		<Installation>
+			<InstallationTarget Id="Microsoft.VisualStudio.Code"/>
+		</Installation>
+		<Dependencies/>
+		<Assets>
+			<Asset Type="Microsoft.VisualStudio.Code.Manifest" Path="extension.vsixmanifest" Addressable="true" />
+			<Asset Type="Microsoft.VisualStudio.Services.Content.Pricing" Path="pricing" Addressable="true" />
+		</Assets>
+	</PackageManifest>

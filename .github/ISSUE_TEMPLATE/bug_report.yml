@@ -1,0 +1,39 @@
+name: "🐛 Báo lỗi kỹ thuật (Bug Report)"
+description: "Báo cáo lỗi trên DrgX IDE, CP/Dev Extension, Classroom Exam Server hoặc Void-bit OJ"
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: dropdown
+    id: pillar
+    attributes:
+      label: "Thành phần gặp lỗi (Pillar)"
+      options:
+        - "1. Website & Hub (web/)"
+        - "2. DrgX CP Studio & Extension (products/drgx-cp/extension)"
+        - "3. DrgX CP Classroom Exam Server (products/drgx-cp/server)"
+        - "4. DrgX Dev Studio & Extension (products/drgx-dev)"
+        - "5. Void-bit Web & C++17 OJ Server (products/void-bit)"
+        - "6. Desktop App Tauri (app/)"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: "Các bước tái hiện lỗi (Steps to Reproduce)"
+      placeholder: |
+        1. Chạy lệnh `.\drgx.cmd ...`
+        2. Bấm vào...
+        3. Lỗi xuất hiện...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Hành vi mong đợi vs. Thực tế"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Kết quả chạy `.\\drgx.cmd test` hoặc Log lỗi"
+      render: powershell

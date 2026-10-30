@@ -1,0 +1,6 @@
+# robots.txt — DrgX IDE & Void-bit OJ Ecosystem
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://drgx-web.netlify.app/sitemap.xml

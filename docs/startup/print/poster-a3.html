@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poster A3 — DrgX IDE</title>
+<style>
+  :root{
+    --navy:#070D1A; --navy2:#0B1428; --panel:#101B34; --line:#26365A;
+    --purple:#7C3AED; --purple2:#A78BFA; --cyan:#22D3EE; --green:#34D399;
+    --text:#EAF1FF; --muted:#9FB2D2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:#20242c}
+  body{font-family:"Segoe UI","Be Vietnam Pro",system-ui,sans-serif;color:var(--text);
+    display:flex;justify-content:center;padding:24px 0}
+  .toolbar{position:fixed;top:0;left:0;right:0;z-index:99;display:flex;gap:14px;align-items:center;
+    padding:10px 22px;background:#0B1220;border-bottom:1px solid #26365A;font-size:13px;color:#B9C9E6}
+  .toolbar b{color:#C4B5FD}
+  .toolbar button{margin-left:auto;border:0;border-radius:7px;padding:8px 18px;background:var(--purple);
+    color:#fff;font-weight:800;cursor:pointer;font-family:inherit}
+  .poster{position:relative;width:297mm;min-height:420mm;overflow:hidden;background:
+    radial-gradient(120mm 90mm at 88% 3%,rgba(124,58,237,.35),transparent 70%),
+    radial-gradient(130mm 100mm at 4% 100%,rgba(34,211,238,.16),transparent 70%),
+    linear-gradient(165deg,#0A1224 0%,var(--navy) 55%,#050A14 100%);
+    padding:17mm 17mm 14mm;display:flex;flex-direction:column;margin-top:38px;
+    box-shadow:0 30px 90px rgba(0,0,0,.6)}
+  .grid{position:absolute;inset:0;opacity:.35;pointer-events:none;
+    background-image:linear-gradient(rgba(159,178,210,.08) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(159,178,210,.08) 1px,transparent 1px);
+    background-size:14mm 14mm;
+    mask-image:radial-gradient(circle at 50% 35%,#000 25%,transparent 78%)}
+  .glow{position:absolute;width:80mm;height:80mm;border-radius:50%;filter:blur(30mm);opacity:.35;pointer-events:none}
+  .glow.a{background:var(--purple);top:-20mm;right:-10mm}
+  .glow.b{background:var(--cyan);bottom:40mm;left:-30mm;opacity:.18}
+  .top{display:flex;align-items:center;gap:9mm;position:relative;z-index:2}
+  .top img{width:30mm;height:30mm;border-radius:7mm;box-shadow:0 8mm 20mm rgba(0,0,0,.45)}
+  .brand h1{font-size:17mm;line-height:1;font-weight:900;letter-spacing:-.03em}
+  .brand h1 span{background:linear-gradient(92deg,var(--cyan),var(--purple2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand p{font-size:4.6mm;color:var(--muted);margin-top:2mm;font-weight:600;letter-spacing:.02em}
+  .badge{display:inline-flex;align-items:center;gap:2.4mm;margin-top:11mm;padding:2.6mm 5mm;border-radius:99mm;
+    border:1px solid #34507C;background:rgba(34,211,238,.08);color:#CFE7FF;font-size:3.5mm;font-weight:700;position:relative;z-index:2}
+  .badge:before{content:"";width:2.2mm;height:2.2mm;border-radius:50%;background:var(--cyan);box-shadow:0 0 4mm var(--cyan)}
+  .headline{margin-top:7mm;position:relative;z-index:2}
+  .headline h2{font-size:22mm;line-height:1.02;font-weight:900;letter-spacing:-.03em}
+  .headline h2 .g{background:linear-gradient(92deg,var(--cyan),var(--purple2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .headline p{font-size:5.2mm;line-height:1.45;color:#C9D8F2;max-width:225mm;margin-top:5mm}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin-top:9mm;position:relative;z-index:2}
+  .stat{background:linear-gradient(180deg,rgba(25,40,72,.9),rgba(12,21,40,.9));border:1px solid var(--line);
+    border-radius:4mm;padding:5mm 5mm}
+  .stat b{display:block;font-size:9.6mm;line-height:1;font-weight:900;letter-spacing:-.02em}
+  .stat span{display:block;font-size:3.4mm;color:var(--muted);margin-top:2mm;line-height:1.35}
+  .section-title{display:flex;align-items:center;gap:3mm;margin:11mm 0 4mm;font-size:3.6mm;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:800;position:relative;z-index:2}
+  .section-title:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,#2A3E66,transparent)}
+  .features{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm;position:relative;z-index:2}
+  .feature{display:flex;gap:4mm;background:rgba(14,24,45,.86);border:1px solid var(--line);border-radius:4mm;padding:5mm}
+  .feature .ico{width:12mm;height:12mm;flex:0 0 12mm;border-radius:3mm;display:flex;align-items:center;justify-content:center;
+    font-size:6mm;background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(34,211,238,.18));border:1px solid #34507C}
+  .feature h3{font-size:4.2mm;margin-bottom:1.4mm}
+  .feature p{font-size:3.35mm;line-height:1.38;color:#B9C9E6}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;position:relative;z-index:2}
+  .step{background:rgba(14,24,45,.72);border:1px solid var(--line);border-radius:3.5mm;padding:4mm}
+  .step b{display:block;font-size:7mm;line-height:1;color:var(--cyan);font-weight:900;margin-bottom:2mm}
+  .step h3{font-size:3.6mm;margin-bottom:1.2mm}
+  .step p{font-size:3.05mm;line-height:1.35;color:#AFC1DE}
+  .proof{margin-top:4mm;text-align:center;font-size:3.1mm;letter-spacing:.14em;text-transform:uppercase;color:#7DD3FC;font-weight:800;position:relative;z-index:2}
+  .bottom{display:grid;grid-template-columns:1fr 62mm;gap:6mm;margin-top:auto;padding-top:9mm;align-items:end;position:relative;z-index:2}
+  .quote{font-size:4.6mm;line-height:1.45;color:#D7E4FA;font-style:italic;border-left:2px solid var(--purple2);padding-left:5mm}
+  .quote b{color:#fff;font-style:normal}
+  .contact{margin-top:5mm;font-size:3.5mm;line-height:1.6;color:var(--muted)}
+  .contact b{color:#EAF1FF}
+  .qr{background:#fff;border-radius:4mm;padding:4mm;text-align:center;color:#0B1428;width:62mm}
+  .qr .box{height:44mm;border:1.2mm dashed #7C3AED;border-radius:2mm;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:1.5mm;color:#4C1D95;font-weight:800;font-size:3.4mm}
+  .qr .box span{font-size:7mm}
+  .qr small{display:block;margin-top:2.4mm;font-size:2.9mm;line-height:1.35;color:#334155;font-weight:600}
+  .footer-bar{display:flex;justify-content:space-between;align-items:center;margin-top:7mm;padding-top:5mm;
+    border-top:1px solid #1E2C4A;font-size:3.2mm;color:#7E93B6;position:relative;z-index:2}
+  .crown{color:#FBBF24;font-weight:800}
+  @media print{
+    @page{size:A3 portrait;margin:0}
+    html,body{background:#fff;padding:0}
+    .toolbar{display:none}
+    .poster{margin:0;box-shadow:none;width:297mm;height:420mm;min-height:420mm}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <b>POSTER A3 — DrgX IDE</b>
+  <span>Thay khung QR bằng link demo/website thật trước khi in · Ctrl+P → A3, không lề</span>
+  <button onclick="window.print()">In / Lưu PDF</button>
+</div>
+
+<div class="poster">
+  <div class="grid"></div>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+
+  <div class="top">
+    <img src="../assets/logo.png" alt="DrgX IDE">
+    <div class="brand">
+      <h1>DrgX <span>IDE</span></h1>
+      <p>Lập trình đã tiến hóa · Local-first AI · Judge tự động</p>
+    </div>
+  </div>
+
+  <div class="badge">Dự án dự thi KH&amp;KN tỉnh Phú Thọ 2026–2027 · Lĩnh vực 01 — AI/STEM · Đáp ứng QĐ 1131/QĐ-TTg</div>
+
+  <div class="headline">
+    <h2>MỘT HỆ SINH THÁI.<br><span class="g">TOÀN BỘ QUY TRÌNH.</span></h2>
+    <p>CP Studio (thi đấu sạch AI) · Dev Studio (AI Agent BYOK) · Void-bit C++17 OJ (47 bài, Stress Test 3 cột, chống đạo văn Winnowing) · Phòng thi LAN (:8765) &amp; Learn Hub 12 tuần.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>&lt; 60 giây</b><span>Cài đặt 1 chạm thay cho 90–120 phút lắp ghép 6–8 công cụ</span></div>
+    <div class="stat"><b>&lt; 0,5 giây</b><span>Chấm đa testcase Offline C++17/Python · Stress Test 3 cột</span></div>
+    <div class="stat"><b>67/67 PASS</b><span>Kiểm định tự động 100% GREEN · Gói cơ bản 0 đồng trọn đời</span></div>
+  </div>
+
+  <div class="section-title">Công nghệ lõi &amp; Tính năng đột phá</div>
+  <div class="features">
+    <div class="feature"><div class="ico">🛡️</div><div><h3>Kiến trúc Kép &amp; Phòng thi LAN</h3><p>CP Studio cách ly AI chống gian lận; Exam Server (:8765) thu &amp; chấm bài 40 máy trong 2 phút.</p></div></div>
+    <div class="feature"><div class="ico">🧪</div><div><h3>Differential Stress Test 3 cột</h3><p>Tự động biên dịch Generator + Brute + Solution, bắt sống phản ví dụ làm code bị WA.</p></div></div>
+    <div class="feature"><div class="ico">🔍</div><div><h3>Chống đạo văn Winnowing k-gram</h3><p>Chuẩn hóa token &amp; băm trượt vẫn nhận ra bài chép đã đổi tên biến, tên hàm và chú thích (similarity 100%, bị gắn cờ).</p></div></div>
+    <div class="feature"><div class="ico">🤖</div><div><h3>AI Local-first &amp; Mở rộng STEM</h3><p>Dev Studio tích hợp DrgX Neural AI/BYOK; hỗ trợ C++/Python lập trình mạch Arduino, ESP32, Robotics.</p></div></div>
+    <div class="feature"><div class="ico">🌐</div><div><h3>Web Lab cho phòng máy yếu</h3><p>Chạy trực tiếp trên trình duyệt Chrome/Edge, không cần quyền Admin, mất Internet vẫn thi được.</p></div></div>
+    <div class="feature"><div class="ico">🎓</div><div><h3>Learn Hub 12 tuần &amp; 5 Skin gốc</h3><p>Lộ trình 4 chặng, CLB Sprint 2 tuần (Ctrl+Alt+L) và 5 giao diện chuyên nghiệp chống mỏi mắt.</p></div></div>
+  </div>
+
+  <div class="section-title">Cách hoạt động</div>
+  <div class="steps">
+    <div class="step"><b>01</b><h3>Cài một lần</h3><p>Tải DrgX IDE, mở thư mục bài toán — không cấu hình compiler.</p></div>
+    <div class="step"><b>02</b><h3>Chạy &amp; chấm</h3><p>F9 để chạy; Ctrl+Alt+J để chấm toàn bộ tests/ với AC/WA/RE/TLE.</p></div>
+    <div class="step"><b>03</b><h3>Săn lỗi</h3><p>Stress test tự sinh dữ liệu, so brute-force, chỉ ra counterexample.</p></div>
+    <div class="step"><b>04</b><h3>Học có lộ trình</h3><p>Ctrl+Alt+L mở Learn Hub: lộ trình, CLB, showcase; web lab cho phòng máy không cài được phần mềm.</p></div>
+  </div>
+
+  <div class="proof">MVP ĐÃ CHẠY THẬT · 3 TRỤ CỘT + 5 SKIN · GIẤY PHÉP MINH BẠCH</div>
+
+  <div class="bottom">
+    <div>
+      <div class="quote">“Học sinh không nên mất hai giờ cài đặt trước khi viết dòng code đầu tiên. <b>DrgX xóa bỏ rào cản đó.</b>”</div>
+      <div class="contact">
+        <b>Nhóm dự án DrgX</b> · Đơn vị: ………………………………………………<br>
+        Trưởng nhóm: …………………………… · SĐT: ………………… · Email: …………………………<br>
+        Giáo viên hướng dẫn: ………………………………………………
+      </div>
+    </div>
+    <div class="qr">
+      <div class="box"><span>▣</span>QR DEMO<br><span style="font-size:2.8mm;font-weight:600">Thay bằng link thật</span></div>
+      <small>Quét để xem video demo / tải bản chạy thử</small>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <span class="crown">🎓 Nhóm DrgX</span>
+    <span>DrgX IDE · Made in Việt Nam · 2026</span>
+  </div>
+</div>
+</body>
+</html>

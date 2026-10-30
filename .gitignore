@@ -1,0 +1,80 @@
+# Rust build artifacts
+**/target/
+
+# Node.js
+**/node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Build outputs / binaries
+*.exe
+*.pdb
+*.msi
+*.appx
+*.dll
+*.lib
+*.obj
+*.o
+*.a
+*.so
+*.dylib
+
+# Demo runtime artifacts
+examples/demo-cp/*.exe
+examples/demo-cp/__drgx_*
+examples/demo-cp/.drgx_*
+examples/demo-cp/stress.in
+examples/demo-cp/stress*.in
+examples/demo-cp/input.txt
+examples/demo-cp/expected.txt
+
+# Release kits / archives
+release/
+*.zip
+
+# Logs / state / temp / runtime profiles
+*.log
+*.log.err
+*.err
+*.pid
+.drgx_last_*
+.drgx-bak
+*.tmp
+*.bak
+*.backup*
+**/Lesson.backup/
+products/*/profile/
+products/*/extensions/
+# Browser (Chromium/Playwright) runtime profiles - contain cookies & personal data
+presentation/voiceover/video/profile/
+products/drgx-cp/server/exams.json
+products/void-bit/OJ/submissions/*
+!products/void-bit/OJ/submissions/.gitkeep
+products/void-bit/OJ/data/cache/*
+products/void-bit/OJ/data/oj.db*
+products/void-bit/OJ/data/submissions_local.json
+
+# Essential prebuilt binaries for 1-click demos
+!app/src-tauri/resources/drgx.exe
+!products/void-bit/OJ/oj_server.exe
+
+# Secrets / local config
+.env
+.env.*
+*.key
+*.pem
+secrets/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
+.DS_Store

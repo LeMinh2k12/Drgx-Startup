@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DrgX IDE",
+  "version": "0.1.0",
+  "identifier": "vn.drgx.ide",
+  "build": {
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "DrgX IDE",
+        "width": 1360,
+        "height": 850,
+        "minWidth": 960,
+        "minHeight": 600,
+        "center": true,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "resources": {
+      "resources/drgx.exe": "drgx.exe",
+      "../../NOTICE.md": "NOTICE.md",
+      "../../LICENSE": "LICENSE",
+      "../../PRIVACY.md": "PRIVACY.md"
+    },
+    "icon": ["icons/icon.ico"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}

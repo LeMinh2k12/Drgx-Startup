@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="obsidian">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Về dự án DrgX IDE — Kiến trúc 6 thành phần, Giấy phép MIT &amp; Nhóm phát triển Phú Thọ</title>
+<meta name="description" content="Tìm hiểu lý do ra đời, kiến trúc 6 thành phần mô-đun độc lập, trạng thái kiểm chứng thực tế 68/68 Health Gate PASS, 5 Skin Chuyên nghiệp, giấy phép mã nguồn mở MIT và nhóm học sinh DrgX — Phú Thọ.">
+<meta name="robots" content="index, follow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://drgx-web.netlify.app/about.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="DrgX IDE">
+<meta property="og:url" content="https://drgx-web.netlify.app/about.html">
+<meta property="og:title" content="Về dự án DrgX IDE — Kiến trúc mô-đun &amp; Minh bạch từ lõi tới chữ">
+<meta property="og:description" content="Giải quyết 4 nỗi đau thực tế của học sinh lập trình Việt Nam bằng kiến trúc local-first minh bạch, tuân thủ chuẩn MIT.">
+<meta property="og:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Về dự án DrgX IDE — Nhóm DrgX Phú Thọ">
+<meta name="twitter:description" content="Kiến trúc 6 thành phần, trạng thái thật của MVP và cam kết giấy phép MIT.">
+<meta name="twitter:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<meta name="theme-color" content="#08090d">
+<link rel="icon" type="image/png" href="assets/logo-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="assets/site.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "Về dự án DrgX IDE",
+  "url": "https://drgx-web.netlify.app/about.html",
+  "description": "Thông tin kiến trúc sản phẩm, trạng thái MVP, giấy phép MIT và nhóm phát triển DrgX — Phú Thọ."
+}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+
+<!-- ═══ Top Announcement Bar ═══ -->
+<div class="top-announce" role="region" aria-label="Thông báo phát hành">
+  <span class="ta-badge"><span class="ta-pulse" aria-hidden="true"></span> NHÓM DRGX — PHÚ THỌ</span>
+  <span>Kiến trúc 6 trụ cột · <b>68/68 Health Gate PASS</b> · Tuân thủ chuẩn MIT &amp; Nghị định 13/2023/NĐ-CP</span>
+  <a href="judge-demo.html">Trải nghiệm Phòng Lab Ảo →</a>
+</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <picture>
+        <source srcset="assets/logo-64.webp" type="image/webp">
+        <img src="assets/logo-64.png" alt="Logo DrgX IDE" width="32" height="32" decoding="async">
+      </picture>
+      <span>DrgX <b>IDE</b></span>
+      <span class="brand-ver">v2.0</span>
+    </a>
+    <nav class="nav-links" aria-label="Điều hướng chính">
+      <a href="index.html">Trang chủ</a>
+      <a href="features.html">Tính năng</a>
+      <a href="ecosystem/index.html">Hệ sinh thái</a>
+      <a href="void-bit.html">Void-bit OJ</a>
+      <a href="download.html">Tải về</a>
+      <a href="about.html" class="active" aria-current="page">Về dự án</a>
+    </nav>
+    <div class="nav-right">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="judge-demo.html">🧪 Phòng Lab Ảo</a>
+      <a class="btn btn-grad btn-sm" href="download.html">Tải DrgX ↓</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Mở menu điều hướng">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="mobile-drawer" role="region" aria-label="Menu di động">
+    <nav class="mobile-nav-list" aria-label="Điều hướng di động">
+      <a href="index.html"><span>Trang chủ</span><span>→</span></a>
+      <a href="features.html"><span>Tính năng</span><span>→</span></a>
+      <a href="ecosystem/index.html"><span>Hệ sinh thái học tập</span><span>→</span></a>
+      <a href="void-bit.html"><span>Void-bit OJ (47 bài)</span><span>→</span></a>
+      <a href="download.html"><span>Tải về &amp; Cài đặt</span><span>→</span></a>
+      <a href="about.html" class="active" aria-current="page"><span>Về dự án &amp; Giấy phép</span><span>→</span></a>
+    </nav>
+    <div class="mobile-skin-bar">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">5 Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-grad btn-sm" href="download.html">Cài ngay ↓</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main-content">
+
+  <!-- ═══ Page H1 Header ═══ -->
+  <section class="page-hero">
+    <div class="eyebrow">Câu chuyện &amp; Kiến trúc sản phẩm · v2.0.0</div>
+    <h1>Xây dựng từ thực tế phòng máy. <span class="grad">Minh bạch từ lõi tới chữ.</span></h1>
+    <p class="lead">DrgX IDE ra đời để giải quyết 4 rào cản lớn nhất khi học lập trình và bồi dưỡng học sinh giỏi tin học tại trường phổ thông — với nguyên tắc <b>chỉ công bố những gì đã chạy thật</b>.</p>
+  </section>
+
+  <!-- ═══ Vì sao có DrgX ═══ -->
+  <section class="content-section" id="why" style="padding-top:44px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Lý do ra đời</div>
+      <h2>Bốn nỗi đau thật của bàn lập trình học đường.</h2>
+      <p class="lead">Và cách DrgX hợp nhất giải pháp trong một lần chạy duy nhất.</p>
+    </div>
+    <div class="tiles-4 reveal">
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">🧰</span>
+        <span class="t-name">Quá nhiều công cụ rời rạc</span>
+        <span class="t-desc">Editor, compiler, judge online, stress script, đồng hồ bấm giờ… nằm rải rác khiến học sinh mất tập trung. DrgX gom cả 6–8 công cụ vào một luồng phím tắt.</span>
+      </div>
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">⏱️</span>
+        <span class="t-name">Chấm test phụ thuộc mạng</span>
+        <span class="t-desc">Judge online phải chờ hàng đợi, mất mạng là gián đoạn buổi học. DrgX Judge và Void-bit OJ chấm hoàn toàn cục bộ ngay trên máy.</span>
+      </div>
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">🏫</span>
+        <span class="t-name">Phòng máy khóa quyền cài</span>
+        <span class="t-desc">Máy trường đóng băng hoặc không có quyền Admin. Chế độ Web Lab biến một máy giáo viên thành máy chủ cho cả lớp code trên trình duyệt.</span>
+      </div>
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">🤖</span>
+        <span class="t-name">AI khó kiểm soát khi thi</span>
+        <span class="t-desc">Dùng chung một IDE khiến lúc học thiếu AI hỗ trợ, lúc thi lại lo gian lận. DrgX tách hẳn <b>CP Studio</b> (không AI) và <b>Dev Studio</b> (có AI BYOK).</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 6 thành phần kiến trúc ═══ -->
+  <section class="content-section" id="components" style="padding-top:24px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Cấu trúc hệ thống</div>
+      <h2>Sáu thành phần mô-đun, một hệ sinh thái.</h2>
+      <p class="lead">Mỗi thành phần được thiết kế như một <b>hộp đen độc lập</b> — có thể chạy riêng hoặc ghép nối linh hoạt mà không khóa chặt vào nhau.</p>
+    </div>
+    <div class="table-wrap reveal">
+      <table class="data">
+        <thead><tr><th>Thành phần</th><th>Nền tảng kỹ thuật</th><th>Vai trò &amp; Số liệu đã kiểm chứng</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>desktop</td>
+            <td>Tauri 2 (Rust) + WebView2 + DrgX Workbench Core · app v0.1.0</td>
+            <td>Giao diện IDE chính: Trang chủ DrgX, menu tiếng Việt, panel Agent, judge, timer, <b>5 skin</b>. Process shell chiếm <b>39 MB</b> RAM; mở cửa sổ trong <b>0,5 s</b>; quản lý tiến trình con bằng Win32 JobObject.</td>
+          </tr>
+          <tr>
+            <td>cp-studio + dev-studio</td>
+            <td>DrgX Workbench Core (MIT) + Launchers · extension v1.0.0</td>
+            <td>Hai môi trường chạy song song với profile cách ly hoàn toàn: <b>run-cp.cmd</b> (kết nối Exam Server 8765 + Judge F9, không AI) và <b>run-dev.cmd</b> (tích hợp Bridge AI 45290 + công cụ phát triển).</td>
+          </tr>
+          <tr>
+            <td>exam-server</td>
+            <td>Python 3 (<code>ThreadingHTTPServer</code>) · v1.1.0</td>
+            <td>Sinh mã phòng 6 ký tự, bảo vệ khóa quản trị <code>DRGX_EXAM_ADMIN_KEY</code>, giới hạn gói tin 512 KB (HTTP 413), chấm bài server-authoritative — vượt qua <b>11/11 bài smoke test</b>.</td>
+          </tr>
+          <tr>
+            <td>void-bit-oj</td>
+            <td>C++ Server (<code>oj_server.exe</code> 3,8 MB) + Node (<code>serve.js</code>)</td>
+            <td>Online Judge cục bộ cổng 8080 (47 bài, chấm theo subtask, đo RAM PSAPI, anti-cheat Winnowing (chép đổi tên biến: 100%)) đi kèm 12 trang web học tập tại cổng 8000.</td>
+          </tr>
+          <tr>
+            <td>web-lab</td>
+            <td>DrgX Web Workbench Engine + tự động dò cổng</td>
+            <td>Phục vụ giao diện IDE qua trình duyệt cho phòng máy không có quyền cài đặt. Tự động ưu tiên cổng 80 hoặc fallback sang <code>8123–8127</code>.</td>
+          </tr>
+          <tr>
+            <td>learn-hub &amp; web</td>
+            <td>HTML5 / CSS3 / Vanilla JS tĩnh · <code>localStorage</code></td>
+            <td>Hệ sinh thái học tập (bản 2.0): lộ trình 12 tuần, khung vận hành CLB tin học, 5 Skin Chuyên nghiệp đồng bộ và Phòng Lab Ảo tương tác; mở nhanh bằng <kbd>Ctrl+Alt+L</kbd>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══ Trạng thái thật của MVP ═══ -->
+  <section class="content-section" id="status" style="padding-top:24px">
+    <div class="tour">
+      <div class="tour-text reveal">
+        <h3><span class="ico" aria-hidden="true">📊</span> Trạng thái thực tế của Hệ sinh thái (Tháng 10/2026)</h3>
+        <div class="feat-list">
+          <div class="feat-item"><span class="fx">✓</span><span><b>68/68 Health Gate PASS</b> <span class="m">— kịch bản <code>scripts\verify_ecosystem.py</code> kiểm định tự động toàn bộ 6 trụ cột đạt 100%.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>DrgX Judge &amp; Exam Server v1.1.0</b> <span class="m">— chấm bộ demo 4 test trong ~4,7 s; smoke test server đạt 11/11 PASS (bao gồm đa luồng).</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Bridge AI (cổng 45290)</b> <span class="m">— đã kiểm chứng end-to-end luồng <code>health → session → generate</code> qua DrgX Neural AI &amp; BYOK.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Void-bit OJ (47 bài · 42 bài giảng)</b> <span class="m">— probe thực tế C++17 &amp; Python 3 đạt 12/12 AC ngày 23/10/2026.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Hồ sơ pháp lý &amp; quyền riêng tư</b> <span class="m">— đầy đủ tài liệu <code>NOTICE.md</code> và <code>PRIVACY.md</code> tuân thủ Nghị định 13/2023/NĐ-CP.</span></span></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="term">
+          <div class="term-head"><i class="tdot r"></i><i class="tdot y"></i><i class="tdot g"></i><span class="tname">Phiên bản đồng bộ trên toàn hệ thống</span></div>
+          <div class="term-body"><span class="dim">PS&gt;</span> .\drgx.cmd verify
+  <span class="ok">[PASS] 68/68 Ecosystem Health Gate Checks</span>
+
+<span class="dim">PS&gt;</span> products\drgx-cp\run-cp.cmd
+  <span class="ok">DrgX CP Studio v1.0.0</span>   <span class="dim">(Exam Server v1.1.0 · Judge F9)</span>
+
+<span class="dim">PS&gt;</span> products\drgx-dev\run-dev.cmd
+  <span class="ok">DrgX Dev Studio v1.0.0</span>  <span class="dim">(Bridge AI @ 45290 · Neural AI/BYOK)</span>
+
+<span class="dim">PS&gt;</span> products\void-bit\run-oj.cmd
+  <span class="ok">Void-bit OJ Server</span>      <span class="dim">(C++ :8080 · 47 bài · Web học :8000)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Giấy phép & Pháp lý ═══ -->
+  <section class="content-section" id="license" style="padding-top:24px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Giấy phép &amp; Bản quyền</div>
+      <h2>Tuân thủ chuẩn mực mã nguồn mở quốc tế.</h2>
+      <p class="lead">DrgX tôn trọng bản quyền của cộng đồng mã nguồn mở và tách biệt rõ ràng phần lõi kế thừa với phần giá trị gia tăng do nhóm tự phát triển.</p>
+    </div>
+    <div class="table-wrap reveal">
+      <table class="data">
+        <thead><tr><th>Hạng mục tài sản</th><th>Nguồn gốc &amp; Giấy phép</th><th>Cam kết tuân thủ của DrgX</th></tr></thead>
+        <tbody>
+          <tr><td>DrgX Workbench Core (MIT)</td><td>Nền tảng mở (MIT License)</td><td>Giữ nguyên thông báo bản quyền MIT trong <code>NOTICE.md</code>; bộ nhận diện và kiến trúc độc lập 100%.</td></tr>
+          <tr><td>Tauri 2 Framework</td><td>The Commons Conservancy (MIT / Apache-2.0)</td><td>Sử dụng cho phần vỏ ứng dụng Desktop (Rust + WebView2).</td></tr>
+          <tr><td>Mã nguồn DrgX &amp; Void-bit</td><td>Nhóm DrgX — Phú Thọ tự phát triển</td><td>Bao gồm CP/Dev Studio extensions v1.0.0, Exam Server v1.1.0, Void-bit OJ, launchers và hệ thống học liệu.</td></tr>
+          <tr><td>Nhận diện &amp; 5 Skin Chuyên nghiệp</td><td>Nhóm DrgX tự thiết kế 100%</td><td>Logo, video intro, biểu tượng và 5 bảng màu (Ion/Obsidian, Nebula, Tokyo, Matrix, Dawn/Light) chống mỏi mắt là tài sản gốc.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hero-cta reveal" style="margin-top:20px">
+      <button class="btn btn-ghost btn-sm" type="button" data-modal-open="modalPrivacy">Đọc Chính sách quyền riêng tư (PRIVACY.md)</button>
+      <button class="btn btn-ghost btn-sm" type="button" data-modal-open="modalNotice">Đọc Ghi công phần mềm (NOTICE.md)</button>
+    </div>
+  </section>
+
+  <!-- ═══ Nhóm phát triển ═══ -->
+  <section class="content-section" id="team" style="padding-top:24px">
+    <div class="vs-card good reveal">
+      <div class="vs-head" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h3 style="font-size:22px;font-weight:800">👥 Nhóm phát triển DrgX — Lớp 9A2, Trường THCS Sông Lô (Phú Thọ)</h3>
+        <span class="vs-badge">Lớp 9A2 · THCS Sông Lô</span>
+      </div>
+      <p style="color:var(--muted);font-size:15px;max-width:860px;margin-bottom:18px">Dự án do tập thể 4 học sinh <b>Lớp 9A2 — Trường THCS Sông Lô</b> trực tiếp nghiên cứu, viết code và kiểm thử từ lõi ứng dụng Desktop, Exam Server, Void-bit OJ cho đến hệ thống website học tập này:</p>
+      <div class="tiles-4" style="margin-bottom:18px">
+        <div class="tile">
+          <span class="t-ico" aria-hidden="true">👑</span>
+          <span class="t-name">Lê Tiến Dũng</span>
+          <span class="t-desc"><b>Nhóm trưởng</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách kiến trúc hệ thống, điều phối chung &amp; Desktop IDE.</span>
+        </div>
+        <div class="tile">
+          <span class="t-ico" aria-hidden="true">⚡</span>
+          <span class="t-name">Lê Bình Minh</span>
+          <span class="t-desc"><b>Nhóm phó</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách kỹ thuật lõi Void-bit C++17 OJ, Stress Test, Winnowing &amp; Exam Server LAN.</span>
+        </div>
+        <div class="tile">
+          <span class="t-ico" aria-hidden="true">🎨</span>
+          <span class="t-name">Minh Đăng</span>
+          <span class="t-desc"><b>Thành viên</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách 5 Giao diện (Skins), Website &amp; Thư viện 42 Bài giảng VNOI Wiki.</span>
+        </div>
+        <div class="tile">
+          <span class="t-ico" aria-hidden="true">🚀</span>
+          <span class="t-name">Minh Quang</span>
+          <span class="t-desc"><b>Thành viên</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách Mô phỏng Robot STEM Arduino/ESP32, Kiểm thử 68/68 &amp; Thực nghiệm.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Final CTA ═══ -->
+  <section class="final-cta">
+    <div class="reveal">
+      <h2>Dự án mở. <span class="grad">Chạy thử là thấy ngay.</span></h2>
+      <p>Mọi câu lệnh khởi chạy và bộ đề kiểm thử đều đã sẵn sàng trong trang Tải về để bạn tự mình kiểm chứng.</p>
+      <div class="hero-cta">
+        <a class="btn btn-grad" href="download.html">Cài đặt &amp; Chạy thử DrgX ↓</a>
+        <a class="btn btn-ghost" href="features.html">Xem lại các tính năng chính</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <picture>
+            <source srcset="assets/logo-64.webp" type="image/webp">
+            <img src="assets/logo-64.png" alt="Logo DrgX" width="28" height="28" loading="lazy" decoding="async">
+          </picture>
+          DrgX <b style="color:var(--accent)">&nbsp;IDE</b>
+        </div>
+        <p class="foot-about">Môi trường lập trình local-first tích hợp AI Agent &amp; Judge dành cho học sinh Việt Nam.</p>
+        <div class="foot-domains" aria-label="Cổng dịch vụ chuẩn">
+          <span class="foot-domain-tag">localhost:8765 (Exam)</span>
+          <span class="foot-domain-tag">localhost:8080 (OJ)</span>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Sản phẩm</h4>
+        <a href="features.html#judge">DrgX Judge (F9)</a>
+        <a href="features.html#exam-integrity">Exam Integrity 4 lớp</a>
+        <a href="features.html#themes-studio">5 Skin Chuyên nghiệp</a>
+        <a href="features.html#exam-server">DrgX Exam Server</a>
+        <a href="void-bit.html">Void-bit OJ (47 bài)</a>
+      </div>
+      <div class="foot-col">
+        <h4>Về dự án</h4>
+        <a href="#why">Lý do ra đời</a>
+        <a href="#components">6 thành phần mô-đun</a>
+        <a href="#status">Trạng thái thật MVP</a>
+        <a href="#license">Giấy phép MIT</a>
+      </div>
+      <div class="foot-col">
+        <h4>Pháp lý &amp; Cài đặt</h4>
+        <a href="download.html">Tải về &amp; Cài đặt</a>
+        <a href="download.html#specs">Bảng thông số đo thật</a>
+        <button class="foot-link" type="button" data-modal-open="modalPrivacy">Chính sách quyền riêng tư</button>
+        <button class="foot-link" type="button" data-modal-open="modalNotice">Giấy phép &amp; Ghi công</button>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nhóm DrgX — Phú Thọ. Hệ sinh thái Lập trình Local-First • Bản quyền mã nguồn mở MIT.</span>
+      <span class="mono">drgx v2.0.0 · 68/68 PASS · 5 Skins Chuyên nghiệp</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Modal Chính sách quyền riêng tư -->
+<div class="modal-backdrop" id="modalPrivacy" role="dialog" aria-modal="true" aria-labelledby="modalPrivacyTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalPrivacyTitle">Chính sách quyền riêng tư — DrgX IDE (PRIVACY.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><b>Cập nhật lần cuối:</b> 19/10/2026 — Tuân thủ nguyên tắc bảo vệ dữ liệu cá nhân (Nghị định 13/2023/NĐ-CP) và kiến trúc <b>local-first</b>.</p>
+      <h4>1. Dữ liệu lưu trữ trên máy người dùng</h4>
+      <p>Toàn bộ mã nguồn, bộ test, kết quả chấm bài và tiến độ học tập nằm trên máy của học sinh/nhà trường. Không yêu cầu đăng ký tài khoản.</p>
+      <h4>2. Quyền kiểm soát AI</h4>
+      <p>Chỉ khi người dùng chủ động gọi lệnh AI trong Dev Studio, đoạn mã được chọn mới gửi tới mô hình đã cấu hình. Không dùng dữ liệu học sinh để huấn luyện mô hình.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Giấy phép -->
+<div class="modal-backdrop" id="modalNotice" role="dialog" aria-modal="true" aria-labelledby="modalNoticeTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalNoticeTitle">Giấy phép &amp; Ghi công phần mềm (NOTICE.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <h4>1. DrgX Workbench Core — MIT License</h4>
+      <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files to deal in the Software without restriction under the MIT License.</p>
+      <h4>2. Tauri &amp; Rust Ecosystem</h4>
+      <p>Sử dụng theo giấy phép MIT / Apache-2.0. Các thành phần DrgX Judge, Exam Server, Void-bit OJ và 5 Skin giao diện thuộc bản quyền của Nhóm DrgX — Phú Thọ.</p>
+    </div>
+  </div>
+</div>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

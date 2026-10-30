@@ -1,0 +1,330 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#1f1f23"/>
+    </linearGradient>
+    <linearGradient id="agentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f141c"/>
+      <stop offset="100%" stop-color="#141a24"/>
+    </linearGradient>
+    <linearGradient id="accentGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <style>
+    .t-mono { font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace; font-size: 13px; }
+    .t-ui { font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+    .kw { fill: #c678dd; }
+    .fn { fill: #61afef; }
+    .st { fill: #98c379; }
+    .cm { fill: #5c6370; font-style: italic; }
+    .tp { fill: #e5c07b; }
+    .vr { fill: #e06c75; }
+    .ghost { fill: #7f848e; }
+  </style>
+
+  <!-- Window Container with Shadow & Border -->
+  <rect x="0" y="0" width="1600" height="1000" rx="14" fill="#181a1f" stroke="#2d3139" stroke-width="2"/>
+
+  <!-- ================= TOP WINDOW BAR ================= -->
+  <rect x="0" y="0" width="1600" height="42" rx="14" fill="#131417"/>
+  <!-- Traffic Light Window Buttons -->
+  <circle cx="24" cy="21" r="6" fill="#ff5f56"/>
+  <circle cx="44" cy="21" r="6" fill="#ffbd2e"/>
+  <circle cx="64" cy="21" r="6" fill="#27c93f"/>
+
+  <!-- Menu Bar -->
+  <g class="t-ui" font-size="12" fill="#9da5b4" transform="translate(90, 25)">
+    <text x="0" y="0">Tệp</text>
+    <text x="36" y="0">Chỉnh sửa</text>
+    <text x="105" y="0">Lựa chọn</text>
+    <text x="168" y="0">Xem</text>
+    <text x="206" y="0">Đi tới</text>
+    <text x="246" y="0">Chạy</text>
+    <text x="284" y="0">Terminal</text>
+    <text x="348" y="0" fill="#a78bfa" font-weight="bold">Trợ lý AI</text>
+    <text x="412" y="0">Trợ giúp</text>
+  </g>
+
+  <!-- Centered Search / Command Palette Box -->
+  <g transform="translate(620, 8)">
+    <rect x="0" y="0" width="380" height="26" rx="6" fill="#21252b" stroke="#333842" stroke-width="1"/>
+    <path d="M12 17l4-4-4-4" fill="none" stroke="#6b7280" stroke-width="1.8"/>
+    <text class="t-ui" x="32" y="17" font-size="12" fill="#848995">DrgX IDE — drgx-workspace [Local-First]</text>
+  </g>
+
+  <!-- Window Controls Right -->
+  <g class="t-ui" font-size="11" fill="#717886" transform="translate(1420, 25)">
+    <rect x="0" y="-13" width="70" height="20" rx="4" fill="#282c34" stroke="#3e4451"/>
+    <text x="8" y="1" fill="#60a5fa">Port: 45290</text>
+    <text x="84" y="1">🗕</text>
+    <text x="110" y="1">🗖</text>
+    <text x="136" y="1">✕</text>
+  </g>
+
+  <!-- ================= MAIN LAYOUT ================= -->
+
+  <!-- 1. ACTIVITY BAR (FAR LEFT) -->
+  <rect x="0" y="42" width="52" height="932" fill="#1b1d23" stroke="#252830" stroke-width="1"/>
+  <!-- Active Indicator Bar -->
+  <rect x="0" y="54" width="2" height="34" fill="#8b5cf6"/>
+
+  <!-- Activity Bar Icons -->
+  <!-- Explorer Icon (Active) -->
+  <g transform="translate(15, 60)" fill="none" stroke="#ffffff" stroke-width="1.8">
+    <path d="M2 4h6l2 2h10v12H2z"/>
+  </g>
+  <!-- Search Icon -->
+  <g transform="translate(16, 110)" fill="none" stroke="#717886" stroke-width="1.8">
+    <circle cx="8" cy="8" r="6"/>
+    <line x1="13" y1="13" x2="18" y2="18"/>
+  </g>
+  <!-- Git Branch Icon -->
+  <g transform="translate(16, 160)" fill="none" stroke="#717886" stroke-width="1.8">
+    <circle cx="5" cy="5" r="3"/>
+    <circle cx="5" cy="15" r="3"/>
+    <circle cx="15" cy="8" r="3"/>
+    <path d="M5 8v4M15 11c0 3-10 1-10 1"/>
+  </g>
+  <!-- DrgX Copilot Icon (Highlighted) -->
+  <g transform="translate(14, 210)">
+    <circle cx="11" cy="11" r="11" fill="rgba(139,92,246,0.2)"/>
+    <path d="M6 11l4-4 4 4-4 4z" fill="#a855f7"/>
+  </g>
+  <!-- Settings Bottom -->
+  <g transform="translate(16, 936)" fill="none" stroke="#717886" stroke-width="1.8">
+    <circle cx="9" cy="9" r="4"/>
+    <path d="M9 1v2M9 15v2M1 9h2M15 9h2"/>
+  </g>
+
+  <!-- 2. EXPLORER SIDEBAR (220px) -->
+  <rect x="52" y="42" width="228" height="932" fill="#181a1f" stroke="#252830" stroke-width="1"/>
+  <!-- Explorer Header -->
+  <text class="t-ui" x="72" y="70" font-size="11" font-weight="bold" fill="#7a8291" letter-spacing="1">EXPLORER : DRGX STUDIO</text>
+  
+  <!-- File Tree Items -->
+  <g class="t-ui" font-size="13" fill="#abb2bf" transform="translate(70, 96)">
+    <!-- Folder app -->
+    <text x="0" y="0" fill="#9da5b4">▼</text>
+    <text x="14" y="0" fill="#e5c07b">📁 app</text>
+
+    <!-- Folder src-tauri -->
+    <text x="16" y="24" fill="#9da5b4">▼</text>
+    <text x="30" y="24" fill="#e5c07b">📁 src-tauri</text>
+
+    <!-- Folder src -->
+    <text x="32" y="48" fill="#9da5b4">▼</text>
+    <text x="46" y="48" fill="#e5c07b">📁 src</text>
+
+    <!-- Files in src -->
+    <text x="56" y="72" fill="#60a5fa">📜 agent_bar.js</text>
+    <text x="56" y="96" fill="#60a5fa">📜 brand.js</text>
+
+    <!-- main.rs (Active File Highlight) -->
+    <rect x="-8" y="106" width="220" height="24" rx="4" fill="rgba(139,92,246,0.18)" stroke="rgba(139,92,246,0.4)"/>
+    <text x="56" y="122" fill="#f8fafc" font-weight="bold">🦀 main.rs</text>
+    <circle cx="200" cy="118" r="3" fill="#a78bfa"/>
+
+    <!-- Cargo.toml -->
+    <text x="46" y="152" fill="#e5c07b">⚙ Cargo.toml</text>
+    <text x="46" y="176" fill="#e5c07b">⚙ tauri.conf.json</text>
+
+    <!-- Folder extension -->
+    <text x="16" y="206" fill="#9da5b4">▼</text>
+    <text x="30" y="206" fill="#e5c07b">📁 extension</text>
+    <text x="46" y="230" fill="#60a5fa">📜 web.js</text>
+    <text x="46" y="254" fill="#e5c07b">⚙ package.json</text>
+
+    <!-- Folder scripts -->
+    <text x="0" y="284" fill="#9da5b4">▶ 📁 scripts</text>
+    <!-- Folder web -->
+    <text x="0" y="308" fill="#9da5b4">▶ 📁 web / intro</text>
+
+    <!-- Special Project Files -->
+    <text x="0" y="340" fill="#38bdf8" font-weight="bold">⚖️ judge_engine.cpp</text>
+    <text x="0" y="364" fill="#a78bfa" font-weight="bold">📖 ARCHITECTURE.md</text>
+  </g>
+
+  <!-- 3. CODE EDITOR AREA (720px) -->
+  <rect x="280" y="42" width="790" height="932" fill="#1e1e24"/>
+
+  <!-- Editor Tabs Bar -->
+  <rect x="280" y="42" width="790" height="38" fill="#181a1f" stroke="#252830" stroke-width="1"/>
+  <!-- Active Tab: main.rs -->
+  <rect x="280" y="42" width="160" height="38" fill="#1e1e24" stroke-top="#8b5cf6" stroke-width="2"/>
+  <rect x="280" y="42" width="160" height="2" fill="#8b5cf6"/>
+  <text class="t-ui" x="296" y="66" font-size="12" fill="#ffffff" font-weight="bold">🦀 main.rs</text>
+  <text class="t-ui" x="420" y="65" font-size="11" fill="#717886">✕</text>
+
+  <!-- Inactive Tab: drgx_copilot.js -->
+  <rect x="440" y="42" width="160" height="38" fill="#14161a" stroke="#252830" stroke-width="1"/>
+  <text class="t-ui" x="456" y="66" font-size="12" fill="#717886">📜 drgx_copilot.js</text>
+
+  <!-- Inactive Tab: ARCHITECTURE.md -->
+  <rect x="600" y="42" width="160" height="38" fill="#14161a" stroke="#252830" stroke-width="1"/>
+  <text class="t-ui" x="616" y="66" font-size="12" fill="#717886">📖 ARCHITECTURE.md</text>
+
+  <!-- Breadcrumbs Bar -->
+  <rect x="280" y="80" width="790" height="24" fill="#1e1e24"/>
+  <text class="t-ui" x="296" y="96" font-size="11" fill="#6b7280">app › src-tauri › src › 🦀 main.rs › <tspan fill="#a78bfa">fn handle_context_steer</tspan></text>
+
+  <!-- Monaco Code Lines -->
+  <g class="t-mono" transform="translate(290, 130)">
+    <!-- Line numbers & code -->
+    <text x="0" y="0" fill="#4b5263">810</text>
+    <text x="40" y="0"><tspan class="kw">pub fn</tspan> <tspan class="fn">handle_context_steer</tspan>(body: &amp;[<tspan class="tp">u8</tspan>]) -&gt; (<tspan class="tp">u16</tspan>, <tspan class="tp">String</tspan>) {</text>
+
+    <text x="0" y="24" fill="#4b5263">811</text>
+    <text x="40" y="24">&#160;&#160;&#160;&#160;<tspan class="kw">let</tspan> v = serde_json::<tspan class="fn">from_slice</tspan>(body).<tspan class="fn">unwrap_or_default</tspan>();</text>
+
+    <text x="0" y="48" fill="#4b5263">812</text>
+    <text x="40" y="48">&#160;&#160;&#160;&#160;<tspan class="kw">let</tspan> text = v[<tspan class="st">"text"</tspan>].<tspan class="fn">as_str</tspan>().<tspan class="fn">unwrap_or</tspan>(<tspan class="st">""</tspan>);</text>
+
+    <text x="0" y="72" fill="#4b5263">813</text>
+    <text x="40" y="72">&#160;&#160;&#160;&#160;<tspan class="kw">let</tspan> session = v[<tspan class="st">"session"</tspan>].<tspan class="fn">as_str</tspan>().<tspan class="fn">unwrap_or</tspan>(<tspan class="st">""</tspan>);</text>
+
+    <text x="0" y="96" fill="#4b5263">814</text>
+    <text x="40" y="96">&#160;&#160;&#160;&#160;<tspan class="cm">// DrgX: Điều phối ngữ cảnh trực tiếp (Direct Context Steer) tức thì</tspan></text>
+
+    <text x="0" y="120" fill="#4b5263">815</text>
+    <text x="40" y="120">&#160;&#160;&#160;&#160;<tspan class="fn">upsert_context_state</tspan>(file_str, &amp;session);</text>
+
+    <text x="0" y="144" fill="#4b5263">816</text>
+    <text x="40" y="144">&#160;&#160;&#160;&#160;<tspan class="fn">sync_workspace_context</tspan>(dir, &amp;file_str);</text>
+
+    <text x="0" y="168" fill="#4b5263">817</text>
+    <text x="40" y="168">&#160;&#160;&#160;&#160;<tspan class="cm">// 💡 Gợi ý code inline từ DrgX Copilot (Model: GLM-5.3 Flash / Port 45290):</tspan></text>
+
+    <!-- INLINE COPILOT GHOST COMPLETION -->
+    <rect x="36" y="176" width="670" height="28" rx="4" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.35)" stroke-dasharray="4,4"/>
+    <text x="0" y="194" fill="#8b5cf6" font-weight="bold">818</text>
+    <text x="40" y="194" class="ghost">&#160;&#160;&#160;&#160;daemon_http("POST", &amp;format!("/api/session/{}/prompt", session), Some(&amp;prompt));</text>
+
+    <!-- Copilot Badge Trigger -->
+    <g transform="translate(480, 216)">
+      <rect x="0" y="0" width="220" height="24" rx="12" fill="#8b5cf6"/>
+      <text class="t-ui" x="14" y="16" font-size="11" font-weight="bold" fill="#ffffff">⚡ DrgX Copilot: Bấm Alt+\ để nhận</text>
+    </g>
+
+    <text x="0" y="256" fill="#4b5263">819</text>
+    <text x="40" y="256">&#160;&#160;&#160;&#160;nav_log(&amp;format!(<tspan class="st">"steer: delivered {} bytes to {}"</tspan>, text.len(), session));</text>
+
+    <text x="0" y="280" fill="#4b5263">820</text>
+    <text x="40" y="280">&#160;&#160;&#160;&#160;(200, <tspan class="st">"{\"ok\":true,\"delivered\":true}"</tspan>.<tspan class="fn">into</tspan>())</text>
+
+    <text x="0" y="304" fill="#4b5263">821</text>
+    <text x="40" y="304">}</text>
+
+    <!-- Code Block 2: Job Object Clean Exit -->
+    <text x="0" y="348" fill="#4b5263">830</text>
+    <text x="40" y="348"><tspan class="cm">// Windows Job Object: Hủy sạch tiến trình ngầm khi thoát DrgX IDE</tspan></text>
+    <text x="0" y="372" fill="#4b5263">831</text>
+    <text x="40" y="372"><tspan class="kw">pub fn</tspan> <tspan class="fn">assign_kill_on_close_job</tspan>(pid: <tspan class="tp">u32</tspan>) {</text>
+    <text x="0" y="396" fill="#4b5263">832</text>
+    <text x="40" y="396">&#160;&#160;&#160;&#160;<tspan class="kw">unsafe</tspan> {</text>
+    <text x="0" y="420" fill="#4b5263">833</text>
+    <text x="40" y="420">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan class="kw">let</tspan> job = <tspan class="fn">CreateJobObjectW</tspan>(std::ptr::null(), std::ptr::null());</text>
+    <text x="0" y="444" fill="#4b5263">834</text>
+    <text x="40" y="444">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;info.BasicLimitInformation.LimitFlags = <tspan class="tp">JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE</tspan>;</text>
+    <text x="0" y="468" fill="#4b5263">835</text>
+    <text x="40" y="468">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan class="fn">AssignProcessToJobObject</tspan>(job, proc);</text>
+    <text x="0" y="492" fill="#4b5263">836</text>
+    <text x="40" y="492">&#160;&#160;&#160;&#160;}</text>
+    <text x="0" y="516" fill="#4b5263">837</text>
+    <text x="40" y="516">}</text>
+  </g>
+
+  <!-- Minimap (Right side of editor) -->
+  <rect x="1020" y="80" width="50" height="894" fill="#16181d" opacity="0.6"/>
+  <g fill="#4b5263" opacity="0.4" transform="translate(1025, 90)">
+    <rect x="0" y="0" width="30" height="2" rx="1"/>
+    <rect x="4" y="6" width="38" height="2" rx="1"/>
+    <rect x="4" y="12" width="28" height="2" rx="1"/>
+    <rect x="4" y="18" width="34" height="2" rx="1"/>
+    <rect x="0" y="24" width="40" height="2" rx="1" fill="#8b5cf6" opacity="0.8"/>
+    <rect x="4" y="30" width="25" height="2" rx="1"/>
+    <rect x="0" y="40" width="35" height="2" rx="1"/>
+    <rect x="4" y="46" width="32" height="2" rx="1"/>
+  </g>
+
+  <!-- Resizer Split Handle -->
+  <line x1="1070" y1="42" x2="1070" y2="974" stroke="#8b5cf6" stroke-width="2"/>
+  <circle cx="1070" cy="500" r="5" fill="#8b5cf6"/>
+
+  <!-- ================= 4. AGENT DUAL-WEBVIEW PANEL (RIGHT) ================= -->
+  <rect x="1070" y="42" width="530" height="932" fill="url(#agentGrad)"/>
+
+  <!-- Agent Header -->
+  <rect x="1070" y="42" width="530" height="42" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+  <g class="t-ui" transform="translate(1088, 68)">
+    <circle cx="8" cy="-3" r="5" fill="#34d399"/>
+    <text x="22" y="1" font-size="13" font-weight="bold" fill="#f0f6fc">Trợ Lý AI DrgX (Neural AI Agent)</text>
+    <rect x="330" y="-12" width="100" height="20" rx="4" fill="rgba(139,92,246,0.2)" stroke="rgba(139,92,246,0.4)"/>
+    <text x="336" y="2" font-size="10.5" font-weight="bold" fill="#c084fc">GLM-5.3 Flash</text>
+  </g>
+
+  <!-- Agent Chat Stream -->
+  <g class="t-ui" transform="translate(1090, 110)">
+    <!-- User Prompt Bubble -->
+    <rect x="60" y="0" width="420" height="54" rx="10" fill="rgba(139,92,246,0.18)" stroke="rgba(139,92,246,0.4)"/>
+    <text x="76" y="22" font-size="11" font-weight="bold" fill="#a78bfa">BẠN (DEVELOPER)</text>
+    <text x="76" y="40" font-size="12.5" fill="#f8fafc">Kiểm tra kết nối proxy 45290 và logic dọn dẹp tiến trình khi thoát.</text>
+
+    <!-- Agent Response Bubble -->
+    <rect x="0" y="70" width="480" height="210" rx="10" fill="#161b22" stroke="#30363d"/>
+    <text x="16" y="94" font-size="11" font-weight="bold" fill="#38bdf8">DRGX AI AGENT</text>
+    <text x="16" y="118" font-size="12.5" fill="#c9d1d9">Đang phân tích cấu trúc mã nguồn trong <tspan fill="#60a5fa">drgx-workspace</tspan>:</text>
+    
+    <!-- Checklist items -->
+    <text x="16" y="144" font-size="12" fill="#34d399">✓ Proxy nội bộ: Khởi tạo trên 127.0.0.1 (cổng 45290 - 45299).</text>
+    <text x="16" y="168" font-size="12" fill="#34d399">✓ JobObject Windows: Đã kích hoạt LimitFlag KILL_ON_JOB_CLOSE.</text>
+    <text x="16" y="192" font-size="12" fill="#34d399">✓ Dual-Webview: Phân tách Main (Workbench) và Agent (Neural AI).</text>
+    <text x="16" y="216" font-size="12" fill="#c9d1d9">Hệ thống sẵn sàng hoạt động an toàn 100% nội địa!</text>
+
+    <!-- Code snippet in agent message -->
+    <rect x="16" y="230" width="448" height="34" rx="6" fill="#0d1117" stroke="#30363d"/>
+    <text class="t-mono" x="28" y="252" font-size="11" fill="#79c0ff">let status = probe_port(45290); // Returns OK in 0.12ms</text>
+
+    <!-- Steer Message from Direct Context Steer -->
+    <g transform="translate(0, 300)">
+      <rect x="0" y="0" width="480" height="96" rx="10" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.4)"/>
+      <circle cx="20" cy="22" r="5" fill="#34d399"/>
+      <text x="34" y="26" font-size="11.5" font-weight="bold" fill="#34d399">ĐIỀU PHỐI NGỮ CẢNH (DIRECT CONTEXT STEER) ĐÃ TIẾP NHẬN:</text>
+      <text x="20" y="52" font-size="12.5" fill="#e6edf3">"[2026-10-18 19:48] Tối ưu hóa animation và giao diện chuẩn IDE"</text>
+      <text x="20" y="76" font-size="11.5" fill="#8b949e">⚡ Agent đã nhận lệnh steer và tự động cập nhật mà không ngắt phiên!</text>
+    </g>
+  </g>
+
+  <!-- Agent Bottom Inbox Input Bar (Docked) -->
+  <g transform="translate(1070, 874)">
+    <rect x="0" y="0" width="530" height="100" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+    <text class="t-ui" x="20" y="24" font-size="11" font-weight="bold" fill="#8b949e">ĐIỀU PHỐI NGỮ CẢNH TRỰC TIẾP (DIRECT CONTEXT STEER)</text>
+    <rect x="20" y="36" width="390" height="38" rx="8" fill="#161b22" stroke="#30363d"/>
+    <text class="t-ui" x="34" y="60" font-size="12.5" fill="#c9d1d9">Gõ yêu cầu bổ sung cho Agent...</text>
+    <rect x="420" y="36" width="90" height="38" rx="8" fill="url(#accentGlow)"/>
+    <text class="t-ui" x="444" y="60" font-size="12" font-weight="bold" fill="#ffffff">Gửi Steer</text>
+  </g>
+
+  <!-- ================= 5. STATUS BAR (BOTTOM) ================= -->
+  <rect x="0" y="974" width="1600" height="26" fill="#8b5cf6"/>
+  <g class="t-ui" font-size="11.5" font-weight="600" fill="#ffffff" transform="translate(14, 991)">
+    <text x="0" y="0">⚡ DrgX Copilot: Sẵn sàng</text>
+    <text x="180" y="0">🔀 master*</text>
+    <text x="260" y="0">⨂ 0  ⚠ 0</text>
+    <text x="350" y="0">Port 80 (Web)</text>
+    <text x="450" y="0">Proxy: 45290</text>
+  </g>
+
+  <g class="t-ui" font-size="11.5" font-weight="600" fill="#ffffff" transform="translate(1320, 991)">
+    <text x="0" y="0">UTF-8</text>
+    <text x="60" y="0">Rust 2021</text>
+    <text x="140" y="0">DrgX v0.3.0</text>
+    <text x="230" y="0">🔔</text>
+  </g>
+</svg>

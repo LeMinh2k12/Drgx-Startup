@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="obsidian" class="lock">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DrgX IDE — Môi trường lập trình Local-First tích hợp Judge, AI Agent &amp; Void-bit OJ</title>
+<meta name="description" content="DrgX IDE: Môi trường lập trình local-first nhanh, mạnh mẽ cho học sinh &amp; sinh viên Việt Nam. Tích hợp Judge đa testcase (F9), Stress Tester, Exam Server, AI Copilot BYOK, 5 Skin Chuyên nghiệp và Void-bit OJ 47 bài.">
+<meta name="keywords" content="DrgX IDE, lập trình thi đấu, học sinh giỏi tin học, local judge C++ Python, Void-bit OJ, DrgX Workbench tiếng Việt, IDE cho học sinh Việt Nam">
+<meta name="author" content="Nhóm DrgX — Phú Thọ">
+<meta name="robots" content="index, follow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://drgx-web.netlify.app/index.html">
+
+<!-- Open Graph / Facebook / Zalo -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="DrgX IDE">
+<meta property="og:url" content="https://drgx-web.netlify.app/index.html">
+<meta property="og:title" content="DrgX IDE — Lập trình đã tiến hóa | 1 IDE thay cho 6–8 công cụ rời rạc">
+<meta property="og:description" content="Viết C++17 &amp; Python như trong một công cụ phát triển thực thụ. Chấm đa testcase F9, Stress Tester, Exam Server, AI Copilot BYOK, 5 Skin và Void-bit OJ 47 bài.">
+<meta property="og:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="1024">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DrgX IDE — Lập trình đã tiến hóa | Local-first IDE + Judge &amp; AI">
+<meta name="twitter:description" content="Một IDE thay cho 6–8 công cụ rời rạc: Judge F9, Stress Tester, Exam Server, AI Copilot, 5 Skin Chuyên nghiệp &amp; Void-bit OJ.">
+<meta name="twitter:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<meta name="theme-color" content="#06070b">
+<link rel="icon" type="image/png" href="assets/logo-64.png">
+
+<!-- Non-blocking Google Fonts (an toàn khi phòng máy offline) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+
+<link rel="stylesheet" href="assets/site.css">
+
+<!-- Schema.org JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "DrgX IDE",
+      "operatingSystem": "Windows 10, Windows 11",
+      "applicationCategory": "DeveloperApplication",
+      "softwareVersion": "2.0.0",
+      "inLanguage": "vi-VN",
+      "description": "Môi trường lập trình local-first tích hợp AI Agent, Judge đa testcase, Exam Server, Web Lab, 5 Skin Chuyên nghiệp và Void-bit OJ dành cho học sinh Việt Nam.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "VND"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Nhóm DrgX — Phú Thọ"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "Nhóm DrgX — Phú Thọ",
+      "url": "https://drgx-web.netlify.app/",
+      "logo": "https://drgx-web.netlify.app/assets/logo-hd.png"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+
+<!-- ═══ Splash intro: chỉ phát 1 lần/phiên, có nút Bỏ qua (Esc) ═══ -->
+<div id="splash" role="dialog" aria-modal="true" aria-label="Video giới thiệu thương hiệu DrgX">
+  <video id="splashVideo" class="splash-video" autoplay muted playsinline preload="metadata">
+    <source src="assets/drgx_logo_animation.mp4" type="video/mp4">
+  </video>
+  <button id="splashSkip" class="splash-skip" type="button" aria-label="Bỏ qua video mở đầu">
+    Bỏ qua Intro <kbd>Esc</kbd>
+  </button>
+</div>
+<noscript><style>#splash{display:none!important} html.lock{overflow:auto!important}</style></noscript>
+
+<!-- ═══ Top Announcement Bar ═══ -->
+<div class="top-announce" role="region" aria-label="Thông báo phiên bản mới">
+  <div class="wrap">
+    <span class="ta-pill">DRGX v2.0 SHIP READY</span>
+    <span>Vượt qua <b>68/68 bài kiểm thử Health Gate</b> · Đồng bộ <b>5 Skin Chuyên nghiệp</b> · Kèm <b>47 bài tập Subtask &amp; 42 bài giảng thuật toán</b>!</span>
+    <a href="judge-demo.html">Trải nghiệm Phòng Lab Ảo →</a>
+  </div>
+</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <picture>
+        <source srcset="assets/logo-64.webp" type="image/webp">
+        <img src="assets/logo-64.png" alt="Logo DrgX IDE" width="32" height="32" decoding="async">
+      </picture>
+      <span>DrgX <b>IDE</b></span>
+      <span class="brand-ver">v2.0</span>
+    </a>
+    <nav class="nav-links" aria-label="Điều hướng chính">
+      <a href="index.html" class="active" aria-current="page">Trang chủ</a>
+      <a href="#workflow">Tour</a>
+      <a href="features.html">Tính năng</a>
+      <a href="#problem-hub">ProblemHub</a>
+      <a href="#themes">5 Skins</a>
+      <a href="void-bit.html">Void-bit OJ</a>
+      <a href="ecosystem/index.html">Hệ sinh thái</a>
+      <a href="download.html">Tải về</a>
+      <a href="about.html">Về dự án</a>
+    </nav>
+    <div class="nav-right">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="judge-demo.html" title="Phòng Lab tương tác trực tuyến: Stress Test, Winnowing &amp; Robot STEM">🧪 Phòng Lab Ảo</a>
+      <a class="btn btn-grad btn-sm" href="download.html">Tải DrgX ↓</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Mở menu điều hướng">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="mobile-drawer" role="region" aria-label="Menu di động">
+    <nav class="mobile-nav-list" aria-label="Điều hướng di động">
+      <a href="index.html" class="active" aria-current="page"><span>Trang chủ</span><span>→</span></a>
+      <a href="features.html"><span>Tính năng &amp; Kiến trúc</span><span>→</span></a>
+      <a href="#problem-hub"><span>ProblemHub &amp; Mẫu giải thuật</span><span>→</span></a>
+      <a href="#themes"><span>5 Skin Chuyên nghiệp</span><span>→</span></a>
+      <a href="judge-demo.html"><span>🧪 Phòng Lab Tương Tác (Sandbox)</span><span>→</span></a>
+      <a href="ecosystem/index.html"><span>Hệ sinh thái học tập (12 tuần)</span><span>→</span></a>
+      <a href="void-bit.html"><span>Void-bit OJ (47 bài · 42 bài giảng)</span><span>→</span></a>
+      <a href="download.html"><span>Tải về &amp; Cài đặt</span><span>→</span></a>
+      <a href="about.html"><span>Về dự án &amp; Giấy phép</span><span>→</span></a>
+    </nav>
+    <div class="mobile-skin-bar">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">5 Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-grad btn-sm" href="download.html">Cài ngay ↓</a>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+
+<!-- ═══ Hero ═══ -->
+<div class="wrap">
+  <section class="hero" aria-labelledby="hero-heading">
+    <div>
+      <span class="hero-badge"><span class="dot" aria-hidden="true"></span> Windows 10/11 · Tauri 2 + DrgX Workbench Core · 68/68 Health Gate PASS</span>
+      <h1 id="hero-heading">Viết code như trong <span class="grad">công cụ thực thụ.</span></h1>
+      <p class="sub"><b>DrgX IDE</b> là không gian lập trình <b>local-first</b> nhanh, mạnh mẽ dành cho học sinh Việt Nam. Chấm mọi testcase bằng <kbd>F9</kbd>, khám phá <b>ProblemHub &amp; Void-bit OJ (47 bài · 42 bài giảng)</b>, bật <b>AI Socratic cục bộ</b> và tùy biến không gian làm việc với <b>5 Skin Chuyên nghiệp</b>.</p>
+      <div class="hero-cta">
+        <a class="btn btn-grad" href="download.html">Tải cho Windows (x64) ↓</a>
+        <a class="btn btn-ghost" href="judge-demo.html">🧪 Trải nghiệm Phòng Lab Ảo</a>
+        <a class="btn btn-ghost" href="void-bit.html#baigiang">📖 Đọc 42 Bài giảng</a>
+        <button class="btn btn-ghost btn-sm" id="replaySplashBtn" type="button" title="Phát lại video intro gốc của nhóm">▶ Xem lại intro</button>
+      </div>
+      <p class="hero-note">Số liệu đo trực tiếp trên tiến trình thật (19–24/10/2026) · 100% miễn phí · Không quảng cáo · Chạy mượt cả khi mất mạng.</p>
+      <div class="hero-stat-row" role="list" aria-label="Thông số kỹ thuật đo thật">
+        <div class="hstat" role="listitem"><div class="v">39 MB</div><div class="k">RAM shell Tauri</div></div>
+        <div class="hstat" role="listitem"><div class="v">0,5 s</div><div class="k">Mở cửa sổ chính</div></div>
+        <div class="hstat" role="listitem"><div class="v">68/68</div><div class="k">Health Gate PASS</div></div>
+        <div class="hstat" role="listitem"><div class="v">47 bài</div><div class="k">Kho Void-bit OJ</div></div>
+      </div>
+    </div>
+
+    <!-- Interactive App Editor Window Mockup -->
+    <div class="real-window" id="realEditorWindow" aria-label="Mô phỏng tương tác cửa sổ DrgX Editor">
+      <div class="rw-titlebar">
+        <div class="rw-dots" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="rw-tabs" role="tablist" aria-label="Các tệp mẫu trong trình soạn thảo">
+          <button class="rw-tab active" type="button" data-rw-file="solution.cpp">solution.cpp</button>
+          <button class="rw-tab" type="button" data-rw-file="stress_gen.py">stress_gen.py</button>
+          <button class="rw-tab" type="button" data-rw-file="winnowing_ast.hpp">winnowing_ast.hpp</button>
+        </div>
+        <span class="rw-client-pill" id="rwClientLabel">CP Studio :8765 · C++17 (g++ -O2)</span>
+      </div>
+      <div class="rw-toolbar">
+        <div class="rw-actions">
+          <button class="rw-act-btn primary" type="button" data-rw-action="execute">▶ Execute / Judge (F9)</button>
+          <button class="rw-act-btn" type="button" data-rw-action="copilot">⚡ AI Copilot (Alt+\)</button>
+        </div>
+        <div class="rw-actions">
+          <button class="rw-act-btn" type="button" data-rw-action="copy">📋 Copy</button>
+          <button class="rw-act-btn" type="button" data-rw-action="clear">✕ Clear</button>
+        </div>
+      </div>
+      <div class="rw-body">
+        <pre class="rw-code" id="rwCodeArea">// [DrgX Editor] :: LSP Connected | C++17 Strict | Judge: F9 Ready
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n; if (!(cin &gt;&gt; n)) return 0;
+    long long sum = 0, x;
+    for (int i = 0; i &lt; n; ++i) { cin &gt;&gt; x; sum += x; }
+    cout &lt;&lt; sum &lt;&lt; "\n"; // Dùng long long chống tràn số ở test 04
+    return 0;
+}</pre>
+        <div class="rw-output" id="rwOutputArea">[DrgX Judge F9] Đang chấm 4 testcase cục bộ cho solution.cpp...
+  Test 01: AC (32 ms | 3,420 KB)  ✓ Khớp output
+  Test 02: AC (31 ms | 3,416 KB)  ✓ Khớp output
+  Test 03: AC (34 ms | 3,428 KB)  ✓ Khớp output
+  Test 04: AC (35 ms | 3,440 KB)  ✓ 3000000000 == 3000000000
+→ VERDICT: AC (4/4 test đạt · 100 điểm · 0 lỗi tràn số)</div>
+      </div>
+      <div class="rw-statusbar">
+        <span>⚡ Local Judge: Ready · Exam Server: 127.0.0.1:8765</span>
+        <span>Chế độ: <b style="color:#34d399">Exam Integrity (Sạch AI)</b></span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ Guided Product Tour (Interactive Workflow Switcher + Real Screenshots) ═══ -->
+<div class="wrap">
+  <section class="content-section" id="workflow" style="padding-top:36px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Guided Product Tour</div>
+      <h2>Nhìn thẳng vào sản phẩm.<br><span class="grad">Năm công cụ trong một luồng phím tắt.</span></h2>
+      <p class="lead">Mọi thao tác từ viết code, chấm đa testcase, bắt phản ví dụ, thi tập trung đến tùy biến giao diện đều nằm trong <b>một ứng dụng duy nhất</b>.</p>
+    </div>
+
+    <div class="wf-box reveal" data-tab-group="home-workflow">
+      <div class="wf-tabs" role="tablist" aria-label="Các bước trong quy trình DrgX">
+        <button class="wf-tab active" type="button" role="tab" id="tab-wf-1" aria-selected="true" aria-controls="panel-wf-1" tabindex="0">
+          <span class="step-num">01</span> Judge cục bộ (F9)
+        </button>
+        <button class="wf-tab" type="button" role="tab" id="tab-wf-2" aria-selected="false" aria-controls="panel-wf-2" tabindex="-1">
+          <span class="step-num">02</span> Stress Tester tự động
+        </button>
+        <button class="wf-tab" type="button" role="tab" id="tab-wf-3" aria-selected="false" aria-controls="panel-wf-3" tabindex="-1">
+          <span class="step-num">03</span> Exam Server phòng thi
+        </button>
+        <button class="wf-tab" type="button" role="tab" id="tab-wf-4" aria-selected="false" aria-controls="panel-wf-4" tabindex="-1">
+          <span class="step-num">04</span> AI Copilot (BYOK)
+        </button>
+        <button class="wf-tab" type="button" role="tab" id="tab-wf-5" aria-selected="false" aria-controls="panel-wf-5" tabindex="-1">
+          <span class="step-num">05</span> Web Lab &amp; Desktop
+        </button>
+      </div>
+
+      <!-- Panel 1: Judge -->
+      <div class="wf-panel active" id="panel-wf-1" role="tabpanel" aria-labelledby="tab-wf-1">
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">⚖️</span> Chấm đa testcase ngay trong máy</h3>
+          <p class="desc">Bấm <kbd>F9</kbd> hoặc <kbd>Ctrl+Alt+J</kbd> — DrgX tự động khớp toàn bộ <code>tests/*.in</code> với <code>*.out / *.ans</code>, trả về verdict <b>AC / WA / RE / TLE</b> kèm thời gian chạy từng test và dòng bị lệch (diff).</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Hoàn toàn offline</b> <span class="m">— không phụ thuộc mạng trường hay hàng đợi judge online.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Bắt lỗi tràn số rõ ràng</b> <span class="m">— hiển thị ngay kỳ vọng <code>3000000000</code> so với kết quả <code>-1294967296</code> khi quên dùng <code>long long</code>.</span></span></div>
+          </div>
+          <div class="hero-cta" style="margin-top:20px">
+            <a class="btn btn-ghost btn-sm" href="features.html#judge">Chi tiết DrgX Judge →</a>
+          </div>
+        </div>
+        <figure class="shot-frame">
+          <div class="glow" aria-hidden="true"></div>
+          <picture>
+            <source srcset="assets/shot-judge.webp" type="image/webp">
+            <img src="assets/shot-judge.png" alt="Ảnh chụp thật kết quả chấm DrgX Judge đạt AC 4/4 test trên máy" width="620" height="358" loading="lazy" decoding="async" data-fallback>
+          </picture>
+          <figcaption>
+            <span>Ảnh chụp thật kênh output DrgX Judge — chấm bộ demo 4 testcase</span>
+            <span class="mono">~32–38 ms / test</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <!-- Panel 2: Stress Tester -->
+      <div class="wf-panel" id="panel-wf-2" role="tabpanel" aria-labelledby="tab-wf-2" hidden>
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">🔥</span> Stress Tester tự tìm phản ví dụ</h3>
+          <p class="desc">Khi bài làm qua được test mẫu nhưng vẫn bị WA ở test ẩn, Stress Tester tự sinh hàng loạt test ngẫu nhiên, so khớp <b>code trâu (brute-force)</b> và <b>code tối ưu</b> cho tới khi bắt được test làm sai.</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Tự động hóa quy trình sinh test</b> <span class="m">— không cần viết script bash/batch thủ công ngoài cửa sổ.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Khởi tạo dự án chuẩn (<kbd>Ctrl+Alt+H</kbd>)</b> <span class="m">— dựng sẵn cấu trúc file bài thi chỉ trong 1 lệnh.</span></span></div>
+          </div>
+          <div class="hero-cta" style="margin-top:20px">
+            <a class="btn btn-ghost btn-sm" href="void-bit.html#gianlan">Xem thêm Stress &amp; Anti-cheat →</a>
+          </div>
+        </div>
+        <figure class="shot-frame">
+          <div class="glow" aria-hidden="true"></div>
+          <picture>
+            <source srcset="assets/shot-stress.webp" type="image/webp">
+            <img src="assets/shot-stress.png" alt="Ảnh chụp thật công cụ Stress Tester của DrgX đang chạy so khớp testcase" width="997" height="412" loading="lazy" decoding="async" data-fallback>
+          </picture>
+          <figcaption>
+            <span>Ảnh chụp thật — Stress Tester chạy tự động ngay trong IDE</span>
+            <span class="mono">Generator + Brute + Sol</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <!-- Panel 3: Exam Server -->
+      <div class="wf-panel" id="panel-wf-3" role="tabpanel" aria-labelledby="tab-wf-3" hidden>
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">🛡️</span> Exam Integrity — Server quyết định kết quả</h3>
+          <p class="desc">Trong giờ kiểm tra, <b>DrgX CP Studio</b> chạy trong profile cách ly (tắt hoàn toàn AI) và gửi mã nguồn lên <b>Exam Server (cổng 8765)</b> để chấm tập trung đa luồng (<code>ThreadingHTTPServer</code>).</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Verdict server-authoritative</b> <span class="m">— server tự biên dịch và chấm; client không thể giả mạo kết quả.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>4 lớp bảo vệ + Admin Guard</b> <span class="m">— mã phòng 6 ký tự do server sinh, chặn payload &gt; 512KB (HTTP 413), bảo vệ route quản trị bằng <code>DRGX_ADMIN_TOKEN</code>.</span></span></div>
+          </div>
+          <div class="hero-cta" style="margin-top:20px">
+            <a class="btn btn-ghost btn-sm" href="features.html#exam-integrity">Xem 4 lớp Exam Integrity →</a>
+          </div>
+        </div>
+        <div class="term">
+          <div class="term-head"><i class="tdot r"></i><i class="tdot y"></i><i class="tdot g"></i><span class="tname">Exam Server (8765) — smoke test 11/11 PASS (4 luồng song song)</span></div>
+          <div class="term-body"><span class="dim">POST /exam/create</span>            → <span class="acc">{"code":"C8YGPD"}</span>
+<span class="dim">POST /exam/join {code,name}</span>  → <span class="ok">{"status":"joined"}</span>
+<span class="dim">POST /submit (C++17 &amp; Py3)</span>   → <span class="ok">verdict: AC (2/2 test)</span>
+<span class="dim">POST /submit (tràn int)</span>      → <span class="warn">verdict: FAIL (WA kèm diff)</span>
+<span class="dim">POST /submit (phòng ảo)</span>      → <span class="bad">HTTP 404 Not Found</span>
+<span class="dim">POST /exam/join (&gt;512 KB)</span>    → <span class="bad">HTTP 413 Payload Too Large</span></div>
+        </div>
+      </div>
+
+      <!-- Panel 4: AI Copilot -->
+      <div class="wf-panel" id="panel-wf-4" role="tabpanel" aria-labelledby="tab-wf-4" hidden>
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">🤖</span> AI Copilot &amp; Agent trong Dev Studio</h3>
+          <p class="desc">Bản <b>DrgX Dev Studio</b> tách riêng cho việc tự học và làm dự án: tích hợp gợi ý code inline (<kbd>Alt+\</kbd>), giải thích thuật toán, review lỗi và sinh testcase qua DrgX Neural AI Engine (cổng 45290).</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Mô hình miễn phí cấu hình sẵn + BYOK</b> <span class="m">— hỗ trợ dùng API key cá nhân, chủ động kiểm soát chi phí.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Điều phối Ngữ cảnh Trực tiếp (Direct Context Steer)</b> <span class="m">— gửi yêu cầu bổ sung ngay khi Agent đang làm việc mà không làm đứt mạch tác vụ.</span></span></div>
+          </div>
+          <div class="hero-cta" style="margin-top:20px">
+            <a class="btn btn-ghost btn-sm" href="features.html#ai">Chi tiết AI Copilot →</a>
+          </div>
+        </div>
+        <figure class="shot-frame">
+          <div class="glow" aria-hidden="true"></div>
+          <img src="assets/drgx_ide_ui.svg" alt="Sơ đồ giao diện DrgX Dev Studio — gợi ý ghost text inline và bảng điều khiển AI Agent" width="960" height="600" loading="lazy" decoding="async">
+          <figcaption>
+            <span>DrgX Dev Studio — gợi ý inline (<kbd>Alt+\</kbd>) và kênh điều phối ngữ cảnh trực tiếp</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <!-- Panel 5: Web Lab & Desktop -->
+      <div class="wf-panel" id="panel-wf-5" role="tabpanel" aria-labelledby="tab-wf-5" hidden>
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">🌐</span> Desktop Native &amp; Web Lab Phòng Máy</h3>
+          <p class="desc">Giải quyết triệt để bài toán <b>phòng máy trường học khóa quyền cài đặt (Deep Freeze / không có quyền Admin)</b>: bật 1 máy chủ giáo viên, cả phòng mở trình duyệt là có đầy đủ IDE.</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Ảnh chụp cửa sổ thật &amp; Web Lab thật</b> <span class="m">— ưu tiên cổng 80, tự động fallback sang <code>8123–8127</code>.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Nhẹ cho máy trạm cấu hình yếu</b> <span class="m">— mọi tác vụ biên dịch nặng nằm trên máy chủ phòng lab.</span></span></div>
+          </div>
+          <div class="hero-cta" style="margin-top:20px">
+            <a class="btn btn-ghost btn-sm" href="features.html#weblab">Xem cấu hình Web Lab →</a>
+          </div>
+        </div>
+        <figure class="shot-frame">
+          <div class="glow" aria-hidden="true"></div>
+          <picture>
+            <source srcset="assets/shot-ide.webp" type="image/webp">
+            <img src="assets/shot-ide.png" alt="Ảnh chụp thật cửa sổ DrgX Desktop — editor solution.cpp, terminal PowerShell, status bar tiếng Việt" width="1366" height="768" loading="lazy" decoding="async" data-fallback>
+          </picture>
+          <figcaption>
+            <span>Ảnh chụp thật — DrgX Desktop &amp; Web Lab (127.0.0.1:8123), nạp sẵn thư mục demo-cp</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ ProblemHub & Template Hub tích hợp ═══ -->
+<div class="wrap">
+  <section class="content-section" id="problem-hub" style="padding-top:16px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Built-in ProblemHub &amp; Templates</div>
+      <h2>Kho đề Subtask &amp; Mẫu giải thuật <span class="grad">ngay trong tầm tay.</span></h2>
+      <p class="lead">Không cần tìm kiếm rời rạc trên mạng — duyệt nhanh các mẫu giải thuật C++17/Python chuẩn thi HSG, bộ sinh test và bài tập Void-bit OJ ngay tại đây.</p>
+    </div>
+
+    <div class="hub-shell reveal" id="drgxProblemHub">
+      <div class="hub-controls">
+        <div class="hub-search">
+          <span class="s-ico" aria-hidden="true">🔍</span>
+          <input type="search" data-hub-search placeholder="Tìm bài tập, mẫu C++17, Dijkstra, Quy hoạch động, Stress Test, STEM Robotics..." aria-label="Tìm kiếm trong ProblemHub">
+        </div>
+        <div class="hub-filters" role="group" aria-label="Lọc danh mục ProblemHub">
+          <button class="hub-filter active" type="button" data-hub-filter="all">Tất cả (6)</button>
+          <button class="hub-filter" type="button" data-hub-filter="template">CP &amp; STEM Templates</button>
+          <button class="hub-filter" type="button" data-hub-filter="oj">Đề Subtask OJ</button>
+          <button class="hub-filter" type="button" data-hub-filter="stress">Stress &amp; Anti-Cheat</button>
+        </div>
+      </div>
+
+      <div class="hub-grid">
+        <!-- Card 1: Fast I/O & 64-bit CP Template -->
+        <article class="hub-card" data-hub-cat="template">
+          <div class="hub-card-top">
+            <span class="hub-badge">C++17 Template</span>
+            <span class="mono" style="font-size:11px;color:var(--ok)">Ctrl+Alt+C</span>
+          </div>
+          <h3>Khung chuẩn HSG Quốc Gia (Fast I/O + 64-bit)</h3>
+          <p>Mẫu khởi tạo nhanh tích hợp sẵn macro chống tràn số <code>long long</code>, điều hướng luồng <code>freopen</code> an toàn và đo thời gian chạy cục bộ.</p>
+          <pre>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+using ll = long long;
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    return 0;
+}</pre>
+          <div class="hub-card-foot">
+            <button class="btn btn-ghost btn-sm" type="button" data-hub-copy>Sao chép mẫu</button>
+            <a class="tile-link mono" style="font-size:12px;color:var(--accent);font-weight:700" href="features.html#editor">Chi tiết IDE →</a>
+          </div>
+        </article>
+
+        <!-- Card 2: Greedy Activity Selection (Verified Probe) -->
+        <article class="hub-card" data-hub-cat="oj">
+          <div class="hub-card-top">
+            <span class="hub-badge">Void-bit #001</span>
+            <span class="mono" style="font-size:11px;color:var(--ok)">AC · 100 điểm</span>
+          </div>
+          <h3>Lựa chọn Hoạt động Tham lam (greedy_activity_001)</h3>
+          <p>Bài toán kinh điển sắp xếp theo thời điểm kết thúc sớm nhất — đã kiểm chứng tự động C++17 &amp; Python 3 trong Health Gate.</p>
+          <pre>sort(a.begin(), a.end(), [](auto&amp; x, auto&amp; y){
+    return x.second &lt; y.second;
+});
+int ans = 0, last_end = -1e9;
+for (auto&amp; [l, r] : a)
+    if (l &gt;= last_end) { ++ans; last_end = r; }</pre>
+          <div class="hub-card-foot">
+            <button class="btn btn-ghost btn-sm" type="button" data-hub-copy>Sao chép giải</button>
+            <a class="tile-link mono" style="font-size:12px;color:var(--accent);font-weight:700" href="void-bit.html#judge">Mở trong OJ →</a>
+          </div>
+        </article>
+
+        <!-- Card 3: Monotonic Stack Subtask -->
+        <article class="hub-card" data-hub-cat="oj">
+          <div class="hub-card-top">
+            <span class="hub-badge">Subtask 20/30/50</span>
+            <span class="mono" style="font-size:11px;color:var(--ok)">12/12 Test AC</span>
+          </div>
+          <h3>Ngăn xếp Đơn điệu (ds_stack_009 · O(N))</h3>
+          <p>Tìm phần tử lớn hơn gần nhất bằng Monotonic Stack. Vượt qua trọn vẹn 3 subtask (N ≤ 10⁶) trong 670 ms trên C++17.</p>
+          <pre>stack&lt;int&gt; st;
+vector&lt;int&gt; res(n, -1);
+for (int i = 0; i &lt; n; ++i) {
+    while (!st.empty() &amp;&amp; a[st.top()] &lt; a[i]) {
+        res[st.top()] = a[i]; st.pop();
+    }
+    st.push(i);
+}</pre>
+          <div class="hub-card-foot">
+            <button class="btn btn-ghost btn-sm" type="button" data-hub-copy>Sao chép giải</button>
+            <a class="tile-link mono" style="font-size:12px;color:var(--accent);font-weight:700" href="void-bit.html">Xem 47 bài →</a>
+          </div>
+        </article>
+
+        <!-- Card 4: Differential Stress Generator -->
+        <article class="hub-card" data-hub-cat="stress">
+          <div class="hub-card-top">
+            <span class="hub-badge">Stress Engine</span>
+            <span class="mono" style="font-size:11px;color:var(--warn)">Auto MISMATCH</span>
+          </div>
+          <h3>Bộ sinh Test Ngẫu nhiên C++17 (mt19937_64)</h3>
+          <p>Dùng <code>std::mt19937_64</code> sinh cây, đồ thị và mảng số lớn để đối chiếu giữa <code>brute.cpp</code> và <code>solution.cpp</code>.</p>
+          <pre>mt19937_64 rng(chrono::steady_clock::now()
+    .time_since_epoch().count());
+auto rand_ll = [&amp;](long long l, long long r) {
+    return uniform_int_distribution&lt;long long&gt;(l, r)(rng);
+};</pre>
+          <div class="hub-card-foot">
+            <button class="btn btn-ghost btn-sm" type="button" data-hub-copy>Sao chép mẫu</button>
+            <a class="tile-link mono" style="font-size:12px;color:var(--accent);font-weight:700" href="void-bit.html#gianlan">Thử Stress →</a>
+          </div>
+        </article>
+
+        <!-- Card 5: Winnowing Anti-Cheat -->
+        <article class="hub-card" data-hub-cat="stress">
+          <div class="hub-card-top">
+            <span class="hub-badge">Anti-Cheat API</span>
+            <span class="mono" style="font-size:11px;color:var(--accent2)">K=25 · W=15</span>
+          </div>
+          <h3>Kiểm tra Đạo văn Winnowing Fingerprinting</h3>
+          <p>Gọi trực tiếp endpoint cục bộ <code>POST /api/anti-cheat/compare</code> để đo độ tương đồng cấu trúc mã nguồn bất chấp đổi tên biến.</p>
+          <pre>POST http://127.0.0.1:8080/api/anti-cheat/compare
+Content-Type: application/json
+{"code_a": "...", "code_b": "..."}
+// → {"similarity": 100, "flagged": true}   (bài chép đã đổi tên biến + chú thích)</pre>
+          <div class="hub-card-foot">
+            <button class="btn btn-ghost btn-sm" type="button" data-hub-copy>Sao chép API</button>
+            <a class="tile-link mono" style="font-size:12px;color:var(--accent);font-weight:700" href="void-bit.html#gianlan">Xem báo cáo →</a>
+          </div>
+        </article>
+
+        <!-- Card 6: STEM / IoT / Robotics C++ Template -->
+        <article class="hub-card" data-hub-cat="template">
+          <div class="hub-card-top">
+            <span class="hub-badge">STEM &amp; Robotics</span>
+            <span class="mono" style="font-size:11px;color:var(--ok)">Arduino / ESP32</span>
+          </div>
+          <h3>Điều khiển Robot tránh vật cản (PID + Ultrasonic)</h3>
+          <p>Mẫu tích hợp lập trình nhúng C++ trong DrgX Dev Studio cho các CLB STEM phổ thông và mô hình Robotics giáo dục.</p>
+          <pre>long readDistanceCm(int trig, int echo) {
+    digitalWrite(trig, LOW); delayMicroseconds(2);
+    digitalWrite(trig, HIGH); delayMicroseconds(10);
+    return pulseIn(echo, HIGH) * 0.034 / 2;
+}</pre>
+          <div class="hub-card-foot">
+            <button class="btn btn-ghost btn-sm" type="button" data-hub-copy>Sao chép mẫu</button>
+            <a class="tile-link mono" style="font-size:12px;color:var(--accent);font-weight:700" href="judge-demo.html">Mở Mô phỏng Robot →</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ Custom Themes & Layouts (5 Skin Chuyên nghiệp) ═══ -->
+<div class="wrap">
+  <section class="content-section" id="themes" style="padding-top:16px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Custom Themes &amp; Visual Studio</div>
+      <h2>5 Skin <span class="grad">Chuyên nghiệp.</span></h2>
+      <p class="lead">Bạn có thể chuyển đổi tức thì giữa <b>5 bảng màu gốc</b> đồng bộ từ trình soạn thảo tới website, bảo vệ thị lực học sinh khi ngồi code nhiều giờ liền.</p>
+    </div>
+
+    <!-- 5 Skin Cards -->
+    <div class="skin-studio-grid reveal" role="group" aria-label="Bảng chọn 5 Skin giao diện DrgX">
+      <button class="skin-card active" type="button" data-skin-card="obsidian">
+        <div class="skin-swatches">
+          <span style="background:#06070b"></span>
+          <span style="background:#818cf8"></span>
+          <span style="background:#38bdf8"></span>
+        </div>
+        <div class="skin-card-title">01 · Ion (Obsidian Zinc)</div>
+        <div class="skin-card-desc">Nền đen đá núi lửa kết hợp lam-tím sắc nét, độ tương phản chuẩn mực, trang nhã.</div>
+        <div class="skin-card-status">● Đang sử dụng</div>
+      </button>
+
+      <button class="skin-card" type="button" data-skin-card="nebula">
+        <div class="skin-swatches">
+          <span style="background:#05050d"></span>
+          <span style="background:#c084fc"></span>
+          <span style="background:#22d3ee"></span>
+        </div>
+        <div class="skin-card-title">02 · Nebula Cyber</div>
+        <div class="skin-card-desc">Tím vũ trụ và xanh cyan điện quang giàu năng lượng cho các buổi luyện đề đêm.</div>
+        <div class="skin-card-status">Bấm để kích hoạt →</div>
+      </button>
+
+      <button class="skin-card" type="button" data-skin-card="tokyo">
+        <div class="skin-swatches">
+          <span style="background:#0d0e17"></span>
+          <span style="background:#bb9af7"></span>
+          <span style="background:#7aa2f7"></span>
+        </div>
+        <div class="skin-card-title">03 · Tokyo Night</div>
+        <div class="skin-card-desc">Bảng màu chàm pastel dịu mắt được cộng đồng lập trình viên hệ thống yêu thích.</div>
+        <div class="skin-card-status">Bấm để kích hoạt →</div>
+      </button>
+
+      <button class="skin-card" type="button" data-skin-card="matrix">
+        <div class="skin-swatches">
+          <span style="background:#020604"></span>
+          <span style="background:#34d399"></span>
+          <span style="background:#a3e635"></span>
+        </div>
+        <div class="skin-card-title">04 · Cyber Matrix</div>
+        <div class="skin-card-desc">Sắc xanh lục bảo terminal cổ điển, độ tương phản cực cao khi đọc log &amp; diff.</div>
+        <div class="skin-card-status">Bấm để kích hoạt →</div>
+      </button>
+
+      <button class="skin-card" type="button" data-skin-card="light">
+        <div class="skin-swatches">
+          <span style="background:#f6f8fc"></span>
+          <span style="background:#4338ca"></span>
+          <span style="background:#0284c7"></span>
+        </div>
+        <div class="skin-card-title">05 · Dawn (Nordic Clean)</div>
+        <div class="skin-card-desc">Giao diện sáng tinh khiết tối ưu cho máy chiếu lớp học và phòng máy ban ngày.</div>
+        <div class="skin-card-status">Bấm để kích hoạt →</div>
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ Multi-Profile & Classroom Manager + Why DrgX ═══ -->
+<div class="wrap">
+  <section class="content-section" id="workspace-manager" style="padding-top:16px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Multi-Profile &amp; Classroom Manager</div>
+      <h2>Quản trị đa hồ sơ &amp; phòng thi. <span class="grad">Thay thế 6–8 công cụ rời rạc.</span></h2>
+      <p class="lead">Tương tự <b>Account &amp; Instance Manager</b> trên các công cụ dev hiện đại, DrgX tách biệt hoàn toàn môi trường thi đấu và môi trường tự học mà không làm rối cài đặt máy cá nhân.</p>
+    </div>
+
+    <div class="tiles-4 reveal">
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">🚀</span>
+        <span class="t-name">Multi-Launch 2 Studio</span>
+        <span class="t-desc">Chạy song song <code>CP Studio</code> (tắt AI để thi trung thực) và <code>Dev Studio</code> (tích hợp AI Copilot) trên 2 thư mục dữ liệu cách ly hoàn toàn.</span>
+        <div class="tagrow"><span class="tag">Zero Conflict</span><span class="tag">Isolated</span></div>
+      </div>
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">🔑</span>
+        <span class="t-name">Phòng Thi &amp; Admin Guard</span>
+        <span class="t-desc">Sinh mã phòng 6 ký tự từ server (<code>C8YGPD</code>), chịu tải đa luồng với <code>ThreadingHTTPServer</code> và khóa route quản trị bằng <code>DRGX_ADMIN_TOKEN</code>.</span>
+        <div class="tagrow"><span class="tag">Port 8765</span><span class="tag">413 Guard</span></div>
+      </div>
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">🔒</span>
+        <span class="t-name">Bridge &amp; BYOK Key Vault</span>
+        <span class="t-desc">Proxy AI chỉ lắng nghe trên <code>127.0.0.1:45290</code> kèm session token ngẫu nhiên. Quản lý khóa API cá nhân an toàn, không rò rỉ mã nguồn.</span>
+        <div class="tagrow"><span class="tag">Loopback Only</span><span class="tag">BYOK</span></div>
+      </div>
+      <div class="tile">
+        <span class="t-ico" aria-hidden="true">🧹</span>
+        <span class="t-name">Win32 JobObject Kernel</span>
+        <span class="t-desc">Gắn toàn bộ tiến trình con vào nhân Windows với cờ <code>KILL_ON_JOB_CLOSE</code>: đóng IDE là thu hồi 100% RAM và giải phóng cổng mạng tức thì.</span>
+        <div class="tagrow"><span class="tag">39 MB Shell</span><span class="tag">0 Zombie</span></div>
+      </div>
+    </div>
+
+    <div class="vs-grid reveal">
+      <div class="vs-card old">
+        <div class="vs-head">
+          <h3 style="font-size:19px;font-weight:800">Cách làm truyền thống (Rời rạc)</h3>
+          <span class="vs-badge">6–8 công cụ</span>
+        </div>
+        <ul class="vs-list">
+          <li><span>✕</span><span><b>Cài đặt phức tạp:</b> Phải tự ghép Code::Blocks/Dev-C++, cấu hình biến môi trường PATH cho MinGW rất dễ lỗi trên máy trường.</span></li>
+          <li><span>✕</span><span><b>Chấm test thủ công:</b> Copy-paste từng test vào cửa sổ console đen, tự nhìn bằng mắt xem output có lệch dấu cách hay tràn số không.</span></li>
+          <li><span>✕</span><span><b>Phụ thuộc mạng:</b> Khi mạng phòng máy chập chờn, không thể nộp bài lên Judge online để biết AC hay TLE.</span></li>
+          <li><span>✕</span><span><b>Lẫn lộn học và thi:</b> Chung một môi trường nên giáo viên khó kiểm soát việc dùng AI gợi ý code trong giờ kiểm tra.</span></li>
+        </ul>
+      </div>
+      <div class="vs-card good">
+        <div class="vs-head">
+          <h3 style="font-size:19px;font-weight:800">Quy trình hợp nhất trên DrgX IDE</h3>
+          <span class="vs-badge">All-in-One Local</span>
+        </div>
+        <ul class="vs-list">
+          <li><span>✓</span><span><b>Chạy ngay bằng 1 lệnh:</b> Điều phối toàn bộ qua <code>drgx.cmd</code> hoặc tách bạch <code>run-cp.cmd</code> (Thi đấu) và <code>run-dev.cmd</code> (Tự học có AI).</span></li>
+          <li><span>✓</span><span><b>Judge &amp; Stress ngay bằng phím tắt:</b> Bấm <kbd>F9</kbd> hoặc <kbd>Ctrl+Alt+J</kbd> chấm toàn bộ testcase trong máy, tự động báo diff và thời gian chạy.</span></li>
+          <li><span>✓</span><span><b>Kèm sẵn Void-bit OJ (47 bài):</b> Có sẵn server C++17 chấm theo subtask, đo RAM PSAPI và kiểm tra đạo văn Winnowing cục bộ.</span></li>
+          <li><span>✓</span><span><b>Hỗ trợ cả phòng máy khóa quyền cài:</b> Bật <b>Web Lab</b> để cả lớp lập trình ngay trên trình duyệt mà không cần quyền Admin.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ Access Tiers & Editions ═══ -->
+<div class="wrap">
+  <section class="content-section" id="editions" style="padding-top:16px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Phiên bản &amp; Quyền truy cập</div>
+      <h2>Mọi tính năng cao cấp. <span class="grad">Miễn phí 100% cho giáo dục.</span></h2>
+      <p class="lead">Không cần vượt link quảng cáo lấy key ngày, không thu phí ẩn: toàn bộ 4 phiên bản chuyên biệt trong hệ sinh thái DrgX đều mở sẵn cho học sinh, CLB và nhà trường.</p>
+    </div>
+
+    <div class="tiers-grid reveal">
+      <div class="tier-card">
+        <div class="tier-name">CP Studio</div>
+        <div class="tier-price">0đ <small>/ trọn đời · Offline</small></div>
+        <ul class="tier-list">
+          <li><b>Profile cách ly hoàn toàn</b> (tắt gợi ý AI)</li>
+          <li><b>DrgX Judge (<kbd>F9</kbd>)</b> chấm đa testcase C++17 &amp; Python</li>
+          <li><b>Stress Tester</b> tự động tìm phản ví dụ</li>
+          <li>Kết nối <b>Exam Server :8765</b> chấm tập trung</li>
+          <li>Đầy đủ <b>5 Skin Chuyên nghiệp</b> + Video Intro</li>
+        </ul>
+        <a class="btn btn-ghost btn-sm" href="download.html#install">Chạy run-cp.cmd →</a>
+      </div>
+
+      <div class="tier-card featured">
+        <span class="tier-pop">Phổ biến nhất</span>
+        <div class="tier-name">Dev Studio + AI</div>
+        <div class="tier-price">0đ <small>/ Neural AI + BYOK</small></div>
+        <ul class="tier-list">
+          <li><b>AI Copilot inline (<kbd>Alt+\</kbd>)</b> độ trễ &lt; 0,2s</li>
+          <li><b>Điều phối Ngữ cảnh Trực tiếp</b> không đứt mạch</li>
+          <li><b>7 Project Templates</b> &amp; Toolchain Doctor</li>
+          <li>Mô hình miễn phí cấu hình sẵn hoặc gắn key riêng</li>
+          <li>Cam kết <b>không thu thập code học sinh</b></li>
+        </ul>
+        <a class="btn btn-grad btn-sm" href="download.html#install">Chạy run-dev.cmd ↓</a>
+      </div>
+
+      <div class="tier-card">
+        <div class="tier-name">Void-bit OJ &amp; CLB</div>
+        <div class="tier-price">0đ <small>/ C++17 Local Server</small></div>
+        <ul class="tier-list">
+          <li><b>47 bài tập có sẵn</b> chấm theo Subtask HSG</li>
+          <li><b>Binary C++17 (3,8 MB)</b> đo bộ nhớ đỉnh PSAPI</li>
+          <li><b>Winnowing Anti-Cheat</b> quét tương đồng mã</li>
+          <li><b>12 trang web học tập</b> + Lộ trình 12 tuần</li>
+          <li>Khởi chạy ngay tại cổng <code>:8080</code> &amp; <code>:8000</code></li>
+        </ul>
+        <a class="btn btn-ghost btn-sm" href="void-bit.html">Mở Void-bit OJ →</a>
+      </div>
+
+      <div class="tier-card">
+        <div class="tier-name">School Web Lab</div>
+        <div class="tier-price">0đ <small>/ Mạng LAN Phòng máy</small></div>
+        <ul class="tier-list">
+          <li><b>1 máy giáo viên</b> phát IDE cho cả phòng máy</li>
+          <li>Học sinh code trên <b>Edge / Chrome</b> (không cần Admin)</li>
+          <li>Tự dò cổng <code>80</code> → fallback <code>8123–8127</code></li>
+          <li>Bảo vệ cổng quản trị với <b>Admin Guard Token</b></li>
+          <li>Tuân thủ 100% giấy phép mã nguồn mở <b>MIT</b></li>
+        </ul>
+        <a class="btn btn-ghost btn-sm" href="features.html#weblab">Cấu hình phòng máy →</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ Tài liệu học tập & Hệ sinh thái ═══ -->
+<div class="wrap">
+  <section class="content-section" id="ecosystem" style="padding-top:16px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Hệ sinh thái học tập DrgX</div>
+      <h2>Biết code thôi chưa đủ.<br><span class="grad">Cần biết học gì tiếp theo.</span></h2>
+      <p class="lead">Đi kèm hai bản Studio là <b>Hệ sinh thái học tập tĩnh</b> (chạy hoàn toàn offline, mở bằng <kbd>Ctrl+Alt+L</kbd>) và <b>Void-bit OJ</b> — kết nối liền mạch từ lộ trình lý thuyết đến thực hành chấm bài.</p>
+    </div>
+    <div class="tiles-4 reveal">
+      <a class="tile" href="ecosystem/index.html#lo-trinh">
+        <span class="t-ico" aria-hidden="true">🧭</span>
+        <span class="t-name">Lộ trình 12 tuần</span>
+        <span class="t-desc">4 chặng tự học từ cú pháp C++/Python, CTDL tuyến tính đến Đồ thị &amp; Quy hoạch động kèm bài luyện thực tế.</span>
+        <span class="t-link">Xem lộ trình →</span>
+      </a>
+      <a class="tile" href="ecosystem/index.html#clb">
+        <span class="t-ico" aria-hidden="true">👥</span>
+        <span class="t-name">Khung vận hành CLB</span>
+        <span class="t-desc">Checklist 2 tuần/vòng (Học – Luyện – Review – Showcase) lưu tiến độ ngay trên trình duyệt, không cần server.</span>
+        <span class="t-link">Mở bộ khung →</span>
+      </a>
+      <a class="tile" href="ecosystem/index.html#giao-vien">
+        <span class="t-ico" aria-hidden="true">👩‍🏫</span>
+        <span class="t-name">Gợi ý cho Giáo viên</span>
+        <span class="t-desc">Cách đóng gói đề + bộ test ẩn và dùng Exam Server để tổ chức kiểm tra 60–90 phút ngay tại phòng máy.</span>
+        <span class="t-link">Xem hướng dẫn →</span>
+      </a>
+      <a class="tile" href="void-bit.html">
+        <span class="t-ico" aria-hidden="true">⚖️</span>
+        <span class="t-name">Void-bit OJ (47 bài)</span>
+        <span class="t-desc">Online Judge local viết bằng C++ (3,8 MB): chấm subtask, đo bộ nhớ PSAPI, anti-cheat Winnowing + 12 trang web học.</span>
+        <span class="t-link">Khám phá Void-bit →</span>
+      </a>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ Final CTA ═══ -->
+<div class="wrap">
+  <section class="final-cta">
+    <div class="reveal">
+      <h2>Sẵn sàng trải nghiệm <span class="grad">DrgX IDE v2.0?</span></h2>
+      <p>Khởi động ngay CP Studio, Dev Studio hoặc Void-bit OJ chỉ với 1 dòng lệnh PowerShell — hoàn toàn miễn phí, trang bị sẵn 5 Skin Chuyên nghiệp &amp; Video Intro nhận diện.</p>
+      <div class="hero-cta">
+        <a class="btn btn-grad" href="download.html">Tải về &amp; Cài đặt ngay ↓</a>
+        <a class="btn btn-ghost" href="void-bit.html">Thử Void-bit OJ (47 bài)</a>
+        <a class="btn btn-ghost" href="judge-demo.html">🧪 Trải nghiệm Phòng Lab Ảo</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <picture>
+            <source srcset="assets/logo-64.webp" type="image/webp">
+            <img src="assets/logo-64.png" alt="Logo DrgX" width="28" height="28" loading="lazy" decoding="async">
+          </picture>
+          DrgX <b style="color:var(--accent)">&nbsp;IDE</b>
+        </div>
+        <p class="foot-about">Môi trường lập trình local-first tích hợp AI Agent, Judge &amp; tài liệu học tập dành cho học sinh Việt Nam. Gồm CP Studio, Dev Studio, Exam Server, Web Lab, Void-bit OJ và Hệ sinh thái học tập.</p>
+        <div class="foot-domains" aria-label="Cổng dịch vụ cục bộ chính thức">
+          <span class="foot-domain-tag">OJ :8080</span>
+          <span class="foot-domain-tag">Learn :8000</span>
+          <span class="foot-domain-tag">Exam :8765</span>
+          <span class="foot-domain-tag">AI :45290</span>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Sản phẩm</h4>
+        <a href="features.html#judge">DrgX Judge (F9)</a>
+        <a href="features.html#exam-integrity">Exam Integrity 4 lớp</a>
+        <a href="features.html#exam-server">DrgX Exam Server</a>
+        <a href="features.html#ai">AI Copilot (BYOK)</a>
+        <a href="features.html#weblab">DrgX Web Lab</a>
+        <a href="#themes">5 Skins Chuyên nghiệp</a>
+        <a href="void-bit.html">Void-bit OJ (47 bài · 42 bài giảng)</a>
+        <a href="judge-demo.html">Phòng Lab Ảo (Sandbox)</a>
+      </div>
+      <div class="foot-col">
+        <h4>Học tập &amp; Cài đặt</h4>
+        <a href="download.html">Tải về &amp; Cài đặt</a>
+        <a href="download.html#specs">Bảng thông số đo thật</a>
+        <a href="ecosystem/index.html">Lộ trình 12 tuần</a>
+        <a href="ecosystem/index.html#clb">Khung sinh hoạt CLB</a>
+        <a href="download.html#faq">Câu hỏi thường gặp (FAQ)</a>
+      </div>
+      <div class="foot-col">
+        <h4>Pháp lý &amp; Dự án</h4>
+        <a href="about.html">Về nhóm DrgX — Phú Thọ</a>
+        <a href="about.html#components">Kiến trúc 6 thành phần</a>
+        <button class="foot-link" type="button" data-modal-open="modalPrivacy">Chính sách quyền riêng tư</button>
+        <button class="foot-link" type="button" data-modal-open="modalNotice">Giấy phép &amp; Ghi công (MIT)</button>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nhóm DrgX — Phú Thọ. Hệ sinh thái Lập trình Local-First • Bản quyền mã nguồn mở MIT.</span>
+      <span class="mono">drgx v2.0.0 · app v0.1.0 · ext v1.0.0 · 68/68 PASS</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Modal Chính sách quyền riêng tư (PRIVACY.md) -->
+<div class="modal-backdrop" id="modalPrivacy" role="dialog" aria-modal="true" aria-labelledby="modalPrivacyTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalPrivacyTitle">Chính sách quyền riêng tư — DrgX IDE (PRIVACY.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><b>Cập nhật lần cuối:</b> 23/10/2026 — Thiết kế theo nguyên tắc <b>local-first</b>: mã nguồn, testcase, cấu hình và lịch sử làm việc được lưu trực tiếp trên máy người dùng.</p>
+      <h4>1. Dữ liệu xử lý cục bộ</h4>
+      <ul>
+        <li>Tệp mã nguồn, testcase, cấu hình và lịch sử chạy bài nằm hoàn toàn trong thư mục dự án trên máy bạn.</li>
+        <li>DrgX Judge, Exam Server, Void-bit OJ và Stress Tester chạy nội bộ; không tự động gửi mã nguồn ra ngoài.</li>
+      </ul>
+      <h4>2. Khi nào dữ liệu được gửi ra ngoài?</h4>
+      <ul>
+        <li>Chỉ khi bạn <b>chủ động</b> gọi tính năng AI Copilot/Agent trong Dev Studio (chỉ gửi đoạn mã/prompt được chọn tới nhà cung cấp mô hình bạn cấu hình).</li>
+        <li>DrgX <b>không bán dữ liệu</b>, không chèn quảng cáo trong editor và không dùng mã nguồn học sinh để huấn luyện mô hình AI.</li>
+      </ul>
+      <h4>3. Bảo mật nội bộ</h4>
+      <ul>
+        <li>Proxy AI chỉ lắng nghe trên <code>127.0.0.1</code>, kiểm tra <code>Host/Origin</code> và yêu cầu bridge token sinh ngẫu nhiên.</li>
+        <li>Tiến độ trên Hệ sinh thái học tập và trạng thái 5 Skin chỉ lưu trong <code>localStorage</code> của trình duyệt, không cần tài khoản.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Giấy phép & Ghi công (NOTICE.md) -->
+<div class="modal-backdrop" id="modalNotice" role="dialog" aria-modal="true" aria-labelledby="modalNoticeTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalNoticeTitle">Giấy phép &amp; Ghi công phần mềm mã nguồn mở (NOTICE.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <h4>1. DrgX Workbench Core — Giấy phép MIT</h4>
+      <p>Lõi trình soạn thảo của DrgX được phát triển trên nền tảng mã nguồn mở theo giấy phép MIT với bộ nhận diện thương hiệu và kiến trúc tích hợp độc lập của Nhóm DrgX — Phú Thọ.</p>
+      <h4>2. Tauri Framework &amp; Rust Crates — Giấy phép MIT / Apache-2.0</h4>
+      <p>Phần vỏ ứng dụng Desktop (<code>drgx-ide.exe</code>, ~39 MB RAM) sử dụng Tauri 2 (Rust + WebView2) và Win32 JobObject để quản lý tiến trình con an toàn.</p>
+      <h4>3. Tài sản nguyên bản của Nhóm DrgX</h4>
+      <p>Hai bản CP Studio &amp; Dev Studio launcher, Exam Server (Python), Void-bit OJ Server (C++17), bộ 5 skin (Ion/Obsidian, Nebula, Tokyo, Matrix, Dawn/Light), logo và video intro là tài sản do nhóm DrgX — Phú Thọ tự phát triển.</p>
+    </div>
+  </div>
+</div>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

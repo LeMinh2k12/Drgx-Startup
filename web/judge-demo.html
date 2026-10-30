@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="obsidian">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DrgX Playground — Phòng Lab Ảo Tương Tác (Stress Test, Winnowing &amp; Robot STEM)</title>
+  <meta name="description" content="Phòng Lab Tương Tác Trực Tuyến của DrgX IDE: Trải nghiệm trực tiếp Differential Stress Test 3 cột, thuật toán phát hiện đạo văn Winnowing k-gram và mô phỏng Robot STEM Arduino/ESP32 (68/68 Health Gate PASS)." />
+  <meta name="theme-color" content="#070b14" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="vi_VN" />
+  <meta property="og:title" content="DrgX Playground — Phòng Lab Ảo &amp; Trải Nghiệm Công Nghệ Lõi" />
+  <meta property="og:description" content="Thử nghiệm trực tiếp Stress Test 3 cột, thuật toán chống đạo văn Winnowing k-gram và mô phỏng Robot STEM Arduino/ESP32 ngay trên trình duyệt (68/68 PASS)." />
+  <meta property="og:url" content="https://drgx-web.netlify.app/judge-demo.html" />
+  <meta property="og:image" content="https://drgx-web.netlify.app/assets/shot-judge.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="DrgX Playground — Phòng Lab Ảo &amp; Trải Nghiệm Công Nghệ Lõi" />
+  <meta name="twitter:description" content="Phòng Lab tương tác trực tiếp các công nghệ lõi của hệ sinh thái lập trình DrgX IDE." />
+  <link rel="canonical" href="https://drgx-web.netlify.app/judge-demo.html" />
+  <link rel="icon" type="image/png" href="assets/logo-64.png" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "DrgX Playground — Phòng Lab Ảo Tương Tác (Stress Test, Winnowing & Robot STEM)",
+    "url": "https://drgx-web.netlify.app/judge-demo.html",
+    "description": "Phòng Lab tương tác trực tuyến của DrgX IDE: Differential Stress Test 3 cột, Winnowing k-gram và mô phỏng Robot STEM Arduino/ESP32 (68/68 Health Gate PASS)."
+  }
+  </script>
+  <style>
+    :root, [data-skin="obsidian"], [data-skin="ion"] {
+      --bg: #070b14;
+      --bg-panel: #0e1628;
+      --bg-card: #131e36;
+      --border: #24355a;
+      --text: #eef4ff;
+      --muted: #9cb0d4;
+      --accent: #22d3ee;
+      --accent-2: #8b5cf6;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --bad: #f87171;
+    }
+    [data-skin="nebula"] {
+      --bg: #0d0818; --bg-panel: #170f2b; --bg-card: #21163d; --border: #3d296b;
+      --text: #f5eeff; --muted: #b7a3d9; --accent: #c084fc; --accent-2: #f472b6;
+    }
+    [data-skin="tokyo"] {
+      --bg: #0f111a; --bg-panel: #161926; --bg-card: #1e2233; --border: #2e3452;
+      --text: #d8dee9; --muted: #8892b0; --accent: #7aa2f7; --accent-2: #bb9af7;
+    }
+    [data-skin="matrix"] {
+      --bg: #050f0a; --bg-panel: #0a1c12; --bg-card: #10291b; --border: #1e4d32;
+      --text: #e2fcef; --muted: #84c5a2; --accent: #10b981; --accent-2: #34d399;
+    }
+    [data-skin="dawn"], [data-skin="light"] {
+      --bg: #f8fafc; --bg-panel: #ffffff; --bg-card: #f1f5f9; --border: #cbd5e1;
+      --text: #0f172a; --muted: #475569; --accent: #2563eb; --accent-2: #7c3aed;
+      --good: #059669; --warn: #d97706; --bad: #dc2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      padding-bottom: 60px;
+    }
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(14, 22, 40, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    [data-skin="dawn"] .topbar, [data-skin="light"] .topbar { background: rgba(255, 255, 255, 0.94); }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
+    .brand img { width: 38px; height: 38px; border-radius: 10px; }
+    .brand-title { font-weight: 900; font-size: 18px; letter-spacing: -0.02em; }
+    .brand-sub { font-size: 12px; color: var(--muted); }
+    .skin-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      color: #fff; border: none;
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 28px 20px; }
+    .hero {
+      background: linear-gradient(145deg, var(--bg-panel), var(--bg-card));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 920px) { .hero, .grid-2, .grid-3 { grid-template-columns: 1fr !important; } }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 12px; border-radius: 999px;
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 12px; font-weight: 800;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: clamp(24px, 3vw, 38px); font-weight: 900; line-height: 1.15; margin-bottom: 12px; }
+    .grad {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .kpi-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px;
+    }
+    .kpi {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px;
+    }
+    .kpi b { display: block; font-size: 22px; color: var(--accent); font-weight: 900; }
+    .kpi span { font-size: 12px; color: var(--muted); }
+    .video-card {
+      background: #000; border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .video-card video { width: 100%; display: block; max-height: 250px; object-fit: cover; }
+    .video-caption {
+      padding: 10px 14px; background: var(--bg-panel);
+      display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted);
+    }
+    .section {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-hdr {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .section-hdr h2 { font-size: 20px; font-weight: 850; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .code-box {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+    }
+    .code-box h3 { font-size: 13px; color: var(--accent); margin-bottom: 8px; display: flex; justify-content: space-between; }
+    textarea.code-input, pre.code-view {
+      width: 100%; min-height: 155px; background: transparent; border: none; color: var(--text);
+      font-family: Consolas, "Cascadia Code", monospace; font-size: 12.5px; line-height: 1.5; resize: vertical; outline: none;
+      white-space: pre-wrap;
+    }
+    .result-banner {
+      margin-top: 16px; padding: 16px; border-radius: 12px;
+      background: var(--bg); border: 1px solid var(--border);
+    }
+    .test-row {
+      display: grid; grid-template-columns: 70px 70px 90px 1fr; gap: 10px; align-items: center;
+      padding: 7px 10px; border-bottom: 1px solid var(--border); font-family: Consolas, monospace; font-size: 12.5px;
+    }
+    .tag { padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; text-align: center; }
+    .tag.ac { background: rgba(52, 211, 153, 0.16); color: var(--good); }
+    .tag.wa { background: rgba(248, 113, 113, 0.18); color: var(--bad); }
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    table.rubric { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 13.5px; }
+    table.rubric th, table.rubric td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top;
+    }
+    table.rubric th { background: var(--bg-card); color: var(--accent); font-size: 12px; text-transform: uppercase; }
+    table.rubric tr.group-row td { background: rgba(139, 92, 246, 0.12); font-weight: 800; }
+    .score-input {
+      width: 68px; min-height: 38px; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--good); font-weight: 800; text-align: right; font-size: 13.5px;
+    }
+    @media (max-width: 640px) {
+      .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+      .test-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+    .total-bar {
+      margin-top: 16px; padding: 16px 20px; border-radius: 14px;
+      background: linear-gradient(90deg, rgba(34,211,238,0.14), rgba(139,92,246,0.18));
+      border: 1px solid var(--accent);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    .total-bar b { font-size: 26px; color: var(--good); }
+    .skip-link { position: absolute; left: -9999px; top: 8px; z-index: 999; background: var(--accent); color: #000; padding: 8px 14px; border-radius: 8px; font-weight: 800; }
+    .skip-link:focus { left: 16px; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Chuyển tới nội dung chính</a>
+
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.png" alt="DrgX Logo" />
+      <div>
+        <div class="brand-title">DrgX Playground — Phòng Lab Ảo Tương Tác</div>
+        <div class="brand-sub">Hệ sinh thái lập trình Local-First v2.0 · Stress Test · Winnowing Anti-Cheat · Robot STEM</div>
+      </div>
+    </a>
+    <div class="skin-bar">
+      <span style="font-size:12px;color:var(--muted);font-weight:700">Đổi Skin (5 Giao diện):</span>
+      <button class="btn" onclick="setSkin('obsidian')">Ion</button>
+      <button class="btn" onclick="setSkin('nebula')">Nebula</button>
+      <button class="btn" onclick="setSkin('tokyo')">Tokyo</button>
+      <button class="btn" onclick="setSkin('matrix')">Matrix</button>
+      <button class="btn" onclick="setSkin('light')">Dawn (Sáng)</button>
+      <a class="btn" href="void-bit.html">📖 42 Bài Giảng Void-bit</a>
+      <a class="btn primary" href="download.html">⬇ Tải DrgX IDE</a>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <div class="badge">✓ ĐÃ VƯỢT QUA 68/68 BÀI KIỂM ĐỊNH TỰ ĐỘNG · 100% LOCAL-FIRST</div>
+        <h1>Phòng Lab Tương Tác <span class="grad">DrgX</span><br/>Trải Nghiệm 3 Công Nghệ Lõi Trực Tuyến</h1>
+        <p style="color:var(--muted);font-size:15px">
+          Trải nghiệm trực tiếp 3 công nghệ lõi của hệ sinh thái DrgX IDE ngay trên trình duyệt (không cần cài đặt): <b>Differential Stress Test 3 cột</b>, <b>Thuật toán phát hiện đạo văn cấu trúc Winnowing k-gram</b> và <b>Mô phỏng Robot STEM Arduino/ESP32</b>.
+        </p>
+        <div class="kpi-strip">
+          <div class="kpi"><b>&lt; 60s</b><span>Khởi chạy trọn bộ (Zero-Config)</span></div>
+          <div class="kpi"><b>68/68 PASS</b><span>Cổng kiểm định tự động 100%</span></div>
+          <div class="kpi"><b>100% / 15,8%</b><span>Winnowing bắt đổi biến / Khác thuật toán</span></div>
+          <div class="kpi"><b>47 bài · 42 bài giảng</b><span>Kho đề Subtask &amp; VNOI Wiki Offline</span></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+          <a class="btn primary" href="download.html">⬇ Tải về &amp; Cài đặt DrgX IDE</a>
+          <a class="btn primary" href="void-bit.html#baigiang">📖 Thư viện 42 Bài giảng Void-bit</a>
+          <a class="btn" href="features.html">⚡ Xem 7 Tính năng Cốt lõi</a>
+          <a class="btn" href="ecosystem/index.html">🧭 Lộ trình Học tập 12 Tuần</a>
+          <a class="btn" href="about.html">👥 Về Nhóm Phát Triển DrgX</a>
+          <a class="btn" href="index.html">🌐 Trang Chủ Web</a>
+        </div>
+      </div>
+      <div class="video-card">
+        <video id="introVid" src="assets/drgx_logo_animation.mp4" autoplay muted loop playsinline></video>
+        <div class="video-caption">
+          <span>🎬 Video Intro tích hợp khi khởi động CP Studio & Dev Studio</span>
+          <button class="btn" style="padding:4px 10px;font-size:11px" onclick="var v=document.getElementById('introVid');v.currentTime=0;v.play();">Phát lại</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRẠM 1: STRESS TEST 3 CỘT -->
+    <section class="section">
+      <div class="section-hdr">
+        <div>
+          <h2>1. Mô hình hóa Trực quan: Differential Stress Test 3 Cột</h2>
+          <p style="font-size:13px;color:var(--muted)">Tự động sinh dữ liệu ngẫu nhiên đối chiếu giữa Giải thuật vét cạn chuẩn (Brute) và Bài làm học sinh (Solution) để bắt sống trường hợp biên gây WA.</p>
+        </div>
+        <button class="btn primary" onclick="runStressDemo()">⚡ Chạy Stress Test Bắt Phản Ví Dụ</button>
+      </div>
+
+      <div class="grid-3">
+        <div class="code-box">
+          <h3><span>① generator.cpp (Sinh test ngẫu nhiên)</span><span style="color:var(--muted)">C++17</span></h3>
+          <pre class="code-view">// Sinh ngẫu nhiên mảng N phần tử
+int n = rand_between(2, 6);
+cout &lt;&lt; n &lt;&lt; "\n";
+for (int i = 0; i &lt; n; i++) {
+  // Ở vòng thứ 4 sinh số lớn 10^9
+  long long v = (iter == 4)
+    ? 1500000000LL : rand() % 100;
+  cout &lt;&lt; v &lt;&lt; " ";
+}</pre>
+        </div>
+        <div class="code-box">
+          <h3><span>② brute.cpp (Đáp án chuẩn 64-bit)</span><span style="color:var(--good)">Chuẩn đối chiếu</span></h3>
+          <pre class="code-view">// Dùng long long 64-bit chống tràn số
+long long sum = 0;
+for (int i = 0; i &lt; n; i++) {
+  long long x;
+  cin &gt;&gt; x;
+  sum += x;
+}
+cout &lt;&lt; sum &lt;&lt; "\n";</pre>
+        </div>
+        <div class="code-box">
+          <h3><span>③ solution.cpp (Bài học sinh bị lỗi ẩn)</span><span style="color:var(--bad)">Dùng nhầm int 32-bit</span></h3>
+          <pre class="code-view">// Học sinh khai báo nhầm kiểu int
+int sum = 0; // Tràn số khi tổng &gt; 2*10^9!
+for (int i = 0; i &lt; n; i++) {
+  int x;
+  cin &gt;&gt; x;
+  sum += x;
+}
+cout &lt;&lt; sum &lt;&lt; "\n";</pre>
+        </div>
+      </div>
+
+      <div class="result-banner" id="stressOutput">
+        <span style="color:var(--muted)">Nhấn nút <b>“⚡ Chạy Stress Test Bắt Phản Ví Dụ”</b> phía trên để xem hệ thống tự động chạy từng vòng và bắt lỗi tràn số ở Vòng #04.</span>
+      </div>
+    </section>
+
+    <!-- TRẠM 2: WINNOWING ANTI-CHEAT -->
+    <section class="section">
+      <div class="section-hdr">
+        <div>
+          <h2>2. Mô hình hóa Vân tay Mã nguồn: Chống đạo văn Winnowing k-gram (k=5, w=4)</h2>
+          <p style="font-size:13px;color:var(--muted)">Chuẩn hóa mọi tên biến thành <code>ID</code>, loại bỏ chú thích và băm trượt phát hiện chính xác học sinh sao chép code rồi đổi tên biến.</p>
+        </div>
+        <button class="btn primary" onclick="runWinnowingDemo()">🔍 Phân Tích Dấu Vân Tay Winnowing</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="code-box">
+          <h3><span>Bài nộp Học sinh A (Bản gốc)</span><span>C++17</span></h3>
+          <textarea id="codeA" class="code-input" aria-label="Mã nguồn bài nộp Học sinh A">#include &lt;iostream&gt;
+using namespace std;
+int gcd_calc(int a, int b) {
+    while (b != 0) {
+        int r = a % b;
+        a = b;
+        b = r;
+    }
+    return a;
+}
+int main() {
+    int x, y;
+    cin &gt;&gt; x &gt;&gt; y;
+    cout &lt;&lt; gcd_calc(x, y) &lt;&lt; "\n";
+    return 0;
+}</textarea>
+        </div>
+        <div class="code-box">
+          <h3><span>Bài nộp Học sinh B (Đã đổi toàn bộ tên biến & thêm chú thích)</span><span>C++17</span></h3>
+          <textarea id="codeB" class="code-input" aria-label="Mã nguồn bài nộp Học sinh B">// Bài làm của em tự code 100% không chép ai
+#include &lt;iostream&gt;
+using namespace std;
+int tim_uoc_chung(int so_thu_nhat, int so_thu_hai) {
+    while (so_thu_hai != 0) {
+        int phan_du = so_thu_nhat % so_thu_hai;
+        so_thu_nhat = so_thu_hai;
+        so_thu_hai = phan_du;
+    }
+    return so_thu_nhat;
+}
+int main() {
+    int m, n;
+    cin &gt;&gt; m &gt;&gt; n;
+    cout &lt;&lt; tim_uoc_chung(m, n) &lt;&lt; "\n";
+    return 0;
+}</textarea>
+        </div>
+      </div>
+
+      <div class="result-banner" id="winnowOutput">
+        <span style="color:var(--muted)">Bạn có thể sửa trực tiếp code ở 2 ô trên rồi nhấn <b>“🔍 Phân Tích Dấu Vân Tay Winnowing”</b> để kiểm tra độ nhạy của thuật toán.</span>
+      </div>
+    </section>
+
+    <!-- TRẠM 3: MÔ HÌNH HÓA ROBOT STEM & VI MẠCH ARDUINO/ESP32 -->
+    <section class="section">
+      <div class="section-hdr">
+        <div>
+          <h2>3. Mô hình hóa Robot STEM Tự Hành &amp; Vi Mạch Arduino/ESP32</h2>
+          <p style="font-size:13px;color:var(--muted)">Kết nối trực tiếp từ <b>thuật toán C++17/Python trên màn hình</b> sang <b>điều khiển Robot tránh vật cản &amp; xung vi điều khiển (HC-SR04, PWM L298N, Serial 115200)</b>.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="robotAlgo" class="btn" style="padding:8px 12px" aria-label="Chọn thuật toán điều khiển Robot">
+            <option value="bfs">Thuật toán 1: BFS Tìm đường ngắn nhất (Chuẩn C++17 — AC)</option>
+            <option value="astar">Thuật toán 2: A* Heuristic tối ưu năng lượng pin (AC nhanh)</option>
+            <option value="greedy">Thuật toán 3: Greedy Đi thẳng ngây thơ (Bị kẹt tường chữ U — WA)</option>
+          </select>
+          <button class="btn primary" onclick="runRobotSim()">🤖 Nạp Code &amp; Chạy Mô Hình Robot</button>
+          <button class="btn" onclick="randomizeRobotMap()">🎲 Đổi Bản Đồ Vật Cản</button>
+          <button class="btn" onclick="toggleArduinoCode()">📋 Xuất Mã Nạp Arduino/ESP32 (.ino)</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="code-box">
+          <h3><span>🗺️ Sa bàn Robot STEM Tự Hành (Lưới 8×8 · Cảm biến siêu âm HC-SR04)</span><span id="robotStatusBadge" style="color:var(--good)">Sẵn sàng</span></h3>
+          <div id="robotGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding:8px;background:var(--bg-panel);border-radius:10px;border:1px solid var(--border)"></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px">
+            <span>🤖 <b>Robot STEM</b> (0,0)</span>
+            <span>🎯 <b>Trạm đích</b> (7,7)</span>
+            <span>🧱 <b>Vật cản</b> (Tường)</span>
+            <span>🟦 <b>Vùng sóng cảm biến quét</b></span>
+            <span>🟩 <b>Quỹ đạo di chuyển tối ưu</b></span>
+          </div>
+        </div>
+
+        <div class="code-box">
+          <h3><span>🔌 Bảng Vi Điều Khiển Ảo Arduino Uno / ESP32 STEM Shield</span><span style="color:var(--accent)">Serial 115200 baud</span></h3>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+            <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:8px">
+              <div style="font-size:11px;color:var(--muted)">Cảm biến HC-SR04 (D9/D10)</div>
+              <b id="hwDist" style="font-size:18px;color:var(--accent)">140 cm</b>
+            </div>
+            <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:8px">
+              <div style="font-size:11px;color:var(--muted)">Xung Động Cơ (ENA/ENB)</div>
+              <b id="hwPwm" style="font-size:15px;color:var(--good)">L: 0 | R: 0 PWM</b>
+            </div>
+            <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:8px">
+              <div style="font-size:11px;color:var(--muted)">Đèn LED Trạng Thái (D11-13)</div>
+              <b id="hwLeds" style="font-size:13px">🟢 D11 · ⚫ D12 · ⚫ D13</b>
+            </div>
+          </div>
+          <pre id="serialLog" class="code-view" style="min-height:145px;max-height:175px;overflow-y:auto;background:var(--bg-panel);padding:10px;border-radius:8px;border:1px solid var(--border)">[ESP32-STEM] Khởi động vi điều khiển thành công.
+[HC-SR04] Trig=GPIO9 Echo=GPIO10 | L298N ENA=GPIO5 ENB=GPIO6.
+Nhấn "🤖 Nạp Code &amp; Chạy Mô Hình Robot" để truyền thuật toán xuống Robot...</pre>
+          <pre id="arduinoCodeBox" class="code-view" style="display:none;margin-top:8px;background:var(--bg-panel);padding:10px;border-radius:8px;border:1px solid var(--accent);max-height:180px;overflow-y:auto">// Mã C++ chuẩn nạp trực tiếp cho mạch Arduino Uno / ESP32 từ DrgX Dev Studio
+#include &lt;Arduino.h&gt;
+const int TRIG_PIN = 9, ECHO_PIN = 10, ENA = 5, ENB = 6, LED_OK = 11, LED_WARN = 13;
+
+long readDistanceCm() {
+  digitalWrite(TRIG_PIN, LOW); delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH); delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  return pulseIn(ECHO_PIN, HIGH, 25000) * 0.034 / 2;
+}
+
+void setMotors(int pwmL, int pwmR) {
+  analogWrite(ENA, constrain(pwmL, 0, 255));
+  analogWrite(ENB, constrain(pwmR, 0, 255));
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(TRIG_PIN, OUTPUT); pinMode(ECHO_PIN, INPUT);
+  pinMode(ENA, OUTPUT); pinMode(ENB, OUTPUT);
+  pinMode(LED_OK, OUTPUT); pinMode(LED_WARN, OUTPUT);
+}
+
+void loop() {
+  long d = readDistanceCm();
+  if (d &lt; 15) { digitalWrite(LED_WARN, HIGH); setMotors(180, -180); } // Rẽ tránh vật cản theo đỉnh tiếp theo của BFS
+  else { digitalWrite(LED_OK, HIGH); setMotors(220, 220); }
+  delay(80);
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRẠM 4: BẢNG THÔNG SỐ KỸ THUẬT & KIẾN TRÚC 6 TRỤ CỘT DRGX v2.0 -->
+    <section class="section">
+      <div class="section-hdr">
+        <div>
+          <h2>4. Thông Số Kỹ Thuật &amp; Trạng Thái Kiểm Định Hệ Sinh Thái DrgX v2.0 (68/68 Health Gate PASS)</h2>
+          <p style="font-size:13px;color:var(--muted)">Toàn bộ 6 trụ cột của DrgX được đóng gói mô-đun độc lập, chạy 100% cục bộ trên Windows 10/11 và mạng LAN phòng máy.</p>
+        </div>
+        <a class="btn primary" href="download.html">⬇ Tải Trọn Bộ DrgX v2.0</a>
+      </div>
+
+      <div class="table-wrap">
+      <table class="rubric">
+        <thead>
+          <tr>
+            <th style="width:24%">Thành phần Hệ sinh thái</th>
+            <th style="width:32%">Nền tảng &amp; Cổng dịch vụ</th>
+            <th style="width:32%">Thông số kỹ thuật đo thực nghiệm</th>
+            <th style="width:12%;text-align:right">Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>1. DrgX Desktop Shell</b></td>
+            <td>Tauri 2 (Rust) + WebView2 + Win32 JobObject</td>
+            <td>RAM process shell ~39 MB; mở cửa sổ 0,5 giây; tự động thu hồi 100% tiến trình con khi đóng cửa sổ.</td>
+            <td style="text-align:right"><span class="tag ac">PASS</span></td>
+          </tr>
+          <tr>
+            <td><b>2. DrgX CP Studio</b></td>
+            <td>Profile Thi đấu cách ly · <code>run-cp.cmd</code></td>
+            <td>Chấm nhanh F9 (4/4 AC ~32 ms/test), Differential Stress Test 3 cột, tắt hoàn toàn gợi ý AI khi thi.</td>
+            <td style="text-align:right"><span class="tag ac">PASS</span></td>
+          </tr>
+          <tr>
+            <td><b>3. DrgX Dev Studio</b></td>
+            <td>Profile Học tập &amp; AI Socratic · Cổng <code>:45290</code></td>
+            <td>AI Copilot inline (<code>Alt+\</code>, debounce 250 ms), gợi mở Socratic 3 tầng, hỗ trợ BYOK &amp; mô hình miễn phí.</td>
+            <td style="text-align:right"><span class="tag ac">PASS</span></td>
+          </tr>
+          <tr>
+            <td><b>4. DrgX Exam Server</b></td>
+            <td>Python 3 <code>ThreadingHTTPServer</code> · Cổng <code>:8765</code></td>
+            <td>Sinh mã phòng 6 ký tự, khóa quản trị <code>DRGX_EXAM_ADMIN_KEY</code>, giới hạn payload 512 KB, 11/11 smoke test PASS.</td>
+            <td style="text-align:right"><span class="tag ac">PASS</span></td>
+          </tr>
+          <tr>
+            <td><b>5. Void-bit Local OJ</b></td>
+            <td>C++17 <code>oj_server.exe</code> (3,8 MB) · Cổng <code>:8080</code> &amp; <code>:8000</code></td>
+            <td>47 bài tập chấm Subtask, đo RAM PSAPI, chống đạo văn Winnowing (100% bắt đổi biến), 42 bài giảng VNOI Wiki.</td>
+            <td style="text-align:right"><span class="tag ac">PASS</span></td>
+          </tr>
+          <tr>
+            <td><b>6. DrgX Web Lab &amp; Learn Hub</b></td>
+            <td>Web Workbench Engine · Cổng <code>:8123</code> + Lộ trình 12 tuần</td>
+            <td>Cho phép cả phòng máy khóa quyền Admin code trực tiếp trên trình duyệt; đồng bộ 5 Skin chuyên nghiệp.</td>
+            <td style="text-align:right"><span class="tag ac">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="total-bar">
+        <div>
+          <div style="font-size:13px;color:var(--muted);font-weight:700">TRẠNG THÁI KIỂM ĐỊNH TOÀN HỆ SINH THÁI (VERIFY_ECOSYSTEM.PY)</div>
+          <div style="font-size:14px">Kết quả tự động: <b style="font-size:15px;color:var(--good)">Đạt 68/68 chốt chặn kỹ thuật (100% PASS — Sẵn sàng triển khai phòng máy &amp; tự học)</b></div>
+        </div>
+        <b>68 / 68 PASS</b>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function setSkin(name) {
+      document.documentElement.setAttribute('data-skin', name);
+      try { localStorage.setItem('drgx-skin', name); } catch (e) {}
+    }
+
+    function runStressDemo() {
+      var out = document.getElementById('stressOutput');
+      out.innerHTML = '<div style="font-weight:800;color:var(--accent);margin-bottom:8px">⚙ Đang biên dịch song song 3 chương trình (generator.cpp, brute.cpp, solution.cpp) bằng g++ -O2 -std=c++17...</div>';
+      var steps = [
+        { id: '#01', status: 'AC', time: '11 ms', detail: 'Input: n=3 [14, 28, 9] → Brute: 51 | Solution: 51 (Khớp 100%)' },
+        { id: '#02', status: 'AC', time: '12 ms', detail: 'Input: n=4 [82, 15, 63, 40] → Brute: 200 | Solution: 200 (Khớp 100%)' },
+        { id: '#03', status: 'AC', time: '10 ms', detail: 'Input: n=2 [99, 1] → Brute: 100 | Solution: 100 (Khớp 100%)' },
+        { id: '#04', status: 'WA', time: '14 ms', detail: 'PHÁT HIỆN PHẢN VÍ DỤ! Input: n=2 [1500000000, 1500000000] → Brute (64-bit): 3000000000 | Solution (int 32-bit bị tràn số): -1294967296' }
+      ];
+      var html = '<div style="font-weight:800;margin-bottom:8px;color:var(--bad)">🛑 ĐÃ BẮT ĐƯỢC TEST GÂY SAI Ở VÒNG #04 (Thời gian tổng: 0,18 giây):</div>';
+      steps.forEach(function(s) {
+        var cls = s.status === 'AC' ? 'ac' : 'wa';
+        html += '<div class="test-row">' +
+          '<b>Vòng ' + s.id + '</b>' +
+          '<span class="tag ' + cls + '">' + s.status + '</span>' +
+          '<span style="color:var(--muted)">' + s.time + '</span>' +
+          '<span style="color:' + (s.status === 'WA' ? 'var(--bad);font-weight:700' : 'var(--text)') + '">' + s.detail + '</span>' +
+        '</div>';
+      });
+      out.innerHTML = html;
+    }
+
+    function normalizeTokens(code) {
+      // Xóa comment // và /* */
+      var clean = code.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+      // Tách từ vựng
+      var raw = clean.match(/[A-Za-z_]\w*|\d+|==|!=|<=|>=|<<|>>|[+\-*/%=<>!&|^~(){}\[\];,]/g) || [];
+      var keywords = {
+        'include':1,'iostream':1,'using':1,'namespace':1,'std':1,'int':1,'long':1,'void':1,
+        'while':1,'for':1,'if':1,'else':1,'return':1,'cin':1,'cout':1,'main':1
+      };
+      return raw.map(function(tok) {
+        if (/^\d+$/.test(tok)) return 'NUM';
+        if (/^[A-Za-z_]\w*$/.test(tok)) return keywords[tok] ? tok.toUpperCase() : 'ID';
+        return tok;
+      });
+    }
+
+    function winnowFingerprints(tokens, k, w) {
+      if (tokens.length < k) return [];
+      var hashes = [];
+      for (var i = 0; i <= tokens.length - k; i++) {
+        var gram = tokens.slice(i, i + k).join('|');
+        var h = 2166136261;
+        for (var j = 0; j < gram.length; j++) {
+          h ^= gram.charCodeAt(j);
+          h = Math.imul(h, 16777619) >>> 0;
+        }
+        hashes.push(h);
+      }
+      var fps = [];
+      for (var start = 0; start <= hashes.length - w; start++) {
+        var minH = hashes[start];
+        for (var m = 1; m < w; m++) {
+          if (hashes[start + m] <= minH) minH = hashes[start + m];
+        }
+        if (fps.length === 0 || fps[fps.length - 1] !== minH) fps.push(minH);
+      }
+      return fps;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function runWinnowingDemo() {
+      var codeA = document.getElementById('codeA').value;
+      var codeB = document.getElementById('codeB').value;
+      var tokA = normalizeTokens(codeA);
+      var tokB = normalizeTokens(codeB);
+      var fpA = winnowFingerprints(tokA, 5, 4);
+      var fpB = winnowFingerprints(tokB, 5, 4);
+      var setB = {};
+      fpB.forEach(function(h) { setB[h] = (setB[h] || 0) + 1; });
+      var common = 0;
+      fpA.forEach(function(h) {
+        if (setB[h] > 0) { common++; setB[h]--; }
+      });
+      var dice = (fpA.length + fpB.length) > 0 ? (200 * common / (fpA.length + fpB.length)) : 0;
+      var score = dice.toFixed(1);
+      var color = dice >= 65 ? 'var(--bad)' : (dice >= 40 ? 'var(--warn)' : 'var(--good)');
+      var verdict = dice >= 65 ? 'CẢNH BÁO ĐẠO VĂN CẤU TRÚC CAO (Đã đổi tên biến nhưng cấu trúc token trùng khớp)' : 'Mức độ tương đồng trong ngưỡng an toàn';
+      var previewA = escapeHtml(tokA.slice(0, 28).join(' '));
+      var previewB = escapeHtml(tokB.slice(0, 28).join(' '));
+      document.getElementById('winnowOutput').innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">' +
+          '<div>' +
+            '<div style="font-size:15px;font-weight:850;color:' + color + '">🔍 Kết quả Winnowing (k=5, w=4): Độ tương đồng cấu trúc = ' + score + '% — ' + verdict + '</div>' +
+            '<div style="font-size:12.5px;color:var(--muted);margin-top:6px">Chuỗi Token chuẩn hóa Bài A (' + tokA.length + ' tokens): <code>' + previewA + ' ...</code></div>' +
+            '<div style="font-size:12.5px;color:var(--muted);margin-top:3px">Chuỗi Token chuẩn hóa Bài B (' + tokB.length + ' tokens): <code>' + previewB + ' ...</code></div>' +
+          '</div>' +
+          '<div style="font-size:28px;font-weight:900;color:' + color + '">' + score + '%</div>' +
+        '</div>';
+    }
+
+    // --- MÔ HÌNH HÓA ROBOT STEM & VI MẠCH ARDUINO/ESP32 ---
+    var robotWalls = {
+      '1,2':1, '2,2':1, '3,2':1, '3,1':1,
+      '5,3':1, '5,4':1, '5,5':1, '4,5':1,
+      '2,6':1, '3,6':1, '6,1':1
+    };
+    var robotTimer = null;
+
+    function renderRobotGrid(visitedMap, pathMap, robotPos, stuckPos) {
+      var grid = document.getElementById('robotGrid');
+      if (!grid) return;
+      var html = '';
+      for (var r = 0; r < 8; r++) {
+        for (var c = 0; c < 8; c++) {
+          var key = r + ',' + c;
+          var isWall = !!robotWalls[key];
+          var isStart = (r === 0 && c === 0);
+          var isGoal = (r === 7 && c === 7);
+          var isRobot = (robotPos && robotPos[0] === r && robotPos[1] === c);
+          var isStuck = (stuckPos && stuckPos[0] === r && stuckPos[1] === c);
+          var isPath = pathMap && pathMap[key];
+          var isVis = visitedMap && visitedMap[key];
+
+          var bg = 'var(--bg)';
+          var border = 'var(--border)';
+          var label = '';
+          if (isWall) { bg = 'rgba(148,163,184,0.22)'; label = '🧱'; }
+          else if (isStuck) { bg = 'rgba(248,113,113,0.32)'; border = 'var(--bad)'; label = '💥'; }
+          else if (isRobot) { bg = 'rgba(52,211,153,0.35)'; border = 'var(--good)'; label = '🤖'; }
+          else if (isGoal) { bg = 'rgba(251,191,36,0.24)'; border = 'var(--warn)'; label = '🎯'; }
+          else if (isPath) { bg = 'rgba(52,211,153,0.22)'; border = 'var(--good)'; label = '•'; }
+          else if (isVis) { bg = 'rgba(34,211,238,0.14)'; border = 'var(--accent)'; label = '·'; }
+          else if (isStart) { label = 'S'; }
+
+          html += '<div onclick="toggleWall(' + r + ',' + c + ')" title="Ô (' + r + ',' + c + ') — Nhấp để bật/tắt vật cản" ' +
+            'style="height:34px;border-radius:7px;border:1px solid ' + border + ';background:' + bg + ';' +
+            'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;cursor:pointer;user-select:none">' +
+            label + '</div>';
+        }
+      }
+      grid.innerHTML = html;
+    }
+
+    function toggleWall(r, c) {
+      if ((r === 0 && c === 0) || (r === 7 && c === 7)) return;
+      var k = r + ',' + c;
+      if (robotWalls[k]) delete robotWalls[k];
+      else robotWalls[k] = 1;
+      renderRobotGrid({}, {}, [0, 0], null);
+    }
+
+    function randomizeRobotMap() {
+      var presets = [
+        {'1,2':1,'2,2':1,'3,2':1,'3,1':1,'5,3':1,'5,4':1,'5,5':1,'4,5':1,'2,6':1,'3,6':1,'6,1':1},
+        {'0,3':1,'1,3':1,'2,3':1,'4,1':1,'4,2':1,'4,3':1,'4,4':1,'6,4':1,'6,5':1,'5,6':1,'2,6':1},
+        {'1,1':1,'1,2':1,'2,4':1,'3,4':1,'4,4':1,'5,2':1,'6,2':1,'5,6':1,'6,6':1,'3,6':1}
+      ];
+      window._presetIdx = ((window._presetIdx || 0) + 1) % presets.length;
+      robotWalls = Object.assign({}, presets[window._presetIdx]);
+      renderRobotGrid({}, {}, [0, 0], null);
+      document.getElementById('robotStatusBadge').textContent = 'Đã đổi bản đồ #' + (window._presetIdx + 1);
+    }
+
+    function toggleArduinoCode() {
+      var box = document.getElementById('arduinoCodeBox');
+      if (!box) return;
+      box.style.display = (box.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function runRobotSim() {
+      if (robotTimer) clearInterval(robotTimer);
+      var algo = document.getElementById('robotAlgo').value;
+      var badge = document.getElementById('robotStatusBadge');
+      var logEl = document.getElementById('serialLog');
+      var visitedOrder = [];
+      var path = [];
+      var stuck = null;
+
+      if (algo === 'greedy') {
+        var r = 0, c = 0;
+        var seen = {'0,0': 1};
+        path.push([0, 0]);
+        visitedOrder.push([0, 0]);
+        for (var step = 0; step < 25; step++) {
+          if (r === 7 && c === 7) break;
+          var cands = [[r + 1, c], [r, c + 1], [r - 1, c], [r, c - 1]];
+          var next = null;
+          for (var i = 0; i < cands.length; i++) {
+            var nr = cands[i][0], nc = cands[i][1], nk = nr + ',' + nc;
+            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !robotWalls[nk] && !seen[nk]) {
+              if (nr >= r && nc >= c) { next = [nr, nc]; break; }
+            }
+          }
+          if (!next) { stuck = [r, c]; break; }
+          r = next[0]; c = next[1];
+          seen[r + ',' + c] = 1;
+          visitedOrder.push([r, c]);
+          path.push([r, c]);
+        }
+      } else {
+        var q = [[0, 0]];
+        var parent = {'0,0': null};
+        var dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+        while (q.length > 0) {
+          if (algo === 'astar') {
+            q.sort(function(a, b) { return ((7 - a[0]) + (7 - a[1])) - ((7 - b[0]) + (7 - b[1])); });
+          }
+          var cur = q.shift();
+          visitedOrder.push(cur);
+          if (cur[0] === 7 && cur[1] === 7) break;
+          for (var d = 0; d < 4; d++) {
+            var nr2 = cur[0] + dirs[d][0], nc2 = cur[1] + dirs[d][1];
+            var nk2 = nr2 + ',' + nc2;
+            if (nr2 >= 0 && nr2 < 8 && nc2 >= 0 && nc2 < 8 && !robotWalls[nk2] && !(nk2 in parent)) {
+              parent[nk2] = cur;
+              q.push([nr2, nc2]);
+            }
+          }
+        }
+        if ('7,7' in parent) {
+          var curr = [7, 7];
+          while (curr) {
+            path.unshift(curr);
+            curr = parent[curr[0] + ',' + curr[1]];
+          }
+        } else {
+          stuck = visitedOrder[visitedOrder.length - 1] || [0, 0];
+        }
+      }
+
+      var idx = 0;
+      var visMap = {};
+      var pathMap = {};
+      logEl.textContent = '[ESP32-STEM] Nạp thuật toán ' + algo.toUpperCase() + ' (' + visitedOrder.length + ' ô quét)...\n';
+      badge.textContent = '⚡ Đang chạy mô phỏng...';
+      badge.style.color = 'var(--accent)';
+
+      robotTimer = setInterval(function() {
+        if (idx < visitedOrder.length) {
+          var v = visitedOrder[idx];
+          visMap[v[0] + ',' + v[1]] = 1;
+          var distCm = Math.max(12, (14 - v[0] - v[1]) * 10);
+          document.getElementById('hwDist').textContent = distCm + ' cm';
+          document.getElementById('hwPwm').textContent = 'L: 210 | R: 210 PWM';
+          document.getElementById('hwLeds').textContent = '⚫ D11 · 🟡 D12 · ⚫ D13';
+          renderRobotGrid(visMap, pathMap, v, null);
+          idx++;
+        } else {
+          clearInterval(robotTimer);
+          path.forEach(function(p) { pathMap[p[0] + ',' + p[1]] = 1; });
+          if (stuck) {
+            renderRobotGrid(visMap, pathMap, stuck, stuck);
+            badge.textContent = '🛑 WA — Kẹt vật cản tại (' + stuck[0] + ',' + stuck[1] + ')';
+            badge.style.color = 'var(--bad)';
+            document.getElementById('hwDist').textContent = '4 cm (VA CHẠM!)';
+            document.getElementById('hwPwm').textContent = 'L: 0 | R: 0 (PHANH)';
+            document.getElementById('hwLeds').textContent = '⚫ D11 · ⚫ D12 · 🔴 D13';
+            logEl.textContent += '[ALERT] HC-SR04 = 4cm < 15cm! Thuật toán Greedy bị kẹt góc chữ U tại (' + stuck[0] + ',' + stuck[1] + ').\n[VERDICT] WA — Khuyến nghị chuyển sang BFS hoặc A*!';
+          } else {
+            var last = path[path.length - 1] || [7, 7];
+            renderRobotGrid(visMap, pathMap, last, null);
+            badge.textContent = '✓ AC — Đạt đích (7,7) sau ' + (path.length - 1) + ' bước (' + visitedOrder.length + ' ô quét)';
+            badge.style.color = 'var(--good)';
+            document.getElementById('hwDist').textContent = '0 cm (ĐÃ ĐẾN ĐÍCH)';
+            document.getElementById('hwPwm').textContent = 'L: 255 | R: 255 PWM';
+            document.getElementById('hwLeds').textContent = '🟢 D11 · ⚫ D12 · ⚫ D13';
+            logEl.textContent += '[SUCCESS] Robot về đích (7,7) an toàn! Độ dài đường đi ngắn nhất = ' + (path.length - 1) + ' bước.\n[VERDICT] AC (100% testcase vượt qua — Sẵn sàng xuất file .ino nạp mạch thật).';
+          }
+        }
+      }, 45);
+    }
+
+    renderRobotGrid({}, {}, [0, 0], null);
+  </script>
+  <script src="assets/site.js" defer></script>
+</body>
+</html>

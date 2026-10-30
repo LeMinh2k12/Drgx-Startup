@@ -1,0 +1,83 @@
+{
+  "name": "drgx-cp",
+  "displayName": "DrgX CP — Judge & Exam Integrity",
+  "description": "Chấm bài local, kết nối exam server, đồng hồ contest, 5 skin DrgX, không phụ thuộc AI.",
+  "version": "1.0.0",
+  "publisher": "drgx",
+  "icon": "media/drgx-cp.png",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other", "Themes"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "drgxCp.judge", "title": "DrgX CP: Chấm toàn bộ tests/ (F9 / Ctrl+Alt+J)" },
+      { "command": "drgxCp.judgePanel", "title": "DrgX CP: Mở bảng chấm bài (Judge UI)" },
+      { "command": "drgxCp.submit", "title": "DrgX CP: Nộp bài lên Exam Server" },
+      { "command": "drgxCp.joinExam", "title": "DrgX CP: Vào phòng thi bằng mã" },
+      { "command": "drgxCp.createExam", "title": "DrgX CP: Tạo phòng thi mới (giáo viên)" },
+      { "command": "drgxCp.skin", "title": "DrgX CP: 🎨 Đổi skin giao diện (5 skin DrgX)" },
+      { "command": "drgxCp.learn", "title": "DrgX CP: 🎓 Mở Hệ sinh thái học tập (Learn Hub)" },
+      { "command": "drgxCp.intro", "title": "DrgX CP: 🎬 Phát lại Video Intro khởi động" },
+      { "command": "drgxCp.home", "title": "DrgX CP: Mở trang chủ" }
+    ],
+    "keybindings": [
+      { "command": "drgxCp.judge", "key": "f9", "when": "editorTextFocus" },
+      { "command": "drgxCp.judge", "key": "ctrl+alt+j" },
+      { "command": "drgxCp.learn", "key": "ctrl+alt+l" },
+      { "command": "drgxCp.home", "key": "ctrl+alt+h" }
+    ],
+    "themes": [
+      {
+        "label": "DrgX Ion",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-ion.json"
+      },
+      {
+        "label": "DrgX Nebula",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-nebula.json"
+      },
+      {
+        "label": "DrgX Tokyo",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-tokyo.json"
+      },
+      {
+        "label": "DrgX Matrix",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-matrix.json"
+      },
+      {
+        "label": "DrgX Dawn",
+        "uiTheme": "vs",
+        "path": "./themes/drgx-dawn.json"
+      }
+    ],
+    "configuration": {
+      "title": "DrgX CP",
+      "properties": {
+        "drgxCp.serverUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8765",
+          "description": "URL của DrgX CP Exam Server."
+        },
+        "drgxCp.examCode": {
+          "type": "string",
+          "default": "",
+          "description": "Mã phòng thi hiện tại."
+        },
+        "drgxCp.studentName": {
+          "type": "string",
+          "default": "hoc-sinh",
+          "description": "Tên/SBD của thí sinh dùng khi nộp bài lên server."
+        },
+        "drgxCp.timeLimit": {
+          "type": "number",
+          "default": 6000,
+          "description": "Giới hạn thời gian thực thi mỗi testcase (ms)."
+        }
+      }
+    }
+  }
+}

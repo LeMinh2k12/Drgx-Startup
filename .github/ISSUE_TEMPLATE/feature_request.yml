@@ -1,0 +1,23 @@
+name: "🚀 Đề xuất tính năng / Bài tập mới (Feature Request)"
+description: "Đề xuất tính năng mới, skin mới, hoặc đóng góp đề bài cho Void-bit OJ"
+title: "[Feat]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: "Nhóm đề xuất"
+      options:
+        - "Tính năng IDE / VS Code Extension (DrgX CP / DrgX Dev)"
+        - "Tính năng Judge / Anti-Cheat / Stress Test (Void-bit OJ)"
+        - "Đóng góp bộ đề bài C++17 / Python mới"
+        - "Giao diện / Hệ thống 5 Skins (WCAG 2.2 AA)"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Vấn đề cần giải quyết & Giải pháp đề xuất"
+      placeholder: "Mô tả ngắn gọn lợi ích cho học sinh / giáo viên / lập trình viên..."
+    validations:
+      required: true

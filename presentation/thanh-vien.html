@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="obsidian">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giới Thiệu Đội Ngũ DrgX — Lớp 9A2 · Trường THCS Sông Lô</title>
+<meta name="description" content="Slide thuyết trình giới thiệu thành viên nhóm dự án DrgX — Lớp 9A2, Trường THCS Sông Lô: Nhóm trưởng Lê Tiến Dũng, Nhóm phó Lê Bình Minh, Thành viên Minh Đăng, Minh Quang.">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="style.css">
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .team-stage {
+    position: relative;
+    z-index: 2;
+    max-width: 1480px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 36px 40px 100px;
+    box-sizing: border-box;
+  }
+  .team-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line2);
+    margin-bottom: 28px;
+  }
+  .school-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: rgba(34, 211, 238, 0.12);
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    color: var(--a1);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .school-pill i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--good);
+    box-shadow: 0 0 10px var(--good);
+    display: inline-block;
+  }
+  .team-hero {
+    text-align: center;
+    margin-bottom: 34px;
+  }
+  .team-hero h1 {
+    font-size: clamp(34px, 4.2vw, 58px);
+    font-weight: 900;
+    margin: 10px 0 12px;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .team-hero p {
+    font-size: clamp(16px, 1.4vw, 21px);
+    color: var(--muted);
+    max-width: 860px;
+    margin: 0 auto;
+    line-height: 1.55;
+  }
+  .filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .filter-btn {
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--line2);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.22), rgba(167, 139, 250, 0.22));
+    border-color: var(--a1);
+    color: var(--fg);
+    transform: translateY(-2px);
+  }
+  .members-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    align-items: stretch;
+  }
+  @media (max-width: 1180px) {
+    .members-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .members-grid { grid-template-columns: 1fr; }
+  }
+  .member-card {
+    position: relative;
+    border-radius: 24px;
+    padding: 28px 24px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    border: 1px solid var(--line2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .member-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: var(--card-accent, var(--a1));
+  }
+  .member-card:hover, .member-card.spotlight {
+    transform: translateY(-8px) scale(1.015);
+    border-color: var(--card-accent, var(--a1));
+    box-shadow: 0 28px 65px rgba(34, 211, 238, 0.18);
+  }
+  .member-card.dimmed {
+    opacity: 0.32;
+    transform: scale(0.96);
+  }
+  .member-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .avatar-ring {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    background: var(--card-grad, linear-gradient(135deg, #06b6d4, #3b82f6));
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+  }
+  .role-tag {
+    font-family: var(--mono, monospace);
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 5px 11px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid currentColor;
+  }
+  .member-name {
+    font-size: 25px;
+    font-weight: 900;
+    margin: 2px 0 0;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+  .member-class {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--a1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .member-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--fg);
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line2);
+  }
+  .member-tasks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+    font-size: 14.2px;
+    color: var(--muted);
+    line-height: 1.48;
+  }
+  .member-tasks li {
+    position: relative;
+    padding-left: 18px;
+  }
+  .member-tasks li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: var(--card-accent, var(--a1));
+    font-weight: 900;
+  }
+  .member-quote {
+    margin-top: auto;
+    padding: 11px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--line2);
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .school-banner {
+    margin-top: 28px;
+    padding: 20px 28px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.1), rgba(167, 139, 250, 0.1), rgba(52, 211, 153, 0.1));
+    border: 1px solid var(--line2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .school-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .school-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(34, 211, 238, 0.16);
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+  }
+  .pitch-script-box {
+    margin-top: 20px;
+    padding: 18px 24px;
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid var(--line2);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .pitch-script-box b { color: var(--fg); }
+</style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-dots"></div>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+
+  <main class="team-stage">
+    <!-- Top Header -->
+    <div class="team-top-bar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="assets/logo.png" alt="Logo DrgX" style="width:40px;height:40px;border-radius:10px">
+        <div>
+          <div style="font-weight:900;font-size:19px;letter-spacing:-0.01em">DrgX <span style="color:var(--a1)">IDE &amp; OJ Ecosystem</span></div>
+          <div style="font-size:12.5px;color:var(--muted)">Hệ sinh thái Lập trình Local-First · AI Sư phạm · Phòng thi LAN</div>
+        </div>
+      </div>
+
+      <div class="school-pill">
+        <i></i>
+        <span>🏫 Lớp 9A2 · Trường THCS Sông Lô · Tỉnh Phú Thọ</span>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn ghost" href="index.html" style="padding:9px 16px;font-size:14px;text-decoration:none">🎬 Vào Slide Thuyết Trình Chính →</a>
+        <a class="btn ghost" href="https://drgx-web.netlify.app/" target="_blank" rel="noopener" style="padding:9px 16px;font-size:14px;text-decoration:none">🌐 App Main: drgx-web.netlify.app ↗</a>
+      </div>
+    </div>
+
+    <!-- Hero Title -->
+    <section class="team-hero">
+      <span class="badge b" style="font-size:12.5px;padding:6px 14px">ĐỘI NGŨ SÁNG LẬP &amp; PHÁT TRIỂN DỰ ÁN DRGX</span>
+      <h1>Bốn thành viên Lớp 9A2.<br><span class="grad">Một khát vọng nâng tầm phòng máy Việt.</span></h1>
+      <p>Xuất phát từ chính những giờ học Tin học và bồi dưỡng học sinh giỏi tại <b>Trường THCS Sông Lô (Lớp 9A2)</b>, nhóm chúng em đã cùng nhau thiết kế, lập trình và kiểm thử toàn bộ 5 trụ cột của hệ sinh thái <b>DrgX</b>.</p>
+
+      <div class="filter-bar" role="tablist" aria-label="Chọn thành viên thuyết trình">
+        <button type="button" class="filter-btn active" onclick="spotlightMember('all')">👥 Hiển thị cả 4 thành viên (Phím 0)</button>
+        <button type="button" class="filter-btn" onclick="spotlightMember(0)">👑 1. Lê Tiến Dũng (Nhóm trưởng)</button>
+        <button type="button" class="filter-btn" onclick="spotlightMember(1)">⚡ 2. Lê Bình Minh (Nhóm phó)</button>
+        <button type="button" class="filter-btn" onclick="spotlightMember(2)">🎨 3. Minh Đăng (Thành viên)</button>
+        <button type="button" class="filter-btn" onclick="spotlightMember(3)">🚀 4. Minh Quang (Thành viên)</button>
+      </div>
+    </section>
+
+    <!-- 4 Member Cards -->
+    <section class="members-grid" id="membersGrid" aria-label="Danh sách 4 thành viên nhóm DrgX">
+      <!-- 1. Lê Tiến Dũng -->
+      <article class="member-card" data-idx="0" onclick="spotlightMember(0)" style="--card-accent:#22d3ee;--card-grad:linear-gradient(135deg,#06b6d4,#2563eb)">
+        <div class="member-top">
+          <div class="avatar-ring">👑</div>
+          <span class="role-tag" style="color:#22d3ee;background:rgba(34,211,238,0.12)">Nhóm Trưởng</span>
+        </div>
+        <div>
+          <h2 class="member-name">Lê Tiến Dũng</h2>
+          <div class="member-class">🎓 Lớp 9A2 · Trường THCS Sông Lô</div>
+        </div>
+        <div class="member-title">Trưởng nhóm Dự án (Team Leader) &amp; Kiến trúc Hệ thống</div>
+        <ul class="member-tasks">
+          <li>Định hướng ý tưởng tổng thể &amp; điều phối lộ trình phát triển 5 trụ cột DrgX.</li>
+          <li>Thiết kế <b>Kiến trúc Kép (Dual-Profile)</b>: Tách biệt <i>Học có AI (Dev Studio)</i> và <i>Thi sạch AI (CP Studio)</i>.</li>
+          <li>Phụ trách đóng gói ứng dụng Desktop (Tauri 2 / Rust) và thuyết trình chính trước Hội đồng.</li>
+        </ul>
+        <div class="member-quote">“Biến 2 giờ cài đặt phức tạp thành 60 giây để mọi học sinh bắt đầu viết code ngay.”</div>
+      </article>
+
+      <!-- 2. Lê Bình Minh -->
+      <article class="member-card" data-idx="1" onclick="spotlightMember(1)" style="--card-accent:#a78bfa;--card-grad:linear-gradient(135deg,#8b5cf6,#ec4899)">
+        <div class="member-top">
+          <div class="avatar-ring">⚡</div>
+          <span class="role-tag" style="color:#a78bfa;background:rgba(167,139,250,0.14)">Nhóm Phó</span>
+        </div>
+        <div>
+          <h2 class="member-name">Lê Bình Minh</h2>
+          <div class="member-class">🎓 Lớp 9A2 · Trường THCS Sông Lô</div>
+        </div>
+        <div class="member-title">Phó nhóm Phụ trách Kỹ thuật Lõi (Core Judge, AI &amp; LAN Server)</div>
+        <ul class="member-tasks">
+          <li>Xây dựng máy chấm cục bộ <b>Void-bit C++17 OJ Server</b> (chấm theo Subtask, đo RAM PSAPI).</li>
+          <li>Lập trình <b>Engine Stress Test 3 cột</b> tự tìm phản ví dụ &amp; thuật toán chống đạo văn <b>Winnowing</b>.</li>
+          <li>Phát triển <b>Exam Server LAN (:8765)</b> chịu tải 40 học sinh nộp bài đồng thời &amp; tích hợp AI Sư phạm.</li>
+        </ul>
+        <div class="member-quote">“Mọi con số kỹ thuật của DrgX đều phải đo đạc thật và kiểm chứng bằng mã nguồn thực tế.”</div>
+      </article>
+
+      <!-- 3. Minh Đăng -->
+      <article class="member-card" data-idx="2" onclick="spotlightMember(2)" style="--card-accent:#34d399;--card-grad:linear-gradient(135deg,#10b981,#059669)">
+        <div class="member-top">
+          <div class="avatar-ring">🎨</div>
+          <span class="role-tag" style="color:#34d399;background:rgba(52,211,153,0.14)">Thành Viên</span>
+        </div>
+        <div>
+          <h2 class="member-name">Minh Đăng</h2>
+          <div class="member-class">🎓 Lớp 9A2 · Trường THCS Sông Lô</div>
+        </div>
+        <div class="member-title">Phụ trách Giao diện (UI/UX), Website &amp; Kho Học liệu Số</div>
+        <ul class="member-tasks">
+          <li>Thiết kế đồng bộ <b>5 Giao diện (Skins) Chuyên nghiệp</b> chống mỏi mắt (Obsidian, Nebula, Tokyo, Matrix, Dawn).</li>
+          <li>Xây dựng cổng <b>Website Hệ sinh thái DrgX</b>, Lộ trình tự học 12 tuần và khung vận hành CLB Tin học.</li>
+          <li>Biên soạn &amp; chuẩn hóa <b>42 Bài giảng Thuật toán VNOI-Wiki</b> cùng kho <b>47 bài tập Subtask</b>.</li>
+        </ul>
+        <div class="member-quote">“Giao diện đẹp, trực quan và có sẵn kho bài giảng giúp các bạn tự học không còn bỡ ngỡ.”</div>
+      </article>
+
+      <!-- 4. Minh Quang -->
+      <article class="member-card" data-idx="3" onclick="spotlightMember(3)" style="--card-accent:#fbbf24;--card-grad:linear-gradient(135deg,#f59e0b,#ea580c)">
+        <div class="member-top">
+          <div class="avatar-ring">🚀</div>
+          <span class="role-tag" style="color:#fbbf24;background:rgba(251,191,36,0.14)">Thành Viên</span>
+        </div>
+        <div>
+          <h2 class="member-name">Minh Quang</h2>
+          <div class="member-class">🎓 Lớp 9A2 · Trường THCS Sông Lô</div>
+        </div>
+        <div class="member-title">Phụ trách Mô phỏng STEM Robotics, Kiểm thử QA &amp; Thực nghiệm</div>
+        <ul class="member-tasks">
+          <li>Phát triển mô-đun <b>Mô phỏng Robot STEM Tự hành 8×8 (BFS/A*) &amp; Vi mạch Arduino/ESP32</b> trên Kiosk.</li>
+          <li>Vận hành hệ thống <b>68/68 Chốt chặn Kiểm định Tự động (Health Gate)</b> đảm bảo 0 lỗi trước giờ thi.</li>
+          <li>Thực nghiệm đo đạc tại phòng máy, xây dựng kế hoạch tài chính 3 năm &amp; triển khai Pilot trường học.</li>
+        </ul>
+        <div class="member-quote">“Từ thuật toán C++/Python trên màn hình đến điều khiển vi mạch STEM đều nằm gọn trong một Kiosk.”</div>
+      </article>
+    </section>
+
+    <!-- School & Team Summary Banner -->
+    <div class="school-banner">
+      <div class="school-banner-left">
+        <div class="school-icon">🏫</div>
+        <div>
+          <div style="font-size:18px;font-weight:900;color:var(--fg)">Tập thể Nhóm Dự án DrgX — Lớp 9A2, Trường THCS Sông Lô</div>
+          <div style="font-size:14px;color:var(--muted);margin-top:3px">Nhóm trưởng: <b>Lê Tiến Dũng</b> · Nhóm phó: <b>Lê Bình Minh</b> · Thành viên: <b>Minh Đăng</b>, <b>Minh Quang</b></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="pill g">✓ 68/68 Kiểm định Xanh</span>
+        <span class="pill p">✓ 47 Bài tập OJ · 42 Bài giảng</span>
+        <span class="pill">✓ 100% Chạy Thật Trên Máy</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Floating Bottom Control Dock -->
+  <div id="hud" role="toolbar" aria-label="Điều khiển trang giới thiệu thành viên">
+    <div class="l">
+      <span id="modeTag">ĐỘI NGŨ 9A2 · THCS SÔNG LÔ</span>
+      <span style="font-size:13px;color:var(--muted)">Bấm phím <b>1–4</b> để spotlight từng thành viên · Phím <b>0</b> hiện tất cả · Phím <b>T</b> đổi 5 Skin</span>
+    </div>
+    <div class="ctrls">
+      <button type="button" onclick="spotlightMember('all')" title="Hiện cả 4 thành viên (Phím 0)">👥 Tất cả</button>
+      <button type="button" onclick="stepMember(-1)" title="Thành viên trước (←)">‹</button>
+      <button type="button" onclick="stepMember(1)" title="Thành viên tiếp theo (→)">›</button>
+      <button type="button" onclick="cycleSkin()" title="Đổi 5 Giao diện Skins (Phím T)">🎨 Skin</button>
+      <a class="hud-link" href="index.html">🎬 Slide Thuyết Trình Chính</a>
+      <a class="hud-link" href="https://drgx-web.netlify.app/" target="_blank" rel="noopener">🌐 App Main (drgx-web.netlify.app)</a>
+    </div>
+  </div>
+
+  <script>
+    var currentSpotlight = 'all';
+    var skins = ['obsidian', 'nebula', 'tokyo', 'matrix', 'dawn'];
+
+    function spotlightMember(target) {
+      currentSpotlight = target;
+      var cards = document.querySelectorAll('.member-card');
+      var btns = document.querySelectorAll('.filter-btn');
+      cards.forEach(function(card, idx) {
+        if (target === 'all') {
+          card.classList.remove('spotlight', 'dimmed');
+        } else if (idx === target) {
+          card.classList.add('spotlight');
+          card.classList.remove('dimmed');
+        } else {
+          card.classList.remove('spotlight');
+          card.classList.add('dimmed');
+        }
+      });
+      btns.forEach(function(btn, idx) {
+        if (target === 'all') {
+          btn.classList.toggle('active', idx === 0);
+        } else {
+          btn.classList.toggle('active', idx === target + 1);
+        }
+      });
+    }
+
+    function stepMember(dir) {
+      if (currentSpotlight === 'all') {
+        spotlightMember(dir > 0 ? 0 : 3);
+      } else {
+        var next = (currentSpotlight + dir + 4) % 4;
+        spotlightMember(next);
+      }
+    }
+
+    function cycleSkin() {
+      var cur = document.documentElement.getAttribute('data-skin') || 'obsidian';
+      var next = skins[(skins.indexOf(cur) + 1) % skins.length];
+      document.documentElement.setAttribute('data-skin', next);
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === '0' || e.key === 'Escape') spotlightMember('all');
+      else if (e.key === '1') spotlightMember(0);
+      else if (e.key === '2') spotlightMember(1);
+      else if (e.key === '3') spotlightMember(2);
+      else if (e.key === '4') spotlightMember(3);
+      else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); stepMember(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); stepMember(-1); }
+      else if (e.key === 't' || e.key === 'T') cycleSkin();
+      else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function(){});
+        else document.exitFullscreen().catch(function(){});
+      }
+    });
+  </script>
+</body>
+</html>

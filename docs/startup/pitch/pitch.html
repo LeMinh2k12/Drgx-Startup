@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DrgX IDE — Pitch deck 2026</title>
+<style>
+  :root{
+    --navy:#070D1A; --navy2:#0B1428; --panel:#101B34; --panel2:#0C1528;
+    --purple:#7C3AED; --purple2:#A78BFA; --cyan:#22D3EE; --green:#34D399;
+    --red:#F87171; --amber:#FBBF24; --text:#E9EFFF; --muted:#93A7C9; --line:#22304F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--navy);color:var(--text);
+    font-family:"Segoe UI","Be Vietnam Pro",system-ui,-apple-system,sans-serif;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center}
+  .deck{position:relative;width:100vw;height:100vh;overflow:hidden;
+    background:
+      radial-gradient(1000px 600px at 78% -10%,rgba(124,58,237,.22),transparent 65%),
+      radial-gradient(900px 500px at 8% 110%,rgba(34,211,238,.12),transparent 60%),
+      var(--navy)}
+  .grid-bg{position:absolute;inset:0;pointer-events:none;opacity:.35;
+    background-image:linear-gradient(rgba(147,167,201,.07) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(147,167,201,.07) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(circle at 50% 40%,#000 30%,transparent 78%)}
+  .progress{position:absolute;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--cyan),var(--purple2));z-index:20;transition:width .3s ease;box-shadow:0 0 18px rgba(34,211,238,.5)}
+  .footer{position:absolute;left:3.2vw;right:3.2vw;bottom:2.2vh;display:flex;justify-content:space-between;
+    align-items:center;color:var(--muted);font-size:clamp(10px,.85vw,14px);z-index:15;letter-spacing:.04em}
+  .footer .brand{display:flex;align-items:center;gap:8px}
+  .footer img{height:20px;width:20px;border-radius:5px}
+  .footer .hint{opacity:.65}
+  .slide{position:absolute;inset:0;padding:6.5vh 7vw 8vh;display:flex;flex-direction:column;justify-content:center;
+    opacity:0;visibility:hidden;transform:translateY(14px) scale(.995);transition:opacity .35s ease,transform .35s ease,visibility .35s;z-index:2}
+  .slide.active{opacity:1;visibility:visible;transform:none}
+  .kicker{display:inline-flex;align-items:center;gap:10px;color:var(--cyan);font-size:clamp(11px,.95vw,15px);
+    font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:1.4vh}
+  .kicker:before{content:"";width:28px;height:2px;background:var(--cyan);display:inline-block}
+  h1{font-size:clamp(34px,4.2vw,68px);line-height:1.06;font-weight:900;letter-spacing:-.02em;max-width:16ch}
+  h2{font-size:clamp(28px,3.1vw,50px);line-height:1.12;font-weight:850;letter-spacing:-.015em;max-width:20ch}
+  h3{font-size:clamp(16px,1.35vw,22px);line-height:1.25;font-weight:800}
+  p,li{font-size:clamp(14px,1.18vw,19px);line-height:1.55;color:#D7E2F7}
+  .muted{color:var(--muted)}
+  .accent{color:var(--cyan)}
+  .purple{color:var(--purple2)}
+  .grad{background:linear-gradient(92deg,var(--cyan),var(--purple2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{font-size:clamp(16px,1.45vw,24px);color:#C8D7F2;max-width:62ch;margin-top:1.6vh}
+  .row{display:flex;gap:2.2vw;align-items:center}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:2.4vw;align-items:center}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1vw;margin-top:2.6vh}
+  .cards.two{grid-template-columns:repeat(2,1fr)}
+  .cards.four{grid-template-columns:repeat(4,1fr)}
+  .cards.five{grid-template-columns:repeat(5,1fr)}
+  .card{background:linear-gradient(180deg,rgba(23,36,64,.92),rgba(13,23,44,.92));
+    border:1px solid var(--line);border-radius:16px;padding:clamp(14px,1.35vw,24px);
+    box-shadow:0 18px 50px rgba(0,0,0,.25)}
+  .card .ico{font-size:clamp(20px,1.8vw,30px);margin-bottom:.8vh}
+  .card h3{margin-bottom:.55vh}
+  .card p{font-size:clamp(12px,1.02vw,16px);line-height:1.45;color:#B9C9E6}
+  .num{width:clamp(28px,2.2vw,38px);height:clamp(28px,2.2vw,38px);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(13px,1.1vw,18px);
+    background:linear-gradient(135deg,var(--purple),var(--cyan));color:#06101F;margin-bottom:.9vh}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;
+    border:1px solid #2B3D62;background:rgba(34,211,238,.07);color:#CFE7FF;font-size:clamp(11px,.9vw,14px);font-weight:700}
+  .pill.p{background:rgba(124,58,237,.16);border-color:#4C3A86;color:#D8CBFF}
+  .pill.g{background:rgba(52,211,153,.1);border-color:#245A46;color:#A7F3D0}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2vw;margin-top:2.6vh}
+  .stat{background:rgba(16,27,52,.72);border:1px solid var(--line);border-radius:14px;padding:clamp(13px,1.3vw,22px)}
+  .stat b{display:block;font-size:clamp(26px,2.7vw,46px);line-height:1;letter-spacing:-.02em;color:#fff}
+  .stat span{display:block;margin-top:.7vh;font-size:clamp(11px,.92vw,14px);color:var(--muted)}
+  .bars{display:flex;flex-direction:column;gap:1.05vh;margin-top:1.6vh}
+  .barrow{display:grid;grid-template-columns:9.2ch 1fr 7.4ch;align-items:center;gap:1vw;font-size:clamp(11px,.95vw,15px);color:#C9D8F2}
+  .track{height:clamp(12px,1.05vw,17px);background:#0A1326;border:1px solid #1C2A49;border-radius:999px;overflow:hidden}
+  .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--purple2))}
+  .money{text-align:right;font-weight:800;color:#EAF2FF}
+  table{width:100%;border-collapse:collapse;font-size:clamp(11px,.95vw,15px);margin-top:1.4vh}
+  th,td{padding:.85vh .7vw;border-bottom:1px solid #1E2C4A;text-align:left}
+  th{color:#9FB4D8;font-size:clamp(10px,.82vw,13px);text-transform:uppercase;letter-spacing:.08em}
+  td:not(:first-child),th:not(:first-child){text-align:right}
+  .good{color:var(--green)} .bad{color:var(--red)} .warn{color:var(--amber)}
+  .flow{display:flex;align-items:center;gap:.8vw;flex-wrap:wrap;margin-top:2vh}
+  .flow .box{padding:clamp(9px,.9vw,15px) clamp(12px,1.15vw,20px);border-radius:10px;border:1px solid #2A3B60;
+    background:#0D1830;font-size:clamp(11px,.92vw,14px);font-weight:700;color:#CFE0FA}
+  .flow .arrow{color:var(--purple2);font-size:clamp(14px,1.2vw,20px)}
+  .cover{justify-content:center;align-items:flex-start}
+  .cover .logo{width:clamp(76px,7vw,118px);border-radius:22px;margin-bottom:2.2vh;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+  .cover h1{font-size:clamp(46px,6.3vw,104px);max-width:none}
+  .cover .tag{font-size:clamp(17px,1.75vw,30px);color:#C9D8F2;margin-top:1.4vh;font-weight:600}
+  .cover .meta{margin-top:3.2vh;display:flex;gap:1vw;flex-wrap:wrap}
+  .team{display:grid;grid-template-columns:repeat(4,1fr);gap:1vw;margin-top:2.2vh}
+  .member{background:#0E1930;border:1px solid var(--line);border-radius:14px;padding:clamp(12px,1.1vw,18px)}
+  .member b{display:block;font-size:clamp(13px,1.05vw,17px)}
+  .member span{display:block;color:var(--muted);font-size:clamp(10px,.85vw,13px);margin-top:.4vh}
+  .quote{border-left:3px solid var(--cyan);padding:1.2vh 0 1.2vh 1.4vw;margin-top:2.4vh;color:#D7E4FA;
+    font-size:clamp(15px,1.42vw,23px);font-style:italic;max-width:58ch}
+  .legal{display:grid;grid-template-columns:1fr auto 1fr;gap:1.6vw;align-items:center;margin-top:2.4vh}
+  .legal .box{background:#0D1830;border:1px solid var(--line);border-radius:14px;padding:clamp(14px,1.3vw,22px);text-align:center}
+  .legal .big{font-size:clamp(19px,1.8vw,30px);font-weight:900;display:block;margin-bottom:.5vh}
+  .legal .arrow{font-size:clamp(24px,2.2vw,38px);color:var(--purple2)}
+  .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:1vw;margin-top:3vh;position:relative}
+  .timeline:before{content:"";position:absolute;left:2%;right:2%;top:13px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));opacity:.5}
+  .tl{position:relative;padding-top:2.5vh}
+  .tl .dot{position:absolute;top:5px;left:0;width:16px;height:16px;border-radius:50%;background:var(--navy);border:3px solid var(--cyan);box-shadow:0 0 16px rgba(34,211,238,.5)}
+  .tl b{display:block;color:var(--cyan);font-size:clamp(13px,1.05vw,17px);margin-bottom:.6vh}
+  .tl p{font-size:clamp(11px,.92vw,14px);color:#B9C9E6}
+  .cta{margin-top:2.6vh;display:flex;gap:1vw;flex-wrap:wrap;align-items:center}
+  .btn{padding:.9vh 1.4vw;border-radius:10px;background:linear-gradient(135deg,var(--purple),#5B21B6);color:#fff;
+    font-weight:800;font-size:clamp(12px,1vw,15px);box-shadow:0 10px 30px rgba(124,58,237,.35)}
+  .contact{color:var(--muted);font-size:clamp(11px,.92vw,14px)}
+  .nav{position:absolute;right:3.2vw;bottom:5.4vh;display:flex;gap:8px;z-index:30}
+  .nav button{width:38px;height:38px;border-radius:10px;border:1px solid #2A3B60;background:rgba(13,24,48,.8);
+    color:#CFE0FA;font-size:17px;cursor:pointer}
+  .nav button:hover{background:#1A2A4A}
+  .ide{background:#070D18;border:1px solid #26375A;border-radius:14px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.45)}
+  .ide-bar{display:flex;align-items:center;gap:7px;padding:9px 13px;background:#0C1526;border-bottom:1px solid #1C2A47;
+    color:#8FA3C8;font-size:clamp(10px,.8vw,12px)}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dot.r{background:#F87171}.dot.y{background:#FBBF24}.dot.g{background:#34D399}
+  .ide-body{display:grid;grid-template-columns:1.15fr 1fr}
+  .code{padding:clamp(10px,1vw,16px);font-family:Consolas,"Cascadia Code",monospace;font-size:clamp(9px,.78vw,12px);
+    line-height:1.6;color:#C9D6F2;white-space:pre;background:#050A14}
+  .kw{color:#C4B5FD}.fn{color:#67E8F9}.str{color:#86EFAC}.cm{color:#64748B}
+  .verdict{padding:clamp(10px,1vw,16px);background:#091120}
+  .vrow{display:grid;grid-template-columns:3.2ch 4.5ch 1fr;gap:.6vw;align-items:center;padding:.55vh 0;
+    border-bottom:1px solid #14213A;font-size:clamp(10px,.82vw,13px);color:#B9C9E6}
+  .vrow b{font-weight:900}
+  .ac{color:var(--green)}.wa{color:var(--red)}.re{color:#FB923C}.tle{color:var(--amber)}
+  .hintbar{display:none}
+  @media (max-width:900px){
+    .cols,.cards,.cards.four,.cards.five,.team,.stats{grid-template-columns:1fr 1fr}
+    .cover h1{font-size:clamp(36px,9vw,64px)}
+    .slide{padding:5vh 6vw 10vh}
+  }
+  @media print{
+    @page{size:297mm 167mm;margin:0}
+    html,body{overflow:visible;background:#070D1A}
+    .deck{width:297mm;height:auto;overflow:visible;background:#070D1A}
+    .grid-bg,.nav,.progress,.footer{display:none!important}
+    .slide{position:relative;inset:auto;width:297mm;height:167mm;page-break-after:always;
+      opacity:1!important;visibility:visible!important;transform:none!important;display:flex!important;
+      padding:14mm 16mm}
+    .slide:last-child{page-break-after:auto}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <div class="grid-bg"></div>
+  <div class="progress" id="progress"></div>
+
+  <!-- 1 -->
+  <section class="slide cover active">
+    <img class="logo" src="../assets/logo.png" alt="DrgX IDE">
+    <div class="kicker">Cuộc thi khởi nghiệp tỉnh Phú Thọ 2026–2027 · Lĩnh vực 01 — AI/STEM</div>
+    <h1>DrgX <span class="grad">IDE</span></h1>
+    <div class="tag">Lập trình đã tiến hóa.</div>
+    <p class="lead">Môi trường lập trình local-first tích hợp AI Agent, Judge &amp; Hệ sinh thái học tập — một công cụ cho toàn bộ hành trình học code của học sinh Việt Nam.</p>
+    <div class="meta">
+      <span class="pill p">Nhóm DrgX</span>
+      <span class="pill">Tỉnh Phú Thọ · Năm học 2026–2027</span>
+      <span class="pill g">67/67 Kiểm định PASS · Công nghệ chiến lược QĐ 1131/QĐ-TTg</span>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="kicker">Vấn đề</div>
+    <h2>Một bài code.<br><span class="grad">Sáu đến tám công cụ.</span></h2>
+    <p class="lead">Học sinh Việt Nam học lập trình trong một mê cung công cụ rời rạc — trước khi viết dòng code đầu tiên, các em đã phải cài đặt, cấu hình và học cách dùng chúng.</p>
+    <div class="cards five">
+      <div class="card"><div class="ico">🧩</div><h3>Phân mảnh</h3><p>Editor, compiler, extension, judge, stress, timer, AI — mỗi thứ một nơi.</p></div>
+      <div class="card"><div class="ico">🧭</div><h3>Thiếu lộ trình</h3><p>Biết code nhưng không biết học gì tiếp; không có CLB/mentor khi bị kẹt.</p></div>
+      <div class="card"><div class="ico">🌐</div><h3>Tiếng Anh &amp; Internet</h3><p>Tài liệu, thông báo lỗi và công cụ hầu hết bằng tiếng Anh; nhiều thứ cần mạng.</p></div>
+      <div class="card"><div class="ico">💸</div><h3>Chi phí</h3><p>Công cụ AI và IDE trả phí theo USD; học sinh khó tiếp cận lâu dài.</p></div>
+      <div class="card"><div class="ico">🏫</div><h3>Phòng máy yếu</h3><p>Máy cấu hình thấp, không có quyền cài đặt, mạng chập chờn.</p></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="kicker">Giải pháp</div>
+    <div class="cols">
+      <div>
+        <h2>Một IDE.<br><span class="grad">Toàn bộ quy trình.</span></h2>
+        <p class="lead">DrgX gộp editor, terminal, AI Agent, judge đa testcase, stress test, contest timer, web lab và Hệ sinh thái học tập vào một môi trường nhẹ, tiếng Việt, chạy local-first.</p>
+        <div class="flow">
+          <span class="box">Cài một lần</span><span class="arrow">→</span>
+          <span class="box">F9</span><span class="arrow">→</span>
+          <span class="box">Ctrl+Alt+J</span><span class="arrow">→</span>
+          <span class="box">Ctrl+Alt+L</span>
+        </div>
+      </div>
+      <div class="cards two" style="margin-top:0">
+        <div class="card"><div class="ico">🤖</div><h3>AI local-first</h3><p>Copilot &amp; agent trong editor; chọn model miễn phí hoặc BYOK.</p></div>
+        <div class="card"><div class="ico">⚖️</div><h3>Judge + Stress</h3><p>AC/WA/RE/TLE, diff, counterexample — ngay trong IDE.</p></div>
+        <div class="card"><div class="ico">🌐</div><h3>Web lab</h3><p>IDE trên trình duyệt cho phòng máy không cài được phần mềm.</p></div>
+        <div class="card"><div class="ico">🎓</div><h3>Học có lộ trình</h3><p>12 tuần × 4 chặng; CLB sprint, showcase và mentor đồng hành.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="kicker">Demo</div>
+    <div class="cols" style="grid-template-columns:1fr 1.15fr">
+      <div>
+        <h2>Thấy kết quả.<br><span class="grad">Không cần chờ.</span></h2>
+        <div style="margin-top:2vh;display:flex;flex-direction:column;gap:1.2vh">
+          <div class="row" style="gap:1vw"><div class="num">1</div><p><b>F9</b> — biên dịch &amp; chạy, đo thời gian.</p></div>
+          <div class="row" style="gap:1vw"><div class="num">2</div><p><b>Ctrl+Alt+J</b> — chấm toàn bộ <code>tests/</code>, xem AC/WA/RE/TLE + diff.</p></div>
+          <div class="row" style="gap:1vw"><div class="num">3</div><p><b>Stress</b> — tự sinh test, so brute-force, bắt counterexample.</p></div>
+          <div class="row" style="gap:1vw"><div class="num">4</div><p><b>Ctrl+Alt+L</b> — Learn Hub: lộ trình, CLB, showcase, tài liệu giáo viên.</p></div>
+          <div class="row" style="gap:1vw"><div class="num">5</div><p><b>Timer + Web lab</b> — đồng hồ contest, phòng lab trên trình duyệt.</p></div>
+        </div>
+      </div>
+      <div class="ide">
+        <div class="ide-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span style="margin-left:6px">DrgX IDE — demo-cp · ⚖️ Judge</span></div>
+        <div class="ide-body">
+          <pre class="code"><span class="cm">// solution.cpp</span>
+<span class="kw">int</span> <span class="fn">main</span>() {
+  <span class="kw">long long</span> n, s = <span class="str">0</span>;
+  cin &gt;&gt; n;
+  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="str">0</span>; i &lt; n; i++) {
+    <span class="kw">long long</span> x; cin &gt;&gt; x;
+    s += x;
+  }
+  cout &lt;&lt; s &lt;&lt; <span class="str">"\n"</span>;
+}</pre>
+          <div class="verdict">
+            <div class="vrow"><span>#01</span><b class="ac">AC</b><span>12 ms</span></div>
+            <div class="vrow"><span>#02</span><b class="wa">WA</b><span>15 ms</span></div>
+            <div class="vrow"><span>#03</span><b class="tle">TLE</b><span>&gt; 6000 ms</span></div>
+            <div class="vrow"><span>#04</span><b class="ac">AC</b><span>18 ms</span></div>
+            <div style="margin-top:1.2vh;color:#93A7C9;font-size:clamp(9px,.75vw,11px);line-height:1.45">
+              <span class="bad">#02: Output 1294967296 — mong đợi 3000000000</span><br>
+              <span class="warn">#03: vượt giới hạn thời gian</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="kicker">Sản phẩm &amp; công nghệ</div>
+    <h2>Năm thành phần.<br><span class="grad">Một trải nghiệm.</span></h2>
+    <div class="cards five">
+      <div class="card"><div class="ico">🖥️</div><h3>Desktop</h3><p><b>Tauri 2 + Rust + WebView2.</b> Nhẹ, single-instance, tự cập nhật nhận diện.</p></div>
+      <div class="card"><div class="ico">🌐</div><h3>Web lab</h3><p><b>DrgX Web Server.</b> Chạy trực tiếp trên trình duyệt, fallback cổng 80 → 8123–8127.</p></div>
+      <div class="card"><div class="ico">🛡️</div><h3>Exam &amp; OJ Server</h3><p><b>Python + C++17.</b> Exam Server (:8765, 11/11 test) &amp; Void-bit OJ (:8080, 47 bài, Winnowing (chép đổi tên biến: 100%)).</p></div>
+      <div class="card"><div class="ico">🧠</div><h3>Extension &amp; STEM</h3><p><b>TypeScript v1.0.0.</b> Copilot, Stress Test 3 cột, 5 skin chuyên nghiệp, hỗ trợ C++/Python IoT/Robotics.</p></div>
+      <div class="card"><div class="ico">🎓</div><h3>Learn Hub</h3><p><b>HTML/CSS/JS tĩnh.</b> Lộ trình 12 tuần, CLB, showcase, tài liệu giáo viên.</p></div>
+    </div>
+    <div class="flow" style="margin-top:2.6vh">
+      <span class="box">DrgX Neural AI / BYOK</span><span class="arrow">→</span>
+      <span class="box">DrgX proxy nội bộ</span><span class="arrow">→</span>
+      <span class="box">IDE + Extension</span><span class="arrow">→</span>
+      <span class="box">Học sinh</span>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="kicker">Khác biệt &amp; pháp lý</div>
+    <h2>Kiến trúc lõi<br><span class="grad">tự chủ &amp; minh bạch.</span></h2>
+    <p class="lead">Khung nền tuân thủ giấy phép MIT &amp; Apache-2.0 — hợp pháp, minh bạch. Giá trị cốt lõi nằm ở hệ sinh thái công nghệ gốc do nhóm tự nghiên cứu phát triển.</p>
+    <div class="legal">
+      <div class="box"><span class="big">Tauri 2 + MIT Core</span><span class="pill">Giấy phép MIT · giữ bản quyền</span></div>
+      <div class="arrow">→</div>
+      <div class="box"><span class="big">Lớp DrgX</span><span class="pill p">CP &amp; Dev Studio, C++17 Judge, Winnowing, Stress Test, Exam Server, Web Lab, Learn Hub</span></div>
+    </div>
+    <div class="cards four" style="margin-top:2.4vh">
+      <div class="card"><h3>Thương hiệu gốc</h3><p>Nhận diện thương hiệu, 5 bộ Skin và Video Intro độc quyền DrgX.</p></div>
+      <div class="card"><h3>NOTICE đầy đủ</h3><p>Danh mục giấy phép mã nguồn mở minh bạch, sẵn sàng kiểm tra.</p></div>
+      <div class="card"><h3>AI tùy chọn</h3><p>Không gửi mã nguồn mặc định; người dùng chủ động chọn.</p></div>
+      <div class="card"><h3>Không tranh chấp</h3><p>Cam kết sản phẩm sạch quyền, không thuộc danh mục cấm.</p></div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="kicker">Thị trường</div>
+    <h2>Bắt đầu từ<br><span class="grad">ngách mình hiểu nhất.</span></h2>
+    <div class="stats">
+      <div class="stat"><b>~3 triệu</b><span>TAM: học sinh THPT + sinh viên CNTT (ước tính)</span></div>
+      <div class="stat"><b>~300 nghìn</b><span>SAM: học sinh học Tin học &amp; lập trình thi đấu</span></div>
+      <div class="stat"><b>5.000 → 120.000</b><span>SOM: người dùng mục tiêu 2027 → 2029</span></div>
+    </div>
+    <div class="cols" style="margin-top:2.8vh">
+      <div>
+        <h3>Khách hàng đầu tiên</h3>
+        <p class="muted" style="margin-top:.8vh">HSG Tin học · CLB lập trình · trường THPT · trung tâm bồi dưỡng · giáo viên Tin học.</p>
+      </div>
+      <div>
+        <h3>Vì sao bây giờ?</h3>
+        <p class="muted" style="margin-top:.8vh">Chuyển đổi số &amp; STEM được đẩy mạnh; AI đã đủ tốt để hỗ trợ học tập; chi phí hạ tầng giảm; học sinh cần công cụ Việt hóa.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="kicker">Mô hình kinh doanh</div>
+    <h2>Freemium +<br><span class="grad">trường học.</span></h2>
+    <div class="cards">
+      <div class="card"><div class="pill g">Miễn phí</div><h3 style="margin-top:1.1vh">Học sinh</h3><p>CP Studio + Dev Studio + Void-bit OJ (47 bài) + judge + exam server + 5 skin DrgX. AI qua model miễn phí/BYOK.</p><p style="margin-top:.8vh;color:#fff;font-weight:800">0 đồng</p></div>
+      <div class="card" style="border-color:#4C3A86"><div class="pill p">Pro</div><h3 style="margin-top:1.1vh">Cá nhân</h3><p>Đồng bộ, phân tích, tính năng nâng cao, ưu tiên hỗ trợ.</p><p style="margin-top:.8vh;color:#fff;font-weight:800">49–69k đ/tháng</p></div>
+      <div class="card"><div class="pill">School</div><h3 style="margin-top:1.1vh">Trường / lab</h3><p>Web lab, quản trị, đào tạo giáo viên, hỗ trợ theo hợp đồng.</p><p style="margin-top:.8vh;color:#fff;font-weight:800">15–20 triệu đ/năm</p></div>
+    </div>
+    <p class="quote">“Học sinh dùng miễn phí để tạo hiệu ứng mạng; trường và người dùng chuyên sâu trả phí. Không quảng cáo trong editor, không bán dữ liệu.”</p>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="kicker">Tài chính</div>
+    <div class="cols" style="grid-template-columns:1.05fr 1fr">
+      <div>
+        <h2>Hòa vốn<br><span class="grad">năm 2028.</span></h2>
+        <div class="bars">
+          <div class="barrow"><span>2027</span><div class="track"><div class="fill" style="width:8%"></div></div><span class="money">245</span></div>
+          <div class="barrow"><span>2028</span><div class="track"><div class="fill" style="width:24%"></div></div><span class="money">1.589</span></div>
+          <div class="barrow"><span>2029</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="money">7.594</span></div>
+        </div>
+        <p class="muted" style="font-size:clamp(10px,.82vw,13px);margin-top:1vh">Doanh thu dự phóng, đơn vị triệu đồng. Giả định thận trọng: 8 → 40 → 150 trường; 5.000 → 30.000 → 120.000 người dùng.</p>
+      </div>
+      <div>
+        <table>
+          <thead><tr><th>Khoản mục</th><th>Năm 1</th><th>Năm 2</th><th>Năm 3</th></tr></thead>
+          <tbody>
+            <tr><td>Doanh thu</td><td>244,9</td><td>1.588,8</td><td>7.594,0</td></tr>
+            <tr><td>Chi phí</td><td>315,0</td><td>1.070,0</td><td>3.500,0</td></tr>
+            <tr><td>Lợi nhuận</td><td class="bad">−70,1</td><td class="good">+518,8</td><td class="good">+4.094,0</td></tr>
+            <tr><td>Lũy kế</td><td class="bad">−70,1</td><td class="good">+448,7</td><td class="good">+4.542,7</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="font-size:clamp(10px,.82vw,13px);margin-top:1vh">Unit Economics: <b>LTV/CAC = 6,2x (B2C) &amp; 7,9x (B2B)</b> · Biên LN gộp <b>82–85%</b> · Thu hồi CAC &lt; 5,3 tháng. Kịch bản −30% người dùng vẫn lãi +90,2 triệu trong năm 2.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="kicker">Lộ trình</div>
+    <h2>Từ lớp học<br><span class="grad">ra toàn quốc.</span></h2>
+    <div class="timeline">
+      <div class="tl"><span class="dot"></span><b>10–11/2026</b><p>Hồ sơ, video, pilot 3 trường/CLB. 100 phản hồi đầu tiên.</p></div>
+      <div class="tl"><span class="dot"></span><b>2027</b><p>Bản 1.0, Pro, web lab. 5.000 người dùng, 8 trường trả phí.</p></div>
+      <div class="tl"><span class="dot"></span><b>2028</b><p>30.000 người dùng, 40 trường, API cho trường, hòa vốn.</p></div>
+      <div class="tl"><span class="dot"></span><b>2029</b><p>120.000 người dùng, 150 trường, mở rộng khu vực.</p></div>
+    </div>
+    <div class="cards three" style="margin-top:3vh">
+      <div class="card"><h3>Đã có</h3><p>MVP chạy được, extension v1.0.0, Void-bit OJ (47 bài, 12/12 AC), Learn Hub, 5 skin gốc, judge/stress thực tế.</p></div>
+      <div class="card"><h3>Đang làm</h3><p>Pilot trường, bộ testcase mẫu, tài liệu giáo viên, đo retention.</p></div>
+      <div class="card"><h3>Cần</h3><p>3 trường pilot, mentor thương mại, 300 triệu ươm tạo 18 tháng.</p></div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <div class="kicker">Tác động xã hội</div>
+    <h2>Học code<br><span class="grad">không rào cản.</span></h2>
+    <div class="cards four">
+      <div class="card"><div class="ico">🎓</div><h3>Học sinh</h3><p>Công cụ chất lượng cao miễn phí; chạy trên máy yếu; tiếng Việt.</p></div>
+      <div class="card"><div class="ico">🏫</div><h3>Nhà trường</h3><p>Web lab không cài đặt; giảm chi phí bản quyền; dễ triển khai.</p></div>
+      <div class="card"><div class="ico">👩‍🏫</div><h3>Giáo viên</h3><p>Công cụ chấm/dạy trực quan; lộ trình, bộ khung CLB và tập huấn tiếng Việt.</p></div>
+      <div class="card"><div class="ico">🔒</div><h3>Dữ liệu</h3><p>Ưu tiên cục bộ; không thu thập mặc định; quyền kiểm soát thuộc người dùng.</p></div>
+    </div>
+    <p class="quote">“Mỗi trường tiết kiệm hàng chục triệu đồng; mỗi học sinh có thêm một cơ hội tiếp cận công nghệ. Đó là thước đo thành công quan trọng nhất.”</p>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide">
+    <div class="kicker">Đội ngũ &amp; lời kêu gọi</div>
+    <div class="cols" style="grid-template-columns:1.1fr .9fr">
+      <div>
+        <h2>Người trẻ.<br><span class="grad">Sản phẩm thật.</span></h2>
+        <div class="team">
+          <div class="member"><b>Trưởng nhóm dự án</b><span>Kiến trúc sản phẩm &amp; C++17 Judge</span></div>
+          <div class="member"><b>Thành viên kỹ thuật</b><span>AI Agent &amp; Exam Server LAN</span></div>
+          <div class="member"><b>Thành viên giao diện</b><span>UI/UX 5 Skin &amp; Extension</span></div>
+          <div class="member"><b>Thành viên vận hành</b><span>Truyền thông, Tài chính &amp; QA</span></div>
+        </div>
+        <p class="muted" style="margin-top:1.4vh;font-size:clamp(11px,.92vw,14px)">Giáo viên hướng dẫn: …………………………………… · Đơn vị: ……………………………………</p>
+      </div>
+      <div class="card" style="border-color:#4C3A86;background:linear-gradient(160deg,rgba(124,58,237,.2),rgba(13,23,44,.95))">
+        <div class="pill p">Chúng tôi cần</div>
+        <h3 style="margin-top:1.2vh;font-size:clamp(18px,1.65vw,27px)">Đồng hành cùng DrgX</h3>
+        <p style="margin-top:1vh">Pilot 3 trường/CLB · ươm tạo 300 triệu · kết nối giáo viên &amp; nhà trường.</p>
+        <div class="cta">
+          <span class="btn">Cùng đưa học sinh Việt lên bản đồ công nghệ</span>
+        </div>
+        <p class="contact" style="margin-top:1.6vh">Liên hệ: ……………………………… · SĐT: …………………… · Cổng Web: 127.0.0.1:8080</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <div class="brand"><img src="../assets/logo.png" alt=""> DrgX IDE — Lập trình đã tiến hóa</div>
+    <div class="hint">← → chuyển slide · F toàn màn hình · Ctrl+P in handout</div>
+  </div>
+  <div class="nav"><button id="prev" title="Slide trước">‹</button><button id="next" title="Slide sau">›</button></div>
+</div>
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0, progress = document.getElementById('progress');
+  function show(n){
+    i = (n + slides.length) % slides.length;
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
+    progress.style.width = ((i + 1) / slides.length * 100) + '%';
+  }
+  function next(){ show(i + 1); }
+  function prev(){ show(i - 1); }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function(){});
+      else document.exitFullscreen().catch(function(){});
+    }
+  });
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+  show(0);
+})();
+</script>
+</body>
+</html>

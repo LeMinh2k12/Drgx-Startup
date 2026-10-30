@@ -1,0 +1,31 @@
+﻿Khoản mục,Năm 1 (2027),Năm 2 (2028),Năm 3 (2029),Ghi chú
+DOANH THU,,,,
+Gói Pro cá nhân (B2C),74.9,718.8,4194.0,150 / 1.200 / 6.000 người; 499k / 599k / 699k đ/năm
+Giấy phép trường (B2B),120.0,720.0,3000.0,8 / 40 / 150 trường; 15 / 18 / 20 triệu đ/năm
+Dịch vụ & đào tạo,50.0,150.0,400.0,"Đào tạo giáo viên, tổ chức contest, tùy biến"
+Tổng doanh thu,244.9,1588.8,7594.0,Đơn vị: triệu đồng
+CHI PHÍ,,,,
+Nhân sự / đội ngũ,120.0,480.0,1500.0,"R&D, phát triển học liệu"
+"Hạ tầng, AI, vận hành",45.0,160.0,600.0,"VPS, CDN, AI Gateway, backup"
+Marketing & cộng đồng,55.0,220.0,800.0,"Pilot trường học, Mini-Contest, nội dung"
+"Pháp lý, kế toán, SHTT",25.0,40.0,100.0,"Đăng ký bản quyền, kế toán"
+"Công cụ, sự kiện, đi lại",40.0,90.0,300.0,"Hội thảo cụm trường, đi lại pilot"
+Dự phòng,30.0,80.0,200.0,Quỹ dự phòng rủi ro
+Tổng chi phí,315.0,1070.0,3500.0,Đơn vị: triệu đồng
+Lợi nhuận sau chi phí,-70.1,518.8,4094.0,Biên lợi nhuận ròng Năm 3: 53.9%
+Lũy kế,-70.1,448.7,4542.7,Hòa vốn Quý 3/2028
+,,,,
+UNIT ECONOMICS (KINH TẾ ĐƠN VỊ),Gói Pro (B2C),Gói School (B2B),Chuẩn ngành EdTech,Ghi chú
+ARPU / ACV (đồng/năm),599000,18000000,,Doanh thu trung bình mỗi khách hàng/năm
+Biên lợi nhuận gộp (%),85%,82%,>= 70%,Nhờ kiến trúc xử lý cục bộ Local-First
+Vòng đời trung bình (năm),2.2,3.5,>= 2.0,Theo chu kỳ học cấp THPT / hợp đồng trường
+LTV (đồng),1120000,51660000,,LTV = ARPU * Biên LN gộp * Vòng đời
+CAC (đồng),180000,6500000,,Chi phí thu hút 1 khách hàng trả phí
+Tỷ lệ LTV / CAC,6.2x,7.9x,>= 3.0x,Hiệu quả sử dụng vốn rất cao
+Thời gian thu hồi CAC (tháng),≈ 4.2,< 5.3,<= 12,Thu hồi chi phí bán hàng ngay năm đầu
+,,,,
+PHÂN TÍCH ĐỘ NHẠY (NĂM 2 - 2028),Doanh thu (tr),Lợi nhuận (tr),Điểm hòa vốn,Thời gian hoàn vốn (300tr)
+Kịch bản Thận trọng (-30% khách hàng),1112.2,90.2,Quý 4/2028,> 24 tháng
+Kịch bản Cơ sở (Base Case),1588.8,518.8,Quý 3/2028,18 - 20 tháng
+Kịch bản Tích cực (+25% khách hàng),1986.0,876.0,Quý 1/2028,16 - 18 tháng
+Giả định độ nhạy,Định phí giữ nguyên (910 tr),Chi phí hạ tầng-AI-vận hành (160 tr) co giãn theo doanh thu,,Lợi nhuận = Doanh thu - Chi phí

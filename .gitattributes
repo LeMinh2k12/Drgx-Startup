@@ -1,0 +1,17 @@
+# Chuẩn hóa line ending khi làm việc nhóm trên Windows
+* text=auto
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Tệp nhị phân — không diff/merge theo dòng
+*.pdf binary
+*.docx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
+*.ttf binary

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="obsidian">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tải về &amp; Cài đặt DrgX IDE — Khởi chạy 1 lệnh, Kiểm định 68/68 &amp; Thông số đo thật</title>
+<meta name="description" content="Hướng dẫn khởi chạy DrgX IDE qua drgx.cmd hoặc từng bộ công cụ: CP Studio (thi đấu), Dev Studio (AI BYOK), Void-bit OJ (47 bài) và 5 Skin Chuyên nghiệp. Kèm bảng thông số kỹ thuật đo thật.">
+<meta name="robots" content="index, follow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://drgx-web.netlify.app/download.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="DrgX IDE">
+<meta property="og:url" content="https://drgx-web.netlify.app/download.html">
+<meta property="og:title" content="Tải về &amp; Cài đặt DrgX IDE — Chạy ngay với Profile cách ly (v2.0.0)">
+<meta property="og:description" content="Khởi chạy CP Studio, Dev Studio và Void-bit OJ chỉ bằng 1 lệnh drgx.cmd. Xem bảng thông số RAM 39 MB, mở cửa sổ 0,5s, 68/68 Health Gate PASS và FAQ chi tiết.">
+<meta property="og:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tải về &amp; Cài đặt DrgX IDE — Bảng thông số đo thật">
+<meta name="twitter:description" content="Hướng dẫn chạy nhanh DrgX CP Studio, Dev Studio, Void-bit OJ và Web Lab.">
+<meta name="twitter:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<meta name="theme-color" content="#08090d">
+<link rel="icon" type="image/png" href="assets/logo-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="assets/site.css">
+
+<!-- FAQPage + SoftwareApplication JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "DrgX IDE",
+      "operatingSystem": "Windows 10, Windows 11",
+      "applicationCategory": "DeveloperApplication",
+      "softwareVersion": "2.0.0",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "VND" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "DrgX có miễn phí không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Có. Toàn bộ trong repo build và chạy hoàn toàn miễn phí: hai bản CP/Dev Studio, judge, exam server, stress, Void-bit OJ và 5 skin chuyên nghiệp. Mô hình AI miễn phí qua DrgX Neural AI hoặc dùng key riêng (BYOK)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "DrgX có chạy được khi mất mạng không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Được. Toàn bộ biên dịch, chấm testcase (F9), Void-bit OJ, template, timer và Hệ sinh thái học tập chạy cục bộ trong máy — chỉ tính năng AI mới gọi dịch vụ ngoài."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Máy phòng học cấu hình yếu chạy nổi không?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chạy tốt — process shell Tauri chỉ chiếm khoảng 39 MB RAM; với máy quá yếu hoặc không có quyền cài đặt, có thể dùng chế độ Web Lab để code trực tiếp trên trình duyệt."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+
+<!-- ═══ Top Announcement Bar ═══ -->
+<div class="top-announce" role="region" aria-label="Thông báo phát hành">
+  <span class="ta-badge"><span class="ta-pulse" aria-hidden="true"></span> BẢN PHÁT HÀNH v2.0.0</span>
+  <span>Đã xác thực <b>68/68 Health Gate PASS</b> · Điều phối 1 lệnh qua <code>drgx.cmd</code> · Đồng bộ <b>5 Skin Chuyên nghiệp</b></span>
+  <a href="judge-demo.html">Trải nghiệm Phòng Lab Ảo →</a>
+</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <picture>
+        <source srcset="assets/logo-64.webp" type="image/webp">
+        <img src="assets/logo-64.png" alt="Logo DrgX IDE" width="32" height="32" decoding="async">
+      </picture>
+      <span>DrgX <b>IDE</b></span>
+      <span class="brand-ver">v2.0</span>
+    </a>
+    <nav class="nav-links" aria-label="Điều hướng chính">
+      <a href="index.html">Trang chủ</a>
+      <a href="features.html">Tính năng</a>
+      <a href="ecosystem/index.html">Hệ sinh thái</a>
+      <a href="void-bit.html">Void-bit OJ</a>
+      <a href="download.html" class="active" aria-current="page">Tải về</a>
+      <a href="about.html">Về dự án</a>
+    </nav>
+    <div class="nav-right">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="judge-demo.html">🧪 Phòng Lab Ảo</a>
+      <a class="btn btn-grad btn-sm" href="#install">Bắt đầu cài ↓</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Mở menu điều hướng">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="mobile-drawer" role="region" aria-label="Menu di động">
+    <nav class="mobile-nav-list" aria-label="Điều hướng di động">
+      <a href="index.html"><span>Trang chủ</span><span>→</span></a>
+      <a href="features.html"><span>Tính năng</span><span>→</span></a>
+      <a href="ecosystem/index.html"><span>Hệ sinh thái học tập</span><span>→</span></a>
+      <a href="void-bit.html"><span>Void-bit OJ (47 bài)</span><span>→</span></a>
+      <a href="download.html" class="active" aria-current="page"><span>Tải về &amp; Cài đặt</span><span>→</span></a>
+      <a href="about.html"><span>Về dự án &amp; Giấy phép</span><span>→</span></a>
+    </nav>
+    <div class="mobile-skin-bar">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">5 Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-grad btn-sm" href="#install">Cài ngay ↓</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main-content">
+
+  <!-- ═══ Page H1 Header ═══ -->
+  <section class="page-hero" id="install">
+    <div class="eyebrow">Tải về &amp; Khởi chạy nhanh · Unified CLI v2.0.0</div>
+    <h1>Chọn đúng công cụ. <span class="grad">Chạy ngay bằng một lệnh.</span></h1>
+    <p class="lead">DrgX được đóng gói theo kiến trúc <b>profile cách ly</b> — giữ cho không gian thi đấu và tự học hoàn toàn tách biệt. Sử dụng trình điều phối <code>drgx.cmd</code> hoặc chọn đúng chế độ khởi chạy theo vai trò của bạn bên dưới.</p>
+  </section>
+
+  <!-- ═══ DrgX-Style Pre-Flight Integrity & Environment Verifier ═══ -->
+  <section class="content-section" id="preflight-verifier" style="padding-top:16px;padding-bottom:10px">
+    <div class="dl-verifier reveal">
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">Trình Kiểm Định Trước Khi Chạy · Pre-Flight Verification</div>
+        <h2 style="font-size:24px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Xác thực chữ ký 6 trụ cột &amp; Toolchain C++17</h2>
+        <p style="font-size:14px;color:var(--muted);line-height:1.65;max-width:640px">
+          Trước khi bước vào kỳ thi HSG hoặc bật máy chủ phòng máy, bấm nút kiểm định bên phải hoặc chạy lệnh <code>drgx.cmd verify</code> để kiểm tra toàn bộ <b>68 hạng mục</b>: Tauri Shell, CP Studio, Dev Studio, Void-bit OJ (47 bài · 42 bài giảng), Exam Server và 5 Skin Chuyên nghiệp.
+        </p>
+        <div id="verifyDownloadStatus" class="dl-status-pill">
+          ⚡ Sẵn sàng kiểm định: 68/68 Health Gate · SHA-256 Clean · Windows 10/11 x64
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:230px">
+        <button id="verifyDownloadBtn" class="btn btn-grad" type="button">🛡️ Xác thực Gói Cài Đặt</button>
+        <a class="btn btn-ghost btn-sm" href="judge-demo.html">🧪 Mở Phòng Lab Ảo</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Interactive Role-Based Quick-Start Selector ═══ -->
+  <section class="content-section" style="padding-top:28px">
+    <div class="wf-box reveal" data-tab-group="download-quickstart">
+      <div class="wf-tabs" role="tablist" aria-label="Chọn chế độ khởi chạy theo nhu cầu">
+        <button class="wf-tab active" type="button" role="tab" id="tab-qs-cp" aria-selected="true" aria-controls="panel-qs-cp" tabindex="0">
+          <span class="step-num">01</span> Luyện thi HSG (CP Studio)
+        </button>
+        <button class="wf-tab" type="button" role="tab" id="tab-qs-dev" aria-selected="false" aria-controls="panel-qs-dev" tabindex="-1">
+          <span class="step-num">02</span> Tự học &amp; AI (Dev Studio)
+        </button>
+        <button class="wf-tab" type="button" role="tab" id="tab-qs-oj" aria-selected="false" aria-controls="panel-qs-oj" tabindex="-1">
+          <span class="step-num">03</span> Kho 47 bài (Void-bit OJ)
+        </button>
+        <button class="wf-tab" type="button" role="tab" id="tab-qs-lab" aria-selected="false" aria-controls="panel-qs-lab" tabindex="-1">
+          <span class="step-num">04</span> Điều phối tổng &amp; Build Tauri
+        </button>
+      </div>
+
+      <!-- Tab 1: CP Studio -->
+      <div class="wf-panel active" id="panel-qs-cp" role="tabpanel" aria-labelledby="tab-qs-cp">
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">⚖️</span> DrgX CP Studio (Profile Thi đấu)</h3>
+          <p class="desc">Dành cho học sinh luyện đề thi HSG và phòng thi tập trung: tự động bật <b>Exam Server đa luồng (cổng 8765)</b>, nạp extension <code>drgx-cp v1.0.0</code>, tắt hoàn toàn gợi ý AI để đảm bảo tính trung thực.</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Chấm nhanh <kbd>F9</kbd> / <kbd>Ctrl+Alt+J</kbd></b> <span class="m">— thử ngay với thư mục mẫu <code>examples\demo-cp</code>.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Tái sử dụng Exam Server</b> <span class="m">— nếu cổng 8765 đã chạy, launcher tự kết nối lại không sinh tiến trình thừa.</span></span></div>
+          </div>
+        </div>
+        <div>
+          <div class="codebox"><button class="copy-btn" type="button">Sao chép</button><pre><span class="cmt"># Cách 1: Qua bộ điều phối trung tâm DrgX v2.0</span>
+<span class="cmd">.\drgx.cmd cp</span>
+
+<span class="cmt"># Cách 2: Chạy trực tiếp launcher CP Studio</span>
+<span class="cmd">products\drgx-cp\run-cp.cmd</span>
+
+<span class="cmt"># Phím tắt chấm bài trong CP Studio:</span>
+<span class="kwd">F9</span>  solution.cpp        <span class="cmt"># → 4/4 AC (~32ms/test)</span>
+<span class="kwd">F9</span>  solution_buggy.cpp  <span class="cmt"># → Bắt lỗi WA tràn int ở test 04</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Dev Studio -->
+      <div class="wf-panel" id="panel-qs-dev" role="tabpanel" aria-labelledby="tab-qs-dev" hidden>
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">🤖</span> DrgX Dev Studio (Profile Học tập &amp; AI)</h3>
+          <p class="desc">Dành cho việc tự học thuật toán, làm dự án CLB và gỡ lỗi khó: tích hợp <b>AI Copilot inline (<kbd>Alt+\</kbd>)</b>, giải thích code, review và sinh test qua DrgX Neural AI Bridge (cổng 45290).</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Chạy song song với CP Studio</b> <span class="m">— mỗi bản nằm ở một profile độc lập, mở cùng lúc không xung đột.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Hỗ trợ mô hình miễn phí &amp; BYOK</b> <span class="m">— chủ động cấu hình API key riêng.</span></span></div>
+          </div>
+        </div>
+        <div>
+          <div class="codebox"><button class="copy-btn" type="button">Sao chép</button><pre><span class="cmt"># Cách 1: Qua bộ điều phối trung tâm</span>
+<span class="cmd">.\drgx.cmd dev</span>
+
+<span class="cmt"># Cách 2: Khởi động Dev Studio + Bridge AI (cổng 45290)</span>
+<span class="cmd">products\drgx-dev\run-dev.cmd</span>
+
+<span class="cmt"># Phím tắt trong trình soạn thảo:</span>
+<span class="kwd">Alt+\</span>       <span class="cmt"># Gợi ý code inline (debounce 250ms)</span>
+<span class="kwd">Ctrl+Alt+L</span>  <span class="cmt"># Mở Hệ sinh thái học tập 12 tuần</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Void-bit OJ -->
+      <div class="wf-panel" id="panel-qs-oj" role="tabpanel" aria-labelledby="tab-qs-oj" hidden>
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">🏆</span> Void-bit OJ (Local Judge + 12 trang học tập)</h3>
+          <p class="desc">Không cần mở trình soạn thảo desktop: khởi chạy trực tiếp <b>OJ Server C++ (3,8 MB)</b> tại cổng <code>8080</code> và <b>Web học tập</b> tại cổng <code>8000</code>.</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>47 bài tập có sẵn</b> <span class="m">— chấm theo subtask, đo bộ nhớ PSAPI, kiểm tra đạo văn Winnowing.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Hỗ trợ C++17 &amp; Python 3</b> <span class="m">— đã kiểm chứng probe đạt 12/12 AC.</span></span></div>
+          </div>
+        </div>
+        <div>
+          <div class="codebox"><button class="copy-btn" type="button">Sao chép</button><pre><span class="cmt"># Tự động bật OJ (:8080) + Web học tập (:8000) và mở trình duyệt</span>
+<span class="cmd">.\drgx.cmd oj</span>
+<span class="cmt"># Hoặc gọi trực tiếp:</span>
+<span class="cmd">products\void-bit\run-oj.cmd</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Unified Orchestrator & Build Tauri -->
+      <div class="wf-panel" id="panel-qs-lab" role="tabpanel" aria-labelledby="tab-qs-lab" hidden>
+        <div class="tour-text">
+          <h3><span class="ico" aria-hidden="true">🛠️</span> Điều phối tổng <code>drgx.cmd</code> &amp; Build Tauri 2</h3>
+          <p class="desc">Dành cho giáo viên quản trị phòng máy hoặc nhà phát triển muốn bật toàn bộ dịch vụ nền chỉ bằng một lệnh hoặc biên dịch vỏ ứng dụng <code>drgx-ide.exe</code> (~39 MB RAM) từ mã nguồn Rust.</p>
+          <div class="feat-list">
+            <div class="feat-item"><span class="fx">✓</span><span><b>Kiểm định 68/68 tự động</b> <span class="m">— chạy <code>drgx.cmd verify</code> trước giờ thi để đảm bảo mọi dịch vụ sẵn sàng.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Quản lý tiến trình bằng Win32 JobObject</b> <span class="m">— đóng cửa sổ là dọn sạch tiến trình con.</span></span></div>
+          </div>
+        </div>
+        <div>
+          <div class="codebox"><button class="copy-btn" type="button">Sao chép</button><pre><span class="cmt"># Kiểm định 6 trụ cột (68/68 Health Gate)</span>
+<span class="cmd">.\drgx.cmd verify</span>
+
+<span class="cmt"># Bật đồng thời Exam Server + Void-bit OJ + Web Portal</span>
+<span class="cmd">.\drgx.cmd all</span>
+
+<span class="cmt"># Build vỏ Tauri 2 (yêu cầu Rust + Node.js)</span>
+<span class="cmd">.\tauri.ps1 build</span></pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yêu cầu môi trường chuẩn -->
+    <div class="reveal" style="margin-top:26px;padding:22px 24px;border:1px solid var(--border);border-radius:18px;background:color-mix(in srgb, var(--card) 72%, transparent);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:15.5px;font-weight:800;margin-bottom:4px">Yêu cầu môi trường trên máy thử nghiệm (Windows 10/11)</div>
+        <p style="font-size:13.5px;color:var(--muted)">Hỗ trợ trình biên dịch <b>g++ MSYS2 UCRT64</b> cho C++17 (máy đo: <code>15.2.0</code>), <b>Python 3.10+</b> cho Exam Server (máy đo: <code>3.12.10</code>) và <b>Node.js 18+</b> cho cổng học liệu tĩnh.</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn btn-ghost btn-sm" href="void-bit.html">Mở Kho 47 Bài Void-bit OJ →</a>
+        <a class="btn btn-ghost btn-sm" href="features.html">Xem hướng dẫn phím tắt →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Thông số đo thật ═══ -->
+  <section class="content-section" id="specs" style="padding-top:20px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Thông số đo thật</div>
+      <h2>Số liệu lấy trực tiếp trên tiến trình đang chạy — <span class="grad">không vẽ trên giấy.</span></h2>
+      <p class="lead">Đo thực tế trên máy thử nghiệm Windows (g++ 15.2.0 MSYS2 UCRT64 · Node 24.22.0 · Python 3.12.10) trong giai đoạn <b>19–24/10/2026</b>. Con số thực tế có thể dao động tùy cấu hình phần cứng từng máy.</p>
+    </div>
+
+    <div class="metric-grid reveal">
+      <div class="metric"><div class="v">0,5 s</div><div class="k">Mở cửa sổ chính</div><div class="note">Tính từ lúc kích hoạt đến khi cửa sổ "DrgX" hiển thị sẵn sàng.</div></div>
+      <div class="metric"><div class="v">39 MB</div><div class="k">RAM process shell</div><div class="note">WorkingSet của riêng tiến trình <code>drgx-ide.exe</code> (private ~6 MB), trung bình 3 mẫu đo.</div></div>
+      <div class="metric"><div class="v">68/68</div><div class="k">Health Gate PASS</div><div class="note">Kiểm định tự động toàn bộ 6 trụ cột của hệ sinh thái qua <code>verify_ecosystem.py</code>.</div></div>
+      <div class="metric"><div class="v">11/11</div><div class="k">Smoke test Exam Server</div><div class="note">Kiểm chứng tự động đủ các nhánh AC / WA / CE / TLE / NO_TESTS / 404 &amp; đa luồng.</div></div>
+      <div class="metric"><div class="v">4,7 s</div><div class="k">Judge bộ demo 4 test</div><div class="note">Bao gồm cả bước biên dịch <code>g++</code>; mỗi testcase thực thi hết ~32–38 ms.</div></div>
+      <div class="metric"><div class="v">87 KB</div><div class="k">Extension bundle</div><div class="note">Kích thước đóng gói gọn nhẹ giúp khởi động nhanh cả hai bản CP &amp; Dev Studio (v1.0.0).</div></div>
+      <div class="metric"><div class="v">16 lệnh</div><div class="k">Extension commands</div><div class="note">Đi kèm 10 tổ hợp phím tắt, 5 skin chuyên nghiệp đồng bộ và Video Intro.</div></div>
+      <div class="metric"><div class="v">8765</div><div class="k">Cổng Exam Server</div><div class="note">Đa luồng <code>ThreadingHTTPServer</code>, chống ngập payload 413, tự tái sử dụng nếu đang chạy.</div></div>
+    </div>
+
+    <p class="hero-note reveal" style="margin-top:16px"><b>Cơ chế thu hồi tài nguyên cấp nhân:</b> Toàn bộ tiến trình con của DrgX được gắn trực tiếp vào <b>Win32 JobObject</b> với cờ <code>KILL_ON_JOB_CLOSE</code> — khi đóng cửa sổ ứng dụng, hệ điều hành thu hồi 100% RAM và giải phóng sạch cổng mạng, không để lại tiến trình chạy ngầm.</p>
+  </section>
+
+  <!-- ═══ FAQ ═══ -->
+  <section class="content-section" id="faq" style="padding-top:20px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Câu hỏi thường gặp (FAQ)</div>
+      <h2>Giải đáp thẳng thắn các thắc mắc thực tế.</h2>
+    </div>
+    <div class="faq reveal">
+      <details open>
+        <summary>DrgX có hoàn toàn miễn phí không? <span class="pm" aria-hidden="true">+</span></summary>
+        <div class="fa-body">Có. Toàn bộ mã nguồn và các gói trong kho lưu trữ đều miễn phí: CP Studio, Dev Studio, DrgX Judge, Exam Server, Stress Tester, Void-bit OJ (47 bài) và 5 skin giao diện chuyên nghiệp. Tính năng AI có sẵn các mô hình miễn phí qua DrgX Neural AI hoặc bạn tự gắn API key cá nhân (BYOK).</div>
+      </details>
+      <details>
+        <summary>Làm sao để đổi 5 Skin Chuyên nghiệp và xem lại Video Intro? <span class="pm" aria-hidden="true">+</span></summary>
+        <div class="fa-body">Trên thanh điều hướng trên cùng của mọi trang web, bạn có thể bấm trực tiếp vào <b>5 chấm màu (Obsidian, Nebula, Tokyo, Matrix, Light)</b> để đổi skin tức thì — trạng thái sẽ tự động lưu vào trình duyệt (<code>localStorage</code>) và đồng bộ xuyên suốt các trang. Trong CP Studio và Dev Studio, bấm nút <b>🎬 Xem Video Intro</b> trên thanh trạng thái để phát lại video nhận diện.</div>
+      </details>
+      <details>
+        <summary>Phòng máy trường bị mất mạng Internet có dùng được không? <span class="pm" aria-hidden="true">+</span></summary>
+        <div class="fa-body">Hoàn toàn dùng được. Toàn bộ luồng biên dịch C++/Python, chấm đa testcase (<kbd>F9</kbd>), Stress Tester, Void-bit OJ (cổng 8080), đồng hồ đếm ngược và Hệ sinh thái học tập 12 tuần đều chạy <b>100% cục bộ trong máy hoặc mạng LAN phòng máy</b>. Chỉ tính năng hỏi AI đám mây mới cần Internet.</div>
+      </details>
+      <details>
+        <summary>Máy tính phòng học cấu hình yếu hoặc khóa quyền cài đặt (Deep Freeze) xử lý thế nào? <span class="pm" aria-hidden="true">+</span></summary>
+        <div class="fa-body">Với máy khóa quyền Admin không cài được phần mềm: giáo viên chỉ cần chạy <b>DrgX Web Lab</b> hoặc <b>Void-bit OJ</b> trên 1 máy chủ, học sinh cả phòng mở trình duyệt web là viết code và chấm bài được ngay.</div>
+      </details>
+      <details>
+        <summary>Dữ liệu mã nguồn của học sinh và khóa API được bảo vệ ra sao? <span class="pm" aria-hidden="true">+</span></summary>
+        <div class="fa-body">Theo nguyên tắc <b>local-first</b>: DrgX không tự động tải mã nguồn lên đám mây, không dùng bài làm của học sinh để huấn luyện AI và không chèn quảng cáo. Proxy nội bộ chỉ lắng nghe trên <code>127.0.0.1</code> kèm token xác thực. Bạn có thể đọc toàn văn bằng cách bấm vào nút <button type="button" data-modal-open="modalPrivacy" style="color:var(--accent);font-weight:700;text-decoration:underline;cursor:pointer">Chính sách quyền riêng tư (PRIVACY.md)</button>.</div>
+      </details>
+      <details>
+        <summary>Giấy phép mã nguồn mở của DrgX được quy định như thế nào? <span class="pm" aria-hidden="true">+</span></summary>
+        <div class="fa-body">DrgX phát triển theo giấy phép mã nguồn mở <b>MIT License</b>, đảm bảo nhà trường, câu lạc bộ và học sinh toàn quyền cài đặt, tùy biến và triển khai miễn phí. Toàn văn ghi công nằm trong <button type="button" data-modal-open="modalNotice" style="color:var(--accent);font-weight:700;text-decoration:underline;cursor:pointer">NOTICE.md</button>.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ═══ Final CTA ═══ -->
+  <section class="final-cta">
+    <div class="reveal">
+      <h2>Một IDE. <span class="grad">Mọi công cụ cần thiết.</span></h2>
+      <p>Cài một lần → <kbd>F9</kbd> chạy &amp; chấm test → Stress tìm phản ví dụ → <kbd>Ctrl+Alt+L</kbd> mở lộ trình 12 tuần → Web Lab cho cả phòng máy.</p>
+      <div class="hero-cta">
+        <a class="btn btn-grad" href="#install">Lấy lệnh chạy ngay ↑</a>
+        <a class="btn btn-ghost" href="ecosystem/index.html">Mở Lộ trình học tập 12 tuần</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <picture>
+            <source srcset="assets/logo-64.webp" type="image/webp">
+            <img src="assets/logo-64.png" alt="Logo DrgX" width="28" height="28" loading="lazy" decoding="async">
+          </picture>
+          DrgX <b style="color:var(--accent)">&nbsp;IDE</b>
+        </div>
+        <p class="foot-about">Môi trường lập trình local-first tích hợp AI Agent &amp; Judge dành cho học sinh Việt Nam.</p>
+        <div class="foot-domains" aria-label="Cổng dịch vụ chuẩn">
+                    <span class="foot-domain-tag">localhost:8765 (Exam)</span>
+          <span class="foot-domain-tag">localhost:8080 (OJ)</span>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Tính năng</h4>
+        <a href="features.html#judge">DrgX Judge (F9)</a>
+        <a href="features.html#exam-integrity">Exam Integrity 4 lớp</a>
+        <a href="features.html#ai">AI Copilot (BYOK)</a>
+        <a href="features.html#themes-studio">5 Skin Chuyên nghiệp</a>
+        <a href="features.html#exam-server">DrgX Exam Server</a>
+      </div>
+      <div class="foot-col">
+        <h4>Tài nguyên</h4>
+        <a href="#preflight-verifier">Kiểm định Gói tải (68/68)</a>
+        <a href="#specs">Bảng thông số đo thật</a>
+        <a href="#faq">Câu hỏi thường gặp</a>
+        <a href="void-bit.html">Void-bit OJ (47 bài)</a>
+        <a href="ecosystem/index.html">Hệ sinh thái học tập</a>
+      </div>
+      <div class="foot-col">
+        <h4>Pháp lý &amp; Dự án</h4>
+        <a href="about.html">Về nhóm DrgX — Phú Thọ</a>
+        <button class="foot-link" type="button" data-modal-open="modalPrivacy">Chính sách quyền riêng tư</button>
+        <button class="foot-link" type="button" data-modal-open="modalNotice">Giấy phép &amp; Ghi công (MIT)</button>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nhóm DrgX — Phú Thọ. Hệ sinh thái Lập trình Local-First • Bản quyền mã nguồn mở MIT.</span>
+      <span class="mono">Số liệu đo 19–24/10/2026 · 68/68 PASS · 5 Skins Chuyên nghiệp</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Modal Chính sách quyền riêng tư -->
+<div class="modal-backdrop" id="modalPrivacy" role="dialog" aria-modal="true" aria-labelledby="modalPrivacyTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalPrivacyTitle">Chính sách quyền riêng tư — DrgX IDE (PRIVACY.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><b>Cập nhật lần cuối:</b> 19/10/2026 — Thiết kế theo nguyên tắc <b>local-first</b>.</p>
+      <h4>1. Xử lý dữ liệu nội bộ</h4>
+      <ul>
+        <li>Mã nguồn, bộ testcase, lịch sử chấm bài nằm trực tiếp trong thư mục dự án trên máy bạn.</li>
+        <li>Proxy nội bộ chỉ lắng nghe trên <code>127.0.0.1</code> kèm token xác thực phiên.</li>
+      </ul>
+      <h4>2. Dịch vụ AI tùy chọn</h4>
+      <ul>
+        <li>Chỉ gửi đoạn mã được chọn khi người dùng chủ động gọi lệnh AI trong Dev Studio.</li>
+        <li>Không bán dữ liệu, không quảng cáo, không dùng mã nguồn của học sinh để huấn luyện mô hình.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Giấy phép -->
+<div class="modal-backdrop" id="modalNotice" role="dialog" aria-modal="true" aria-labelledby="modalNoticeTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalNoticeTitle">Giấy phép &amp; Ghi công phần mềm (NOTICE.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <h4>1. DrgX Workbench Core (MIT License)</h4>
+      <p>Lõi trình soạn thảo phát triển theo điều khoản MIT License với bộ nhận diện thương hiệu và kiến trúc tích hợp độc lập của DrgX.</p>
+      <h4>2. Tauri 2 &amp; Thành phần gốc DrgX</h4>
+      <p>Khung ứng dụng sử dụng Tauri (MIT / Apache-2.0). Toàn bộ mã nguồn CP/Dev Studio extension v1.0.0, Exam Server v1.1.0, Void-bit OJ và 5 skin là tài sản do Nhóm DrgX — Phú Thọ phát triển.</p>
+    </div>
+  </div>
+</div>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

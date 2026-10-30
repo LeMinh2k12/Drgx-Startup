@@ -1,0 +1,162 @@
+{
+  "name": "drgx-copilot",
+  "displayName": "DrgX Copilot & CP Studio",
+  "description": "Lập trình thi đấu & Gợi ý code AI siêu tốc, tích hợp trực tiếp trên DrgX IDE",
+  "publisher": "drgx",
+  "version": "1.0.0",
+  "engines": { "vscode": "^1.85.0" },
+  "main": "./dist/web.js",
+  "icon": "media/icon.png",
+  "extensionKind": ["workspace"],
+  "activationEvents": ["*"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": true },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "themes": [
+      {
+        "label": "DrgX Ion",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-ion.json"
+      },
+      {
+        "label": "DrgX Dawn",
+        "uiTheme": "vs",
+        "path": "./themes/drgx-dawn.json"
+      },
+      {
+        "label": "DrgX Nebula",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-nebula.json"
+      },
+      {
+        "label": "DrgX Tokyo",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-tokyo.json"
+      },
+      {
+        "label": "DrgX Matrix",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-matrix.json"
+      }
+    ],
+    "configuration": {
+      "title": "DrgX Copilot & CP Studio",
+      "properties": {
+        "drgxCopilot.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Bật/tắt gợi ý code inline bằng AI"
+        },
+        "drgxCopilot.cpPredictor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Bật AI dự đoán cấu trúc dữ liệu & thuật toán thi đấu (Prefix Sum, RMQ, SegTree, DP, DSU, Fenwick, v.v.)"
+        },
+        "drgxCopilot.autoTrigger": {
+          "type": "boolean",
+          "default": true,
+          "description": "Tự động kích hoạt gợi ý khi gõ code (tắt để chỉ gợi ý khi bấm Alt+\\)"
+        },
+        "drgxCopilot.autoOpenHome": {
+          "type": "boolean",
+          "default": true,
+          "description": "Tự mở Trang chủ DrgX một lần khi mở thư mục mới và chưa có tệp nào được mở."
+        },
+        "drgxCopilot.model": {
+          "type": "string",
+          "default": "drgx/nemotron-3.5-lightning-free",
+          "enum": [
+            "drgx/nemotron-3.5-lightning-free",
+            "drgx/beam-free",
+            "drgx/glm-5.3-flash-free",
+            "drgx/deepseek-v4.1-flash-free"
+          ],
+          "enumDescriptions": [
+            "DrgX Nemotron 3.5 Lightning (Tốc độ cao, ít bị giới hạn)",
+            "DrgX Beam Free (Chính xác cho JS/TS/Python)",
+            "DrgX GLM 5.3 Flash Free (Đa ngôn ngữ)",
+            "DrgX DeepSeek V4.1 Flash Free (Logic phức tạp)"
+          ],
+          "description": "Mô hình AI dùng để sinh gợi ý code"
+        },
+        "drgxCopilot.maxLines": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Số dòng tối đa của mỗi gợi ý"
+        },
+        "drgxCopilot.delayMs": {
+          "type": "number",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 2000,
+          "description": "Độ trễ trước khi gọi model khi gõ tự động (ms). Bấm Alt+\\ sẽ gọi ngay lập tức."
+        },
+        "drgxCopilot.cliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Đường dẫn tuyệt đối tới drgx.exe nếu terminal không tìm thấy CLI trong PATH. Để trống để dùng 'drgx'."
+        },
+        "drgxCopilot.judgeTimeLimit": {
+          "type": "number",
+          "default": 6000,
+          "minimum": 100,
+          "maximum": 120000,
+          "description": "Giới hạn thời gian cho mỗi test khi chấm Judge (ms)."
+        }
+      }
+    },
+    "commands": [
+      { "command": "drgx.run", "title": "DrgX: Biên dịch & Chạy mã nguồn (F9)" },
+      { "command": "drgx.test", "title": "DrgX: Chấm testcase với input.txt (F5)" },
+      { "command": "drgx.judge", "title": "DrgX: ⚖️ Judge — chấm toàn bộ tests/ (Ctrl+Alt+J)" },
+      { "command": "drgx.timer", "title": "DrgX: ⏱ Contest Timer — đồng hồ đếm ngược" },
+      { "command": "drgx.init", "title": "DrgX: Khởi tạo bài toán CP mới" },
+      { "command": "drgx.stress", "title": "DrgX: 🧪 Stress Tester — so khớp brute-force" },
+      { "command": "drgx.insertCP", "title": "DrgX: Thêm thuật toán CP (SegTree, RMQ, DSU, DP...)" },
+      { "command": "drgx.learn", "title": "DrgX: 🎓 Hệ sinh thái học tập — lộ trình, CLB, mentor (Ctrl+Alt+L)" },
+      { "command": "drgx.doctor", "title": "DrgX: Chẩn đoán môi trường hệ thống" },
+      { "command": "drgx.profile", "title": "DrgX: 🎛 Hồ sơ làm việc — tự cài extension (CP/Web/App/AI/STEM)" },
+      { "command": "drgx.menu", "title": "DrgX: Bảng Điều Khiển Nhanh" },
+      { "command": "drgx.home", "title": "DrgX: 🏠 Trang chủ — Dashboard điều khiển" },
+      { "command": "drgx.studio", "title": "DrgX: 🚀 Mở DrgX Studio (Native Tauri v2 App)" },
+      { "command": "drgx.skin", "title": "DrgX: 🎨 Đổi skin giao diện" },
+      { "command": "drgxCopilot.trigger", "title": "DrgX: Gợi ý code ngay (Alt+\\)" },
+      { "command": "drgxCopilot.selfTest", "title": "DrgX: Self test" }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "drgx.run",
+          "when": "resourceExtname == .cpp || resourceExtname == .c || resourceExtname == .py",
+          "group": "navigation@1"
+        },
+        {
+          "command": "drgx.judge",
+          "when": "resourceExtname == .cpp || resourceExtname == .c || resourceExtname == .py",
+          "group": "navigation@2"
+        },
+        {
+          "command": "drgx.studio",
+          "when": "resourceExtname == .cpp || resourceExtname == .c || resourceExtname == .py",
+          "group": "navigation@3"
+        }
+      ]
+    },
+    "keybindings": [
+      { "command": "drgx.run", "key": "f9", "when": "editorTextFocus" },
+      { "command": "drgx.test", "key": "f5", "when": "editorTextFocus && !inDebugMode" },
+      { "command": "drgx.judge", "key": "ctrl+alt+j" },
+      { "command": "drgx.studio", "key": "ctrl+alt+s" },
+      { "command": "drgx.run", "key": "ctrl+alt+r", "when": "editorTextFocus" },
+      { "command": "drgx.test", "key": "ctrl+alt+t", "when": "editorTextFocus" },
+      { "command": "drgx.insertCP", "key": "ctrl+alt+c", "when": "editorTextFocus" },
+      { "command": "drgx.learn", "key": "ctrl+alt+l" },
+      { "command": "drgx.home", "key": "ctrl+alt+h" },
+      { "command": "drgxCopilot.trigger", "key": "alt+\\", "when": "editorTextFocus" }
+    ]
+  }
+}

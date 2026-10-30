@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="ion">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DrgX Studio — Native Tauri v2 Pro IDE (C++17 · CP · OJ · AI Copilot)</title>
+  <link rel="stylesheet" href="studio.css">
+</head>
+<body>
+  <canvas id="matrixCanvas"></canvas>
+
+  <div class="studio-shell" id="studioShell">
+    <!-- ================= TOP BAR ================= -->
+    <header class="studio-topbar">
+      <div class="brand-group">
+        <button class="btn icon-btn sm" id="btnToggleLeft" onclick="togglePanelCollapse('left')" title="Ẩn/Hiện thanh bên trái (Ctrl+B)">☰</button>
+        <div class="brand-logo">D</div>
+        <div class="brand-title">DrgX <em>Studio</em></div>
+        <span class="brand-sub">Tauri v2 Pro · v2.6</span>
+      </div>
+
+      <div class="toolbar-actions">
+        <button class="btn primary" id="btnRunCode" onclick="runCurrentCode()" title="Biên dịch & Chạy file đang mở (F5 / Ctrl+Enter)">
+          ▶ Chạy Code <span class="kbd-hint">F5</span>
+        </button>
+        <button class="btn success" id="btnRunTests" onclick="runBatchTests()" title="Chạy toàn bộ bộ test (Ctrl+Shift+T)">
+          🧪 Chạy Bộ Test
+        </button>
+        <button class="btn warn" id="btnRunStress" onclick="switchDock('stress'); runStressTest()" title="Stress Test đối chiếu solution.cpp vs brute.cpp">
+          ⚔️ Stress Test
+        </button>
+        <button class="btn" id="btnJudgeOj" onclick="submitToOj()" title="Chấm bài trực tiếp trên C++17 Subtask Judge (Ctrl+Shift+J)">
+          🏆 Nộp OJ
+        </button>
+        <button class="btn" onclick="aiAction('bugcheck')" title="Quét lỗi tràn số, I/O, logic & tự động vá code (Ctrl+Shift+B)">
+          🔍 AI Tìm Bug & Vá
+        </button>
+        <button class="btn" onclick="formatCurrentCode()" title="Tự động căn chỉnh & làm đẹp code C++17 (Shift+Alt+F)">
+          ✨ Format
+        </button>
+        <button class="btn" id="btnToggleStatement" onclick="toggleStatementPane()" title="Bật/tắt khung Đề bài OJ">
+          📖 Đề Bài OJ
+        </button>
+        <button class="btn" id="btnTogglePreview" onclick="toggleWebPreviewPane()" title="Bật/tắt Live Web Preview">
+          🌐 Web Live
+        </button>
+      </div>
+
+      <div class="toolbar-actions">
+        <button class="btn sm" id="btnPomodoro" onclick="togglePomodoro()" title="Đồng hồ tập trung / Đếm ngược thi HSG">
+          ⏱️ <span id="pomoDisplay">25:00</span>
+        </button>
+        <button class="btn sm" id="btnSynth" onclick="cycleAmbientSound()" title="Nhạc nền Lo-Fi / Mưa / Brown Noise tạo bằng WebAudio">
+          🎵 <span id="synthLabel">Tắt nhạc</span>
+        </button>
+        <button class="btn sm" id="btnSkin" onclick="cycleStudioSkin()" title="Đổi 5 giao diện DrgX (Ctrl+Shift+K)">
+          🎨 <span id="skinLabel">Ion Dark</span>
+        </button>
+        <button class="btn sm" onclick="openCommandPalette()" title="Bảng lệnh nhanh (Ctrl+K / Ctrl+Shift+P)">
+          ⌘ <span class="kbd-hint">Ctrl+K</span>
+        </button>
+        <button class="btn icon-btn sm" id="btnToggleDock" onclick="togglePanelCollapse('dock')" title="Ẩn/Hiện khung Terminal & Test phía dưới (Ctrl+J)">⬓</button>
+        <button class="btn icon-btn sm" id="btnToggleRight" onclick="togglePanelCollapse('right')" title="Ẩn/Hiện khung AI Copilot bên phải (Ctrl+I)">◨</button>
+      </div>
+    </header>
+
+    <!-- ================= MAIN 3-COLUMN WORKBENCH ================= -->
+    <main class="studio-workbench" id="studioWorkbench">
+      <!-- ---------- LEFT SIDEBAR: FILES / 47 OJ PROBLEMS / 15 CP TEMPLATES ---------- -->
+      <aside class="studio-sidebar" id="studioSidebar">
+        <div class="sidebar-tabs">
+          <button class="tab-btn active" data-side="files" onclick="switchSidebar('files')">📁 Tệp</button>
+          <button class="tab-btn" data-side="problems" onclick="switchSidebar('problems')">🏆 47 Bài OJ</button>
+          <button class="tab-btn" data-side="templates" onclick="switchSidebar('templates')">📚 Template CP</button>
+        </div>
+
+        <!-- Tab 1: Workspace Files -->
+        <div class="sidebar-pane active" id="side-files">
+          <div class="pane-header">
+            <span class="workspace-pill" id="workspacePathLabel" title="Thư mục làm việc hiện tại">Workspace</span>
+            <div style="display:flex;gap:4px">
+              <button class="btn sm" onclick="pickNativeFolder()" title="Chọn thư mục Workspace bằng hộp thoại Windows (Ctrl+O)">📂 Mở</button>
+              <button class="btn sm primary" onclick="promptNewFile()" title="Tạo tệp mới (Ctrl+N)">+ Tệp</button>
+              <button class="btn sm" onclick="saveCurrentFile()" title="Lưu tệp (Ctrl+S)">💾</button>
+              <button class="btn sm" onclick="loadWorkspaceFiles()" title="Làm mới cây thư mục">↻</button>
+            </div>
+          </div>
+          <div class="scroll-list" id="fileTreeList"></div>
+        </div>
+
+        <!-- Tab 2: 47 Polygon-grade OJ Problems -->
+        <div class="sidebar-pane" id="side-problems">
+          <div class="pane-header" style="flex-direction:column;align-items:stretch">
+            <input type="text" class="search-input" id="probSearch" placeholder="🔍 Tìm trong 47 bài tập OJ (tên, mã, chủ đề)..." oninput="renderProblemList()">
+            <div style="display:flex;gap:4px;margin-top:4px">
+              <select class="input-box" id="probDiffFilter" onchange="renderProblemList()">
+                <option value="">Tất cả độ khó (47 bài)</option>
+                <option value="Dễ">🟢 Dễ (Easy)</option>
+                <option value="Trung bình">🟡 Trung bình (Medium)</option>
+                <option value="Khó">🔴 Khó (Hard)</option>
+              </select>
+            </div>
+          </div>
+          <div class="scroll-list" id="problemListContainer"></div>
+        </div>
+
+        <!-- Tab 3: Competitive Programming Templates -->
+        <div class="sidebar-pane" id="side-templates">
+          <div class="pane-header">
+            <input type="text" class="search-input" id="tplSearch" placeholder="🔍 Tìm thuật toán (DSU, SegTree, Dijkstra, LCA...)" oninput="renderTemplateList()">
+          </div>
+          <div class="scroll-list" id="templateListContainer"></div>
+        </div>
+      </aside>
+
+      <!-- Resizer: Left Sidebar <-> Center -->
+      <div class="splitter-v" id="resizerLeft" title="Kéo để thay đổi độ rộng thanh bên trái"></div>
+
+      <!-- ---------- CENTER COLUMN: FILE TABS + PRO CODE EDITOR + BOTTOM DOCK ---------- -->
+      <section class="studio-center" id="studioCenter">
+        <!-- File Tabs Bar -->
+        <div class="file-tabs-bar">
+          <div class="open-tabs-wrap">
+            <div class="open-tabs" id="openFileTabs"></div>
+            <button class="tab-add-btn" onclick="promptNewFile()" title="Tạo file mới (Ctrl+N)">+</button>
+          </div>
+          <div class="editor-meta-controls">
+            <div class="font-zoom-group" title="Cỡ chữ trình soạn thảo (Ctrl+= / Ctrl+-)">
+              <button class="zoom-btn" onclick="adjustEditorFontSize(-1)">A-</button>
+              <span id="fontSizeLabel">13.5px</span>
+              <button class="zoom-btn" onclick="adjustEditorFontSize(1)">A+</button>
+            </div>
+            <button class="btn sm" onclick="toggleFindBar()" title="Tìm kiếm & Thay thế trong code (Ctrl+F)">🔍 Tìm</button>
+            <select class="input-box" id="editorLangSelect" style="width:auto;padding:3px 8px" onchange="onLangSelectChange()">
+              <option value="cpp">C++17 (GCC 15.2)</option>
+              <option value="python">Python 3</option>
+              <option value="javascript">JavaScript (Node)</option>
+              <option value="html">HTML5 Live</option>
+            </select>
+            <span class="badge info" id="cursorPosBadge">Ln 1, Col 1</span>
+            <span class="badge easy" id="saveStateBadge">Đã lưu</span>
+          </div>
+        </div>
+
+        <!-- Split Area: OJ Problem Statement (optional) + Pro Code Editor + Web Preview (optional) -->
+        <div class="editor-split-area" id="editorSplitArea">
+          <!-- OJ Problem Statement Pane -->
+          <div class="statement-panel" id="statementPanel">
+            <div class="pane-header">
+              <strong id="activeProblemTitle" style="color:var(--accent)">Chưa chọn bài OJ</strong>
+              <div style="display:flex;gap:4px">
+                <button class="btn sm" onclick="loadProblemSamplesIntoRunner()" title="Nạp các test ví dụ của đề vào Bộ Test">📥 Nạp Test Mẫu</button>
+                <button class="btn sm primary" onclick="submitToOj()" title="Chấm bài theo Subtask">🏆 Chấm Bài</button>
+                <button class="btn sm" onclick="toggleStatementPane()">✕</button>
+              </div>
+            </div>
+            <div class="statement-body" id="statementBody">
+              <p>Chọn một bài trong tab <b>🏆 47 Bài OJ</b> ở cột trái để xem đề bài đầy đủ, bảng điểm Subtask và nộp bài chấm trực tiếp.</p>
+            </div>
+          </div>
+
+          <!-- Pro Code Editor with 60fps Syntax Highlighting, Active Line, Ghost Text & IntelliSense -->
+          <div class="code-editor-wrap" id="codeEditorWrap">
+            <!-- Floating Find & Replace Bar (Ctrl+F) -->
+            <div class="find-replace-bar" id="findReplaceBar">
+              <input type="text" class="search-input" id="findInput" placeholder="Tìm kiếm (Enter)..." onkeydown="if(event.key==='Enter')findNextInEditor()">
+              <input type="text" class="search-input" id="replaceInput" placeholder="Thay thế bằng..." onkeydown="if(event.key==='Enter')replaceInEditor(false)">
+              <button class="btn sm" onclick="findNextInEditor()">Tìm tiếp</button>
+              <button class="btn sm" onclick="replaceInEditor(false)">Thay</button>
+              <button class="btn sm" onclick="replaceInEditor(true)">Thay tất cả</button>
+              <button class="btn sm" onclick="toggleFindBar(false)">✕</button>
+            </div>
+
+            <!-- Line Numbers Gutter -->
+            <div class="line-numbers" id="lineNumbers">1</div>
+
+            <!-- Layered Code Canvas -->
+            <div class="editor-canvas" id="editorCanvas">
+              <div class="active-line-bar" id="activeLineBar"></div>
+              <div class="error-line-bar" id="errorLineBar"></div>
+              <pre class="code-highlight-pre" id="codeHighlightPre" aria-hidden="true"><code id="codeHighlightContent"></code></pre>
+              <textarea id="codeTextarea" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="// Nhập code C++17 / Python / JS tại đây... (Gõ từ khóa hoặc '/' để mở gợi ý thuật toán CP)"></textarea>
+
+              <!-- Floating IntelliSense Autocomplete Popup -->
+              <div class="intellisense-popup" id="intellisensePopup"></div>
+
+              <!-- Floating Copilot Status Pill -->
+              <div class="editor-hud-pill" id="editorHudPill">
+                <span id="ghostStatusText">⚡ AI Copilot &amp; C++17 IntelliSense sẵn sàng · Gõ <code>/</code> để chèn CP</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Web Preview Pane -->
+          <div class="web-preview-panel" id="webPreviewPanel">
+            <div class="pane-header">
+              <strong style="color:var(--accent)">🌐 Live Web Preview</strong>
+              <div style="display:flex;gap:4px">
+                <button class="btn sm" onclick="refreshWebPreview()">↻ Làm mới</button>
+                <button class="btn sm" onclick="toggleWebPreviewPane()">✕</button>
+              </div>
+            </div>
+            <iframe id="webPreviewFrame" style="flex:1;border:none;background:#fff" sandbox="allow-scripts allow-same-origin allow-forms allow-modals"></iframe>
+          </div>
+        </div>
+
+        <!-- Horizontal Resizer: Editor <-> Bottom Dock -->
+        <div class="splitter-h" id="resizerDock" title="Kéo để thay đổi chiều cao khung Thực Thi & Test"></div>
+
+        <!-- Bottom Dock: Run I/O | Batch Test Runner | Stress Tester | Dev & Doctor -->
+        <div class="studio-dock" id="studioDock">
+          <div class="dock-tabs">
+            <button class="tab-btn active" data-dock="io" onclick="switchDock('io')">🖥️ Thực Thi (I/O)</button>
+            <button class="tab-btn" data-dock="tests" onclick="switchDock('tests')">🧪 Bộ Test (<span id="testCountBadge">2</span>)</button>
+            <button class="tab-btn" data-dock="stress" onclick="switchDock('stress')">⚔️ Stress Test (Đối chiếu)</button>
+            <button class="tab-btn" data-dock="devtools" onclick="switchDock('devtools')">🛠️ Dev, Git &amp; Doctor</button>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;padding-right:8px">
+              <span class="badge info" id="execVerdictBadge">Sẵn sàng</span>
+              <span style="font-size:11.5px;color:var(--text-2);font-family:monospace" id="execTimeLabel">0 ms</span>
+            </div>
+          </div>
+
+          <!-- Dock 1: Standard Input / Output / Compiler Diagnostics -->
+          <div class="dock-pane active" id="dock-io">
+            <div class="io-grid">
+              <div class="io-col">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <strong style="font-size:11.5px;color:var(--text-2)">📥 Dữ liệu vào (STDIN)</strong>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn sm" onclick="pasteStdinClipboard()">📋 Dán</button>
+                    <button class="btn sm" onclick="document.getElementById('stdinBox').value=''">Xóa</button>
+                  </div>
+                </div>
+                <textarea class="mono-box" id="stdinBox" placeholder="Nhập dữ liệu đầu vào (stdin)...">15 27</textarea>
+              </div>
+              <div class="io-col">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <strong style="font-size:11.5px;color:var(--text-2)">📤 Kết quả đầu ra (STDOUT / Lỗi Biên Dịch / Subtask Judge)</strong>
+                  <button class="btn sm" onclick="copyOutput()">📋 Sao chép</button>
+                </div>
+                <pre class="mono-box" id="stdoutBox">Bấm "▶ Chạy Code (F5)" để biên dịch và thực thi.</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dock 2: Multi-Test Case Batch Runner -->
+          <div class="dock-pane" id="dock-tests">
+            <div style="display:flex;flex-direction:column;width:100%;height:100%;padding:8px 10px;gap:8px;overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button class="btn sm success" onclick="runBatchTests()">▶ Chạy Tất Cả Test</button>
+                  <button class="btn sm" onclick="addTestCase()">+ Thêm Test</button>
+                  <button class="btn sm" onclick="loadProblemSamplesIntoRunner()">📥 Lấy Test Mẫu Đề OJ</button>
+                </div>
+                <span id="batchSummaryText" style="font-weight:700;color:var(--accent)">Chưa chạy kiểm thử</span>
+              </div>
+              <div id="testCasesContainer" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px"></div>
+            </div>
+          </div>
+
+          <!-- Dock 3: Automated Stress Tester -->
+          <div class="dock-pane" id="dock-stress">
+            <div style="display:flex;flex-direction:column;width:100%;height:100%;padding:8px 10px;gap:8px;overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <button class="btn sm warn" onclick="runStressTest()">⚔️ Bắt Đầu Stress Test</button>
+                  <label style="font-size:11.5px;color:var(--text-1)">Số test sinh:
+                    <input type="number" id="stressIterInput" class="input-box" value="15" min="1" max="200" style="width:64px;display:inline-block">
+                  </label>
+                  <label style="font-size:11.5px;color:var(--text-1)">Time limit (ms):
+                    <input type="number" id="stressTlInput" class="input-box" value="1500" min="300" max="5000" style="width:76px;display:inline-block">
+                  </label>
+                  <button class="btn sm" onclick="openFileInEditor('brute.cpp')">Mở brute.cpp</button>
+                  <button class="btn sm" onclick="openFileInEditor('gen.py')">Mở gen.py</button>
+                </div>
+                <span id="stressStatusBadge" class="badge info">So sánh file đang mở vs brute.cpp bằng gen.py</span>
+              </div>
+              <pre class="mono-box" id="stressOutputBox">Stress Test tự động biên dịch code chính và brute.cpp, dùng gen.py sinh test ngẫu nhiên liên tục để bắt phản ví dụ (WA/TLE/RE).</pre>
+            </div>
+          </div>
+
+          <!-- Dock 4: DevTools, Toolchain Doctor, Git & Anti-Cheat -->
+          <div class="dock-pane" id="dock-devtools">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;height:100%;padding:8px 10px;overflow:hidden">
+              <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden">
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <button class="btn sm primary" onclick="runStudioDoctor()">🩺 Kiểm Tra Toolchain (Doctor)</button>
+                  <button class="btn sm" onclick="runGitStatus()">🌿 Git Status &amp; Log</button>
+                  <button class="btn sm" onclick="runAntiCheatSelfCheck()">🛡️ Quét Đạo Văn (Winnowing)</button>
+                </div>
+                <pre class="mono-box" id="devDoctorBox">Bấm "Kiểm Tra Toolchain" để xác minh g++, Python, Node, Git, DrgX CLI và OJ Server.</pre>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <strong style="font-size:11.5px;color:var(--text-2)">🔧 Chuyển đổi nhanh (JSON / Base64):</strong>
+                  <button class="btn sm" onclick="devUtilAction('json')">Format JSON</button>
+                  <button class="btn sm" onclick="devUtilAction('b64enc')">Base64 Mã hóa</button>
+                  <button class="btn sm" onclick="devUtilAction('b64dec')">Base64 Giải mã</button>
+                </div>
+                <textarea class="mono-box" id="devUtilBox" placeholder="Dán JSON hoặc chuỗi cần chuyển đổi vào đây...">{ "drgx": "studio", "engine": "rust-tauri-v2", "bugs": 0 }</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resizer: Center <-> Right AI Copilot -->
+      <div class="splitter-v" id="resizerRight" title="Kéo để thay đổi độ rộng khung AI Copilot"></div>
+
+      <!-- ---------- RIGHT SIDEBAR: DRGX AI COPILOT & VIBE STUDIO ---------- -->
+      <aside class="studio-right" id="studioRight">
+        <div class="right-tabs">
+          <button class="tab-btn active" data-right="copilot" onclick="switchRight('copilot')">🤖 AI Copilot &amp; Tutor</button>
+          <button class="tab-btn" data-right="vibe" onclick="switchRight('vibe')">🎧 Vibe &amp; Thi Đấu</button>
+        </div>
+
+        <!-- Right Pane 1: AI Copilot -->
+        <div class="right-pane active" id="right-copilot">
+          <div class="ai-quick-grid">
+            <button class="btn sm" onclick="aiAction('bugcheck')">🔍 Tìm Bug &amp; Tự Vá</button>
+            <button class="btn sm" onclick="aiAction('explain')">📊 Giải Thích &amp; O(n)</button>
+            <button class="btn sm" onclick="aiAction('optimize')">⚡ Tối Ưu Hóa C++</button>
+            <button class="btn sm" onclick="aiAction('gentest')">🎲 Sinh 6 Test Hiểm</button>
+            <button class="btn sm" onclick="aiAction('hint', 1)">💡 Gợi Ý Tầng 1–3</button>
+            <button class="btn sm" onclick="aiAction('solution')">🏅 Xem Code Mẫu OJ</button>
+          </div>
+
+          <div class="ai-feed" id="aiFeed">
+            <div class="ai-card">
+              <h4>⚡ DrgX AI Copilot &amp; Pro Editor v2.6</h4>
+              <p>Tích hợp <b>C++17 Syntax Highlighting 60fps</b>, <b>IntelliSense Autocomplete</b> và <b>Inline Ghost Text</b> ngay trong nhân Rust Tauri v2.</p>
+              <p style="margin-top:6px;font-size:11.5px;color:var(--text-2)">
+                • Gõ <code>vec</code>, <code>pri</code>, <code>seg</code>, <code>dsu</code>, <code>dij</code> hoặc <code>/</code> để mở popup gợi ý.<br>
+                • Bấm <code>Tab</code> khi có chữ mờ để chèn nhanh gợi ý AI.<br>
+                • Bấm <b>Tìm Bug &amp; Tự Vá</b> để phát hiện tràn số <code>int</code> và vá 1 chạm.
+              </p>
+            </div>
+          </div>
+
+          <div class="ai-input-row">
+            <input type="text" class="search-input" id="aiChatInput" placeholder="Hỏi AI Socratic Tutor về bài toán hoặc thuật toán..." onkeydown="if(event.key==='Enter')sendAiChat()">
+            <button class="btn primary sm" onclick="sendAiChat()">Gửi</button>
+          </div>
+        </div>
+
+        <!-- Right Pane 2: Vibe & Focus Studio -->
+        <div class="right-pane" id="right-vibe">
+          <div class="scroll-list" style="padding:12px;display:flex;flex-direction:column;gap:12px">
+            <div class="ai-card">
+              <h4>⏱️ Đồng Hồ Tập Trung &amp; Giả Lập Phòng Thi</h4>
+              <div style="font-size:28px;font-weight:900;font-family:monospace;color:var(--accent);margin:8px 0" id="vibeTimerBig">25:00</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn sm primary" onclick="togglePomodoro()">⏯ Bật / Tạm dừng</button>
+                <button class="btn sm" onclick="setPomodoroMinutes(25)">25p Pomodoro</button>
+                <button class="btn sm" onclick="setPomodoroMinutes(5)">5p Nghỉ</button>
+                <button class="btn sm warn" onclick="setPomodoroMinutes(180)">180p Thi HSG</button>
+              </div>
+            </div>
+
+            <div class="ai-card">
+              <h4>🎵 Âm Thanh Tập Trung (WebAudio Procedural Synth)</h4>
+              <p style="font-size:11.5px;color:var(--text-2);margin-bottom:8px">Tạo âm thanh trực tiếp bằng bộ tổng hợp DSP, không cần mạng hay file MP3 ngoài:</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <button class="btn sm" onclick="setAmbientMode('off')">🔇 Tắt âm nền</button>
+                <button class="btn sm" onclick="setAmbientMode('rain')">🌧️ Mưa Đêm Dịu</button>
+                <button class="btn sm" onclick="setAmbientMode('brown')">🌊 Brown Noise Sâu</button>
+                <button class="btn sm" onclick="setAmbientMode('pad')">🎹 Cyber Synth Pad</button>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;cursor:pointer">
+                <input type="checkbox" id="mechKeyToggle"> Bật âm phản hồi phím cơ nhẹ khi gõ code
+              </label>
+            </div>
+
+            <div class="ai-card">
+              <h4>🎨 Giao Diện &amp; Hiệu Ứng (5 DrgX Skins)</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+                <button class="btn sm" onclick="applyStudioSkin('ion')">🌙 Ion Dark</button>
+                <button class="btn sm" onclick="applyStudioSkin('dawn')">☀️ Dawn Light</button>
+                <button class="btn sm" onclick="applyStudioSkin('nebula')">🌌 Nebula Purple</button>
+                <button class="btn sm" onclick="applyStudioSkin('tokyo')">🌃 Tokyo Night</button>
+                <button class="btn sm" onclick="applyStudioSkin('matrix')">🟢 Matrix Cyber</button>
+                <button class="btn sm" onclick="toggleMatrixRainEffect()">✨ Mưa Ma Trận</button>
+              </div>
+            </div>
+
+            <div class="ai-card">
+              <h4>📈 Thống Kê Phiên Luyện Tập</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;font-size:12px">
+                <div>Số lần chạy code: <b id="statRuns" style="color:var(--accent)">0</b></div>
+                <div>Số bài nộp OJ: <b id="statSubmits" style="color:var(--success)">0</b></div>
+                <div>Số test đã chạy: <b id="statTestsRun" style="color:var(--accent)">0</b></div>
+                <div>Phím đã gõ: <b id="statKeystrokes" style="color:var(--text-0)">0</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- ================= BOTTOM STATUS BAR ================= -->
+    <footer class="studio-statusbar">
+      <div class="status-group">
+        <span><i class="dot-online"></i><strong id="statusEngineText">DrgX Studio Native Tauri v2 Ready</strong></span>
+        <span id="statusCompilerText">GCC 15.2.0 (C++17)</span>
+        <span id="statusOjText">OJ Judge: 47 bài tập sẵn sàng</span>
+      </div>
+      <div class="status-group">
+        <span>Phím tắt: <b>F5</b> Chạy · <b>Ctrl+Space / /</b> Gợi ý CP · <b>Ctrl+F</b> Tìm · <b>Ctrl+K</b> Bảng lệnh</span>
+        <span id="statusClock">--:--</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ================= COMMAND PALETTE MODAL (Ctrl+K / Ctrl+Shift+P) ================= -->
+  <div class="cmd-modal" id="cmdModal" onclick="if(event.target===this)closeCommandPalette()">
+    <div class="cmd-box">
+      <div style="padding:12px;border-bottom:1px solid var(--border)">
+        <input type="text" class="search-input" id="cmdInput" placeholder="Nhập lệnh DrgX Studio (chạy code, nộp bài, chèn thuật toán, đổi skin...)" oninput="renderCommandList()">
+      </div>
+      <div class="cmd-list" id="cmdList"></div>
+    </div>
+  </div>
+
+  <!-- ================= NEW FILE MODAL (Ctrl+N) ================= -->
+  <div class="cmd-modal" id="newFileModal" onclick="if(event.target===this)closeNewFileModal()">
+    <div class="cmd-box" style="max-width:480px">
+      <div class="pane-header" style="padding:12px 16px">
+        <strong style="font-size:13.5px;color:var(--text-0)">✨ Tạo Tệp Mã Nguồn Mới</strong>
+        <button class="btn sm" onclick="closeNewFileModal()">✕</button>
+      </div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="display:block;font-size:11.5px;color:var(--text-2);margin-bottom:5px">Tên tệp mới (.cpp, .py, .js, .html):</label>
+          <input type="text" class="search-input" id="newFileNameInput" value="bai1.cpp" placeholder="Ví dụ: bai1.cpp, solve.py, index.html" onkeydown="if(event.key==='Enter')confirmCreateNewFile()">
+        </div>
+        <div>
+          <label style="display:block;font-size:11.5px;color:var(--text-2);margin-bottom:6px">Chọn mẫu khởi tạo nhanh:</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <button class="btn sm" onclick="selectNewFilePreset('bai1.cpp', 'cp')">🟦 C++17 Chuẩn Thi Đấu</button>
+            <button class="btn sm" onclick="selectNewFilePreset('brute.cpp', 'brute')">⚔️ C++17 Brute-Force</button>
+            <button class="btn sm" onclick="selectNewFilePreset('solve.py', 'py')">🐍 Python 3 CP</button>
+            <button class="btn sm" onclick="selectNewFilePreset('app.html', 'html')">🌐 HTML5 Live Web</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+          <button class="btn" onclick="closeNewFileModal()">Hủy</button>
+          <button class="btn primary" onclick="confirmCreateNewFile()">Tạo &amp; Mở Ngay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="studioToast"></div>
+
+  <script src="studio.js"></script>
+</body>
+</html>

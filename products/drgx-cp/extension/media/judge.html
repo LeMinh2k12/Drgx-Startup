@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="{{csp}}">
+<link rel="stylesheet" href="{{css}}">
+<title>DrgX Judge</title>
+</head>
+<body data-phase="idle">
+<div class="aurora" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"><img src="{{logo}}" alt="DrgX"></span>
+    <span class="brand-copy">
+      <span class="brand-title">DrgX <em>Judge</em></span>
+      <span class="brand-sub" id="subtitle">Bảng chấm bài</span>
+    </span>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="actions">
+    <button class="btn ghost" id="btnCopy" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+      Sao chép
+    </button>
+    <button class="btn ghost" id="btnLog" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"></path></svg>
+      Output
+    </button>
+    <button class="btn primary" id="btnRerun" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg>
+      Chấm lại
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="hero-main">
+      <div class="ring" id="ring">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-progress" id="ringProgress" cx="50" cy="50" r="42"></circle>
+        </svg>
+        <div class="ring-copy">
+          <span class="ring-value" id="ringValue">—</span>
+          <span class="ring-label" id="ringLabel">sẵn sàng</span>
+        </div>
+      </div>
+      <div class="verdict">
+        <span class="eyebrow" id="verdictEyebrow">Local judge</span>
+        <h1 id="verdictTitle">Chưa có lần chấm nào</h1>
+        <p id="verdictDesc">Mở một file C++ (.cpp) hoặc Python (.py) rồi nhấn F9 để chấm toàn bộ testcase trong thư mục <code>tests/</code>.</p>
+        <div class="progress" id="progress" hidden>
+          <span class="progress-track"><span class="progress-fill" id="progressFill"></span></span>
+          <span class="progress-text" id="progressText"></span>
+        </div>
+        <div class="verdict-tags" id="verdictTags"></div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">Test đạt</span>
+        <strong class="stat-value" id="statAc">—</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Thời gian chạy</span>
+        <strong class="stat-value" id="statTime">—</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Biên dịch</span>
+        <strong class="stat-value" id="statCompile">—</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Chế độ</span>
+        <strong class="stat-value" id="statMode">Local</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="compile" id="compileCard" hidden>
+    <div class="compile-head">
+      <span class="compile-icon">!</span>
+      <span>
+        <strong>Biên dịch thất bại</strong>
+        <span class="compile-sub">Sửa lỗi bên dưới rồi chấm lại bằng F9.</span>
+      </span>
+    </div>
+    <pre id="compileMessage"></pre>
+  </section>
+
+  <section class="empty" id="emptyCard">
+    <div class="empty-art" aria-hidden="true">
+      <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"></circle><circle cx="32" cy="32" r="9"></circle><path d="M32 4v10M32 50v10M4 32h10M50 32h10"></path></svg>
+    </div>
+    <h2 id="emptyTitle">Sẵn sàng chấm bài</h2>
+    <p id="emptyDesc">Nhấn <kbd>F9</kbd> trong editor để chạy judge cục bộ. Kết quả từng testcase, diff output và lỗi biên dịch sẽ xuất hiện tại đây.</p>
+    <button class="btn primary" id="btnEmptyRun" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
+      Chấm ngay
+    </button>
+  </section>
+
+  <section class="results" id="results" hidden>
+    <div class="toolbar">
+      <div class="tabs" id="tabs" role="tablist">
+        <button class="tab active" data-filter="all" type="button">Tất cả <b id="tabAll">0</b></button>
+        <button class="tab" data-filter="ac" type="button">Đạt <b id="tabAc">0</b></button>
+        <button class="tab" data-filter="fail" type="button">Chưa đạt <b id="tabFail">0</b></button>
+      </div>
+      <span class="toolbar-hint" id="toolbarHint">Bấm vào một test để xem diff</span>
+    </div>
+    <div class="test-list" id="testList"></div>
+    <div class="no-match" id="noMatch" hidden>Không có test nào trong mục này.</div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span>DrgX CP Studio · Judge UI</span>
+  <span class="foot-keys"><kbd>F9</kbd> chấm lại · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> trong bảng này</span>
+</footer>
+
+<script src="{{js}}"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+{
+  "name": "drgx-dev",
+  "displayName": "DrgX Dev — AI Copilot & Project Studio",
+  "description": "Trợ lý AI lập trình, tự sinh test, review code, 5 skin DrgX qua DrgX Neural AI Bridge hoặc API key riêng.",
+  "version": "1.0.0",
+  "publisher": "drgx",
+  "icon": "media/drgx-dev.png",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other", "Themes"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "drgxDev.askAi", "title": "DrgX Dev: Hỏi AI về đoạn code đang chọn (Ctrl+Alt+A)" },
+      { "command": "drgxDev.generateTests", "title": "DrgX Dev: AI sinh bộ testcase mẫu (Ctrl+Alt+T)" },
+      { "command": "drgxDev.reviewCode", "title": "DrgX Dev: AI review & gợi ý tối ưu (Ctrl+Alt+R)" },
+      { "command": "drgxDev.triggerCopilot", "title": "DrgX Dev: Kích hoạt Copilot gợi ý code (Alt+\\)" },
+      { "command": "drgxDev.skin", "title": "DrgX Dev: 🎨 Đổi skin giao diện (5 skin DrgX)" },
+      { "command": "drgxDev.learn", "title": "DrgX Dev: 🎓 Mở Hệ sinh thái học tập (Learn Hub)" },
+      { "command": "drgxDev.intro", "title": "DrgX Dev: 🎬 Phát lại Video Intro khởi động" },
+      { "command": "drgxDev.home", "title": "DrgX Dev: Mở trang chủ" }
+    ],
+    "keybindings": [
+      { "command": "drgxDev.askAi", "key": "ctrl+alt+a", "when": "editorTextFocus" },
+      { "command": "drgxDev.reviewCode", "key": "ctrl+alt+r", "when": "editorTextFocus" },
+      { "command": "drgxDev.generateTests", "key": "ctrl+alt+t", "when": "editorTextFocus" },
+      { "command": "drgxDev.triggerCopilot", "key": "alt+\\", "when": "editorTextFocus" },
+      { "command": "drgxDev.learn", "key": "ctrl+alt+l" },
+      { "command": "drgxDev.home", "key": "ctrl+alt+h" }
+    ],
+    "themes": [
+      {
+        "label": "DrgX Ion",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-ion.json"
+      },
+      {
+        "label": "DrgX Nebula",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-nebula.json"
+      },
+      {
+        "label": "DrgX Tokyo",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-tokyo.json"
+      },
+      {
+        "label": "DrgX Matrix",
+        "uiTheme": "vs-dark",
+        "path": "./themes/drgx-matrix.json"
+      },
+      {
+        "label": "DrgX Dawn",
+        "uiTheme": "vs",
+        "path": "./themes/drgx-dawn.json"
+      }
+    ],
+    "configuration": {
+      "title": "DrgX Dev",
+      "properties": {
+        "drgxDev.bridgeUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:45290",
+          "description": "URL của DrgX Neural AI Bridge cục bộ."
+        },
+        "drgxDev.model": {
+          "type": "string",
+          "default": "drgx/nemotron-3.5-lightning-free",
+          "enum": [
+            "drgx/nemotron-3.5-lightning-free",
+            "drgx/deepseek-v4.1-flash-free",
+            "drgx/glm-5.3-flash-free",
+            "drgx/beam-free"
+          ],
+          "description": "Model AI mặc định (DrgX Neural Engine)."
+        },
+        "drgxDev.apiProvider": {
+          "type": "string",
+          "default": "auto",
+          "enum": ["auto", "openai", "gemini", "deepseek", "claude"],
+          "description": "Nhà cung cấp AI tùy chọn khi dùng API Key riêng (BYOK)."
+        },
+        "drgxDev.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key tùy chọn (OpenAI / Gemini / DeepSeek / Claude). Để trống để dùng DrgX Neural AI miễn phí."
+        },
+        "drgxDev.inlineCopilot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Bật/tắt gợi ý code trực tiếp (Ghost-Text Inline Copilot)."
+        }
+      }
+    }
+  }
+}

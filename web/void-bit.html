@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="obsidian">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Void-bit OJ — Online Judge chạy Local (47 bài, Subtask, Anti-cheat) | Đi kèm DrgX</title>
+<meta name="description" content="Void-bit OJ: Hệ thống chấm bài Online Judge chạy cục bộ (server C++ 3,8 MB, chấm theo subtask, đo RAM PSAPI, anti-cheat Winnowing) kèm 12 trang web học tập tĩnh và 5 Skin Chuyên nghiệp.">
+<meta name="robots" content="index, follow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://drgx-web.netlify.app/void-bit.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="DrgX IDE">
+<meta property="og:url" content="https://drgx-web.netlify.app/void-bit.html">
+<meta property="og:title" content="Void-bit OJ — Vừa chấm bài local theo Subtask, vừa học thuật toán">
+<meta property="og:description" content="Kho 47 bài tập, server C++ 3,8 MB chấm AC/WA/TLE/RE/CE, đo độ tương đồng mã nguồn Winnowing (chép đổi tên biến: 100%) và 12 trang web học tập.">
+<meta property="og:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Void-bit OJ — Online Judge chạy Local đi kèm DrgX IDE">
+<meta name="twitter:description" content="Kho 47 bài, chấm subtask C++ &amp; Python đạt 12/12 AC, anti-cheat Winnowing, chạy bằng 1 lệnh.">
+<meta name="twitter:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<meta name="theme-color" content="#08090d">
+<link rel="icon" type="image/png" href="assets/logo-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="assets/site.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Void-bit OJ (DrgX Local Online Judge)",
+  "operatingSystem": "Windows 10, Windows 11",
+  "applicationCategory": "EducationalApplication",
+  "description": "Online Judge chạy local viết bằng C++ (chấm theo subtask, đo bộ nhớ PSAPI, kiểm tra đạo văn Winnowing) kèm 12 trang web học tập tĩnh.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "VND"
+  }
+}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+
+<!-- ═══ Top Announcement Bar ═══ -->
+<div class="top-announce" role="region" aria-label="Thông báo phát hành">
+  <span class="ta-badge"><span class="ta-pulse" aria-hidden="true"></span> VOID-BIT OJ v2.0</span>
+  <span>Server C++ 3,8 MB chấm theo Subtask · <b>47 bài tập chuẩn thi HSG</b> · Tích hợp <b>5 Skin Chuyên nghiệp</b> &amp; <b>Winnowing Anti-Cheat</b></span>
+  <a href="judge-demo.html">Trải nghiệm Phòng Lab Ảo →</a>
+</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <picture>
+        <source srcset="assets/logo-64.webp" type="image/webp">
+        <img src="assets/logo-64.png" alt="Logo DrgX IDE" width="32" height="32" decoding="async">
+      </picture>
+      <span>DrgX <b>IDE</b></span>
+      <span class="brand-ver">v2.0</span>
+    </a>
+    <nav class="nav-links" aria-label="Điều hướng chính">
+      <a href="index.html">Trang chủ</a>
+      <a href="features.html">Tính năng</a>
+      <a href="ecosystem/index.html">Hệ sinh thái</a>
+      <a href="void-bit.html" class="active" aria-current="page">Void-bit OJ</a>
+      <a href="download.html">Tải về</a>
+      <a href="about.html">Về dự án</a>
+    </nav>
+    <div class="nav-right">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="judge-demo.html">🧪 Phòng Lab Ảo</a>
+      <a class="btn btn-grad btn-sm" href="#chay">Chạy Void-bit ↓</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Mở menu điều hướng">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="mobile-drawer" role="region" aria-label="Menu di động">
+    <nav class="mobile-nav-list" aria-label="Điều hướng di động">
+      <a href="index.html"><span>Trang chủ</span><span>→</span></a>
+      <a href="features.html"><span>Tính năng</span><span>→</span></a>
+      <a href="ecosystem/index.html"><span>Hệ sinh thái học tập</span><span>→</span></a>
+      <a href="void-bit.html" class="active" aria-current="page"><span>Void-bit OJ (47 bài)</span><span>→</span></a>
+      <a href="download.html"><span>Tải về &amp; Cài đặt</span><span>→</span></a>
+      <a href="about.html"><span>Về dự án &amp; Giấy phép</span><span>→</span></a>
+    </nav>
+    <div class="mobile-skin-bar">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">5 Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-grad btn-sm" href="download.html">Cài ngay ↓</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main-content">
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero" id="top" aria-labelledby="vb-heading">
+    <div>
+      <span class="hero-badge"><span class="dot" aria-hidden="true"></span> Đã kiểm chứng end-to-end trên máy · 68/68 Health Gate PASS</span>
+      <h1 id="vb-heading">Void-bit OJ.<br><span class="grad">Vừa chấm bài, vừa học.</span></h1>
+      <p class="sub">Ứng dụng đi kèm bộ DrgX gồm <b>hai nửa bổ trợ</b>: một <b>Online Judge chạy local</b> (server C++ 3,8 MB, 47 bài tập chấm theo subtask, anti-cheat Winnowing, stress test) và <b>Thư viện 42 bài giảng chuyên sâu (8 chuyên đề VNOI Wiki) + 12 trang học tập tĩnh</b>. Hoàn toàn không cần Internet để học lý thuyết, làm Quiz và chấm bài.</p>
+      <div class="hero-cta">
+        <a class="btn btn-grad" href="#baigiang">📖 Khám phá 42 Bài giảng ↓</a>
+        <a class="btn btn-ghost" href="#chay">⚡ Chạy Void-bit ngay ↓</a>
+        <a class="btn btn-ghost" href="judge-demo.html">⚖️ Thử Stress Test &amp; Winnowing</a>
+      </div>
+      <p class="hero-note">Mọi số liệu dưới đây được đo trực tiếp ngày 23/10/2026; mục nào chỉ nằm trong tài liệu kỹ thuật của server đều được ghi chú rõ "theo docs server".</p>
+      <div class="hero-stat-row" role="list" aria-label="Số liệu thực nghiệm Void-bit OJ">
+        <div class="hstat" role="listitem"><div class="v">47</div><div class="k">bài tập OJ chấm Subtask</div></div>
+        <div class="hstat" role="listitem"><div class="v">42</div><div class="k">bài giảng (8 chuyên đề)</div></div>
+        <div class="hstat" role="listitem"><div class="v">12/12</div><div class="k">probe AC · C++/Py</div></div>
+        <div class="hstat" role="listitem"><div class="v">100%</div><div class="k">similarity bài chép đổi tên biến</div></div>
+      </div>
+    </div>
+
+    <figure class="hero-fig" style="margin:0">
+      <div class="codebox"><button class="copy-btn" type="button">Sao chép</button><pre><span class="cmt"># Cách 1: Chạy qua trình điều phối trung tâm DrgX v2.0</span>
+<span class="cmd">.\drgx.cmd oj</span>
+
+<span class="cmt"># Cách 2: Gọi trực tiếp launcher Void-bit</span>
+<span class="cmd">products\void-bit\run-oj.cmd</span>
+
+<span class="cmt"># → Web học tập:   http://127.0.0.1:8000</span>
+<span class="cmt"># → OJ chấm local: http://127.0.0.1:8080</span></pre></div>
+      <figcaption style="margin-top:12px;font-size:12.5px;color:var(--faint)">Một lệnh duy nhất khởi chạy cả hai cổng: Web học tập (Node, cổng 8000) và OJ Server (C++, cổng 8080).</figcaption>
+    </figure>
+  </section>
+
+  <!-- ═══ 01. Chạy như thế nào ═══ -->
+  <section class="content-section" id="chay" style="padding-top:40px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Nhận vào máy — 01 · Khởi chạy</div>
+      <h2>Chạy một lệnh, <span class="grad">không cần cài đặt phức tạp.</span></h2>
+      <p class="lead">Void-bit nằm sẵn tại thư mục <code>products\void-bit</code> trong bộ DrgX. Launcher tự động khởi chạy OJ server (nếu cổng 8080 đang chạy sẵn thì <b>tự tái sử dụng</b>), bật web học tập ở cổng 8000 và mở trình duyệt.</p>
+    </div>
+    <div class="codebox reveal"><button class="copy-btn" type="button">Sao chép</button><pre><span class="cmt">## Mở PowerShell tại thư mục gốc của DrgX</span>
+<span class="cmd">.\drgx.cmd oj</span>                      <span class="cmt"># Hoặc: products\void-bit\run-oj.cmd</span>
+
+<span class="cmt">## Hoặc khởi chạy riêng từng dịch vụ khi cần debug:</span>
+<span class="cmd">products\void-bit\OJ\oj_server.exe --port 8080 --static static --problems problems</span>
+<span class="cmd">node products\void-bit\serve.js</span>    <span class="cmt"># web học tập :8000</span></pre></div>
+    <p class="hero-note reveal" style="margin-top:14px">Lưu ý kỹ thuật: <code>oj_server.exe</code> dùng tham số cờ tường minh <span class="mono">--port / --static / --problems</span> (tài liệu README cũ ghi tham số theo vị trí đã được cập nhật lại chính xác).</p>
+  </section>
+
+  <!-- ═══ 02. OJ chấm local ═══ -->
+  <section class="content-section" id="judge" style="padding-top:40px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Nhận vào máy — 02 · OJ Local Engine</div>
+      <h2>Chấm trên máy thật — <span class="grad">đo từng mili-giây, từng KB bộ nhớ.</span></h2>
+      <p class="lead">Judge biên dịch và thực thi mã nguồn ngay trên máy, trả về chi tiết <b>từng testcase</b>: thời gian chạy (<span class="mono">runtime_ms</span>), bộ nhớ đỉnh (<span class="mono">memory_kb</span> đo qua Windows PSAPI) và điểm số theo từng subtask.</p>
+    </div>
+    <div class="metric-grid reveal">
+      <div class="metric"><div class="v">12/12</div><div class="k">Probe AC — C++17</div><div class="note">Bài <code>ds_stack_009</code>: 12 test / 3 subtask (20+30+50 điểm). Tổng thời gian gồm compile: 5,6 s; thời gian chạy thuần 670 ms.</div></div>
+      <div class="metric"><div class="v">12/12</div><div class="k">Probe AC — Python 3</div><div class="note">Đo trên cùng bài và cùng server: 2,0 s toàn tuyến; thời gian chạy thuần 1,61 s (áp dụng hệ số TL x3).</div></div>
+      <div class="metric"><div class="v">0/12</div><div class="k">Bắt bài nộp rỗng</div><div class="note">Nộp <code>int main(){return 0;}</code> → trả về WA cả 12/12 test kèm chi tiết input/expected/output.</div></div>
+      <div class="metric"><div class="v">8000+8080</div><div class="k">Hai cổng độc lập</div><div class="note">Cổng 8000: Web học tập tĩnh (Node). Cổng 8080: Giao diện "Local OJ — Codeforces Modern" gọi trực tiếp <code>/api/judge</code>.</div></div>
+    </div>
+    <div class="feat-list reveal" style="margin-top:26px">
+      <div class="feat-item"><span class="fx">✓</span><span><b>Chấm điểm chuẩn Subtask thi HSG</b> <span class="m">— bài toán chia 3 subtask (20 / 30 / 50 điểm); học sinh chỉ nhận điểm của một subtask khi vượt qua toàn bộ test thuộc subtask đó.</span></span></div>
+      <div class="feat-item"><span class="fx">✓</span><span><b>Đầy đủ 5 trạng thái AC / WA / TLE / RE / CE</b> <span class="m">— trả về kèm trường <code>compile_error</code> chi tiết để học sinh sửa lỗi cú pháp ngay trên giao diện web.</span></span></div>
+      <div class="feat-item"><span class="fx">✓</span><span><b>REST API &amp; SSE Stream mở</b> <span class="m">— hỗ trợ <code>GET /api/problems</code>, <code>POST /api/judge</code>, <code>/api/judge/stream</code> (Server-Sent Events) và <code>POST /api/reload</code>.</span></span></div>
+    </div>
+  </section>
+
+  <!-- ═══ 03. Ngôn ngữ ═══ -->
+  <section class="content-section" id="ngonngu" style="padding-top:40px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Nhận vào máy — 03 · Đa ngôn ngữ</div>
+      <h2>Hỗ trợ đa ngôn ngữ — <span class="grad">công bằng về giới hạn thời gian.</span></h2>
+      <p class="lead">Do đặc thù thông dịch của Python chậm hơn C++, Void-bit OJ cấp hệ số nhân thời gian riêng cho từng ngôn ngữ (Python x3, Java x2 theo tài liệu server) để học sinh dùng Python không bị TLE bất công.</p>
+    </div>
+    <div class="table-wrap reveal">
+      <table class="data">
+        <thead><tr><th>Ngôn ngữ</th><th>Lệnh biên dịch / thực thi (theo docs server)</th><th>Trạng thái kiểm chứng trên máy thử nghiệm</th></tr></thead>
+        <tbody>
+          <tr><td>C++17</td><td><span class="mono">g++ -O2</span></td><td><b>Đã đo thật (23/10/2026)</b> — AC 12/12 test, tổng thời gian chạy thuần 670 ms</td></tr>
+          <tr><td>Python 3</td><td><span class="mono">python -u</span> (hệ số Time Limit ×3)</td><td><b>Đã đo thật (23/10/2026)</b> — AC 12/12 test, tổng thời gian chạy thuần 1,61 s</td></tr>
+          <tr><td>C11</td><td><span class="mono">gcc -O2</span></td><td>Có trong mã nguồn &amp; docs server — máy đo chưa chạy probe riêng</td></tr>
+          <tr><td>Java 22</td><td><span class="mono">javac</span> + <span class="mono">java</span> (hệ số Time Limit ×2)</td><td>Có trong mã nguồn &amp; docs server — máy đo chưa cài JDK nên chưa chạy test</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══ 04. Anti-cheat + Stress ═══ -->
+  <section class="content-section" id="gianlan" style="padding-top:40px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Nhận vào máy — 04 · Tính minh bạch kỹ thuật</div>
+      <h2>Anti-cheat Winnowing — <span class="grad">đo lường cụ thể, không phóng đại.</span></h2>
+      <p class="lead">Thay vì tuyên bố chung chung "chống sao chép 100%", Void-bit cung cấp thuật toán lấy dấu vân tay mã nguồn <b>Winnowing</b> chạy thật qua API, trả về tỷ lệ tương đồng để giáo viên xem xét quyết định.</p>
+    </div>
+    <div class="metric-grid reveal">
+      <div class="metric"><div class="v">100%</div><div class="k">Similarity bài chép đổi tên biến</div><div class="note">Engine Winnowing thật: bài C++/Python bị đổi toàn bộ tên biến, tên hàm và chú thích vẫn đạt similarity 100% (<code>flagged=true</code>, ngưỡng 80%); hai lời giải khác thuật toán chỉ 15,8% (<code>flagged=false</code>). Tái kiểm chứng: <code>python scripts/verify_winnowing.py</code>.</div></div>
+      <div class="metric"><div class="v">K=25 · W=15</div><div class="k">Tham số Winnowing</div><div class="note">Kích thước k-gram và cửa sổ trượt chuẩn — gọi qua <code>/api/anti-cheat/compare</code> hoặc quét toàn bộ kho nộp bài với <code>/api/anti-cheat/scan</code>.</div></div>
+      <div class="metric"><div class="v">3 đầu vào</div><div class="k">Engine Stress Test</div><div class="note">Nhận <code>{generator, brute_force, solution}</code> qua endpoint <code>/api/stress-test</code> để tự động tìm test làm sai.</div></div>
+      <div class="metric"><div class="v">21 + 26</div><div class="k">Cấu trúc kho 47 bài</div><div class="note">Gồm 21 bài chuyên đề trọng tâm và 26 bài luyện tập mở rộng phân bậc theo chủ đề trong thư mục <code>problems/</code>.</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ 05. Thư viện 42 Bài giảng Thuật toán & C++17 (8 Chuyên đề VNOI Wiki) ═══ -->
+  <section class="content-section" id="baigiang" style="padding-top:40px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Nhận vào máy — 05 · Thư viện 42 Bài giảng VNOI-Wiki Style</div>
+      <h2>8 chuyên đề — <span class="grad">42 bài giảng chuyên sâu &amp; 12 sổ tay Cheat-sheet.</span></h2>
+      <p class="lead">Toàn bộ kho học liệu của Void-bit (nằm trong <code>products/void-bit/Lesson/index.html</code> &amp; <code>js/lessons-data.js</code> dung lượng 151 KB) được biên soạn theo chuẩn VNOI Wiki: có phân tích độ phức tạp Toán học, code mẫu C++17 chuẩn thi HSG, bộ câu hỏi <b>Active Recall Quiz</b> và liên kết trực tiếp tới <b>47 bài tập chấm Subtask</b>. Bấm vào bất kỳ bài giảng nào dưới đây để đọc thử ngay hoặc mở trực tiếp trên cổng <code>:8000</code>.</p>
+    </div>
+
+    <!-- Bộ lọc 8 chuyên đề + Tìm kiếm nhanh -->
+    <div class="reveal" style="margin-bottom:20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div id="vbCatTabs" role="tablist" aria-label="Lọc theo 8 chuyên đề thuật toán" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input type="search" id="vbLessonSearch" placeholder="🔍 Tìm trong 42 bài giảng (VD: dp, segment, dijkstra, kmp)..." aria-label="Tìm kiếm bài giảng Void-bit" style="padding:9px 14px;border-radius:999px;border:1px solid var(--border-strong);background:var(--card);color:var(--text);font-size:13px;min-width:260px;outline:none">
+          <a class="btn btn-grad btn-sm" href="http://127.0.0.1:8000/Lesson/index.html" target="_blank" rel="noopener">🚀 Mở Thư viện Bài giảng (:8000) ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Khung đọc thử + Danh sách 42 bài giảng -->
+    <div class="reveal" style="display:grid;grid-template-columns:1.05fr 1.25fr;gap:20px;align-items:start" id="vbExplorerLayout">
+      <!-- Cột trái: Danh mục 42 bài học -->
+      <div style="border:1px solid var(--border-strong);border-radius:20px;background:var(--card);padding:18px;max-height:620px;overflow-y:auto" id="vbLessonListWrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+          <strong style="font-size:13.5px;color:var(--text)" id="vbListCountLabel">Danh mục 42 Bài giảng (8 Chuyên đề)</strong>
+          <span style="font-size:11.5px;color:var(--muted);font-family:'JetBrains Mono',monospace">js/lessons-data.js · 151 KB</span>
+        </div>
+        <div id="vbLessonList" style="display:grid;gap:7px"></div>
+      </div>
+
+      <!-- Cột phải: Trình đọc thử trực tiếp (Live Lesson Preview) -->
+      <div style="border:1px solid var(--border-strong);border-radius:20px;background:var(--card);padding:22px;position:sticky;top:86px" id="vbLessonReader">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <span id="vbReaderCatBadge" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--accent) 16%, transparent);color:var(--accent)">🧠 Kĩ thuật thiết kế giải thuật</span>
+          <span id="vbReaderDiffBadge" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--ok) 16%, transparent);color:var(--ok)">Độ khó: Dễ · O(log N)</span>
+        </div>
+        <h3 id="vbReaderTitle" style="font-size:21px;font-weight:800;margin:6px 0 10px;color:var(--text)">1. Tìm kiếm nhị phân (Binary Search)</h3>
+        <p id="vbReaderDesc" style="font-size:13.8px;color:var(--muted);line-height:1.65;margin-bottom:14px"></p>
+        <div style="margin-bottom:14px">
+          <div style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:6px">📌 Các chủ đề &amp; Kỹ thuật cốt lõi trong bài giảng:</div>
+          <div id="vbReaderBullets" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+        </div>
+        <div class="codebox" style="margin-bottom:16px">
+          <button class="copy-btn" type="button">Sao chép</button>
+          <pre id="vbReaderCode" style="max-height:240px;overflow-y:auto;font-size:12.5px"></pre>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:12px;border-top:1px solid var(--border)">
+          <a id="vbReaderOpenLessonBtn" class="btn btn-grad btn-sm" href="http://127.0.0.1:8000/Lesson/index.html?cat=paradigms&amp;id=binary-search" target="_blank" rel="noopener">📖 Đọc toàn bộ Bài giảng + Làm Quiz (:8000) ↗</a>
+          <a id="vbReaderOpenCourseBtn" class="btn btn-ghost btn-sm" href="http://127.0.0.1:8000/courses.html" target="_blank" rel="noopener">📚 Mở trang Khóa học (:8000)</a>
+          <a id="vbReaderOpenOjBtn" class="btn btn-ghost btn-sm" href="http://127.0.0.1:8000/oj-new.html" target="_blank" rel="noopener">⚔️ Luyện bài tập OJ</a>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @media (max-width: 960px) {
+        #vbExplorerLayout { grid-template-columns: 1fr !important; }
+        #vbLessonReader { position: static !important; }
+      }
+      .vb-cat-pill {
+        border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--text) 3%, transparent);
+        color: var(--muted);
+        padding: 7px 13px;
+        border-radius: 999px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .18s ease;
+      }
+      .vb-cat-pill:hover, .vb-cat-pill.active {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 16%, transparent);
+        color: var(--text);
+      }
+      .vb-les-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--text) 2%, transparent);
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+        color: var(--text);
+        transition: all .16s ease;
+      }
+      .vb-les-item:hover, .vb-les-item.active {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+      }
+    </style>
+  </section>
+
+  <!-- ═══ 06. Web học tập 12 trang & Sổ tay Cheat-sheet ═══ -->
+  <section class="content-section" id="hoctap" style="padding-top:40px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Nhận vào máy — 06 · Hệ sinh thái Web học tập (:8000)</div>
+      <h2>12 trang học tập tĩnh &amp; 12 Sổ tay Cheat-sheet — <span class="grad">chạy ngay trên cổng 8000.</span></h2>
+      <p class="lead">Bên cạnh thư viện 42 bài giảng tại <code>Lesson/index.html</code>, hệ thống web học tập của Void-bit còn cung cấp 12 trang chuyên biệt: <b>courses</b> (8 chuyên đề + 6 sổ tay), <b>docs</b> (12 Cheat-sheet C++17), <b>oj-new</b>, <b>hsg</b>, <b>contests</b>, <b>contest</b>, <b>stresstest</b>, <b>submissions</b>, <b>leaderboard</b>, <b>users</b>, <b>forum</b>, <b>chat</b> — phục vụ qua <code>serve.js</code>.</p>
+    </div>
+    <div class="feat-list reveal">
+      <div class="feat-item"><span class="fx">✓</span><span><b>Tích hợp kép trên <code>courses.html</code> &amp; <code>docs.html</code></b> <span class="m">— hiển thị trọn vẹn <b>8 chuyên đề · 42 bài giảng chuyên sâu</b> song song với <b>6 khóa sổ tay cấp tốc (12 ghi chú Cheat-sheet)</b>, tự động lưu tiến độ học tập vào <code>localStorage</code>.</span></span></div>
+      <div class="feat-item"><span class="fx">✓</span><span><b>Hỗ trợ Progressive Web App (PWA)</b> <span class="m">— đi kèm <code>manifest.json</code>, Service Worker <code>sw.js</code> và bộ icon chuẩn 192/512px để cài ra màn hình chính.</span></span></div>
+      <div class="feat-item"><span class="fx">✓</span><span><b>Kiến trúc Chấm Kép (DrgX Hybrid Judge)</b> <span class="m">— giao diện chấm bài cục bộ chuẩn xác nằm ở cổng <code>:8080</code> (đã kiểm chứng AC 12/12 trên máy); đồng bộ liền mạch với trang học liệu tương tác ở cổng <code>:8000</code>.</span></span></div>
+    </div>
+  </section>
+
+  <!-- ═══ Final CTA ═══ -->
+  <section class="final-cta">
+    <div class="reveal">
+      <h2>Một lệnh — mở trọn <span class="grad">Void-bit OJ &amp; Học liệu.</span></h2>
+      <p>Kho 47 bài tập · chấm theo subtask · C++ &amp; Python đã đo AC 12/12 · kiểm tra trùng lặp mã nguồn Winnowing · 12 trang web học tập.</p>
+      <div class="hero-cta">
+        <a class="btn btn-grad" href="download.html">Tải về &amp; Chạy thử ngay ↓</a>
+        <a class="btn btn-ghost" href="features.html">Xem tính năng DrgX IDE</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <picture>
+            <source srcset="assets/logo-64.webp" type="image/webp">
+            <img src="assets/logo-64.png" alt="Logo DrgX" width="28" height="28" loading="lazy" decoding="async">
+          </picture>
+          DrgX <b style="color:var(--accent)">&nbsp;IDE</b>
+        </div>
+        <p class="foot-about">Môi trường lập trình local-first tích hợp AI Agent &amp; Judge dành cho học sinh Việt Nam — đi kèm Void-bit OJ và hệ sinh thái học tập.</p>
+        <div class="foot-domains" aria-label="Cổng dịch vụ chuẩn">
+                    <span class="foot-domain-tag">localhost:8080 (OJ)</span>
+          <span class="foot-domain-tag">localhost:8000 (Learn)</span>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Void-bit OJ</h4>
+        <a href="#chay">Cách chạy 1 lệnh</a>
+        <a href="#judge">OJ chấm local (:8080)</a>
+        <a href="#ngonngu">Đa ngôn ngữ &amp; Hệ số TL</a>
+        <a href="#gianlan">Anti-cheat Winnowing</a>
+        <a href="#baigiang">42 Bài giảng VNOI Wiki</a>
+        <a href="#hoctap">12 trang web học tập</a>
+      </div>
+      <div class="foot-col">
+        <h4>Hệ sinh thái DrgX</h4>
+        <a href="features.html#judge">DrgX Judge (F9)</a>
+        <a href="features.html#themes-studio">5 Skin Chuyên nghiệp</a>
+        <a href="features.html#exam-server">DrgX Exam Server</a>
+        <a href="ecosystem/index.html">Lộ trình 12 tuần</a>
+        <a href="download.html#specs">Bảng thông số đo thật</a>
+      </div>
+      <div class="foot-col">
+        <h4>Pháp lý &amp; Dự án</h4>
+        <a href="about.html">Về nhóm DrgX — Phú Thọ</a>
+        <button class="foot-link" type="button" data-modal-open="modalPrivacy">Chính sách quyền riêng tư</button>
+        <button class="foot-link" type="button" data-modal-open="modalNotice">Giấy phép &amp; Ghi công (MIT)</button>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nhóm DrgX — Phú Thọ. Void-bit OJ thuộc Hệ sinh thái Lập trình Local-First DrgX.</span>
+      <span class="mono">Số liệu đo thực nghiệm 24/10/2026 · 68/68 PASS · 5 Skins Chuyên nghiệp</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Modal Chính sách quyền riêng tư -->
+<div class="modal-backdrop" id="modalPrivacy" role="dialog" aria-modal="true" aria-labelledby="modalPrivacyTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalPrivacyTitle">Chính sách quyền riêng tư — DrgX IDE (PRIVACY.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Void-bit OJ Server (cổng 8080) chấm bài hoàn toàn trên máy cục bộ của bạn, không gửi mã nguồn hay kết quả chấm ra Internet.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Giấy phép -->
+<div class="modal-backdrop" id="modalNotice" role="dialog" aria-modal="true" aria-labelledby="modalNoticeTitle" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalNoticeTitle">Giấy phép &amp; Ghi công (NOTICE.md)</h3>
+      <button class="modal-close" type="button" data-modal-close aria-label="Đóng cửa sổ">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Void-bit OJ và bộ công cụ DrgX tuân thủ giấy phép mã nguồn mở MIT đối với các thành phần nền tảng và minh bạch hóa toàn bộ nguồn gốc bài tập.</p>
+    </div>
+  </div>
+</div>
+
+<script src="assets/site.js"></script>
+<script>
+(function(){
+  var VB_CATS = [
+    { id: 'all',          label: 'Tất cả (42)',              icon: '📚' },
+    { id: 'paradigms',    label: 'Thiết kế giải thuật (10)', icon: '🧠' },
+    { id: 'linear-ds',    label: 'CTDL Tuyến tính (4)',      icon: '📏' },
+    { id: 'nonlinear-ds', label: 'CTDL Phi tuyến (3)',       icon: '🌳' },
+    { id: 'advanced-ds',  label: 'CTDL Nâng cao (7)',        icon: '⚡' },
+    { id: 'graph-algos',  label: 'Thuật toán Đồ thị (8)',    icon: '🕸️' },
+    { id: 'math',         label: 'Toán học & Số học (5)',    icon: '➗' },
+    { id: 'string',       label: 'Xử lý Xâu (3)',            icon: '🔤' },
+    { id: 'geometry',     label: 'Hình học tính toán (2)',   icon: '📐' }
+  ];
+
+  var VB_LESSONS = [
+    // 1. paradigms (10)
+    { cat: 'paradigms', id: 'binary-search', title: 'Tìm kiếm nhị phân (Binary Search)', diff: 'Dễ', comp: 'O(log N)', topics: ['Chặt nhị phân trên mảng', 'Binary Search on Answer', 'lower_bound / upper_bound', 'Chống tràn mid = l + (r-l)/2'], desc: 'Kỹ thuật chia đôi không gian tìm kiếm có tính đơn điệu (Monotonicity), giảm độ phức tạp từ O(N) xuống O(log N) cho cả bài toán tra cứu lẫn tối ưu hóa kết quả Min-Max.', code: 'long long lo = 1, hi = 1e18, ans = hi;\nwhile (lo <= hi) {\n    long long mid = lo + (hi - lo) / 2;\n    if (check(mid)) { ans = mid; hi = mid - 1; }\n    else lo = mid + 1;\n}' },
+    { cat: 'paradigms', id: 'two-pointers', title: 'Two Pointers & Sliding Window', diff: 'Dễ', comp: 'O(N)', topics: ['Hai con trỏ cùng chiều', 'Hai con trỏ ngược chiều', 'Cửa sổ trượt (Sliding Window)', 'Monotonic Deque'], desc: 'Tận dụng tính đơn điệu của đoạn [L, R] để dịch chuyển hai biên không lùi lại, giải quyết các bài toán tìm đoạn con ngắn nhất/dài nhất trong thời gian tuyến tính O(N).', code: 'int l = 0;\nlong long sum = 0, best = 0;\nfor (int r = 0; r < n; ++r) {\n    sum += a[r];\n    while (sum > S) sum -= a[l++];\n    best = max(best, (long long)(r - l + 1));\n}' },
+    { cat: 'paradigms', id: 'dp-intro', title: 'Quy hoạch động (DP) — Tổng quan', diff: 'Trung bình', comp: 'O(N·W)', topics: ['Cấu trúc con tối ưu', 'Memoization vs Tabulation', 'Balo 0/1 (Knapsack)', 'Dãy con tăng dài nhất (LIS)'], desc: 'Phương pháp lưu trữ lời giải các bài toán con chồng lấp để tránh tính lại. Bao gồm quy trình 4 bước: Định nghĩa trạng thái, Công thức truy hồi, Trường hợp cơ sở và Thứ tự duyệt.', code: 'vector<long long> dp(W + 1, 0);\nfor (int i = 0; i < n; ++i)\n    for (int w = W; w >= weight[i]; --w)\n        dp[w] = max(dp[w], dp[w - weight[i]] + val[i]);' },
+    { cat: 'paradigms', id: 'bitmask-dp', title: 'DP trạng thái (Bitmask DP)', diff: 'Khó', comp: 'O(N²·2^N)', topics: ['Biểu diễn tập hợp bằng bit', 'Bài toán Người du lịch (TSP)', 'Duyệt tập con (Submask)', 'SOS DP'], desc: 'Mã hóa trạng thái đã thăm của N ≤ 20 phần tử thành số nguyên mask ∈ [0, 2^N - 1], hạ độ phức tạp từ O(N!) xuống O(N² · 2^N).', code: 'for (int mask = 1; mask < (1 << n); ++mask)\n    for (int u = 0; u < n; ++u) if (mask & (1 << u))\n        for (int v = 0; v < n; ++v) if (!(mask & (1 << v)))\n            dp[mask | (1 << v)][v] = min(dp[mask | (1 << v)][v], dp[mask][u] + cost[u][v]);' },
+    { cat: 'paradigms', id: 'digit-dp', title: 'DP chữ số (Digit DP)', diff: 'Khó', comp: 'O(18·S·2)', topics: ['Đếm số trong đoạn [L, R]', 'Cờ ràng buộc tight / is_less', 'Xử lý chữ số 0 đứng đầu', 'Memoization theo vị trí'], desc: 'Đếm số lượng số nguyên trong đoạn [L, R] (lên tới 10^18) thỏa mãn tính chất trên từng chữ số thông qua hàm f(R) - f(L - 1).', code: 'long long dfs(int pos, int sum, bool tight) {\n    if (pos == (int)digits.size()) return sum == target;\n    if (!tight && memo[pos][sum] != -1) return memo[pos][sum];\n    int lim = tight ? digits[pos] : 9;\n    long long res = 0;\n    for (int d = 0; d <= lim; ++d)\n        res += dfs(pos + 1, sum + d, tight && (d == lim));\n    return tight ? res : memo[pos][sum] = res;\n}' },
+    { cat: 'paradigms', id: 'tree-dp', title: 'DP trên cây (Tree DP)', diff: 'Khó', comp: 'O(N)', topics: ['Quy hoạch động từ lá lên gốc', 'Đường kính của cây', 'Tập độc lập cực đại trên cây', 'Rerooting DP (Đổi gốc)'], desc: 'Tổng hợp thông tin từ các cây con v để tính trạng thái tại đỉnh cha u trong quá trình duyệt DFS hậu thứ tự (Post-order).', code: 'void dfs(int u, int p) {\n    dp[u][1] = weight[u];\n    for (int v : adj[u]) if (v != p) {\n        dfs(v, u);\n        dp[u][0] += max(dp[v][0], dp[v][1]);\n        dp[u][1] += dp[v][0];\n    }\n}' },
+    { cat: 'paradigms', id: 'convex-hull-trick', title: 'Convex Hull Trick (CHT)', diff: 'Khó', comp: 'O(N log N)', topics: ['Tối ưu DP dạng y = m·x + b', 'Bao lồi các đường thẳng', 'Monotonic CHT với Deque', 'Li Chao Tree'], desc: 'Tối ưu hóa công thức quy hoạch động dp[i] = min(b[j]·a[i] + c[j]) từ O(N²) xuống O(N) hoặc O(N log N) bằng hình học bao lồi các đường thẳng.', code: 'struct Line { long long m, b; long long eval(long long x) const { return m * x + b; } };\n// Duy trì deque các đường thẳng có hệ số góc đơn điệu giảm' },
+    { cat: 'paradigms', id: 'greedy', title: 'Tham lam (Greedy)', diff: 'Dễ', comp: 'O(N log N)', topics: ['Xếp lịch đoạn thẳng (Activity Selection)', 'Chứng minh bằng Exchange Argument', 'Tham lam với Hàng đợi ưu tiên', 'Huffman Coding'], desc: 'Đưa ra lựa chọn tối ưu cục bộ tại mỗi bước dựa trên tiêu chí sắp xếp chặt chẽ để dẫn tới nghiệm tối ưu toàn cục.', code: 'sort(segs.begin(), segs.end(), [](auto &a, auto &b){ return a.r < b.r; });\nint cnt = 0, last_end = -1e9;\nfor (auto &s : segs) if (s.l >= last_end) { ++cnt; last_end = s.r; }' },
+    { cat: 'paradigms', id: 'divide-conquer', title: 'Chia để trị (Divide & Conquer)', diff: 'Trung bình', comp: 'O(N log N)', topics: ['Merge Sort & Đếm cặp nghịch thế', 'Định lý Master (Master Theorem)', 'Cặp điểm gần nhất', 'D&C Optimization trong DP'], desc: 'Tách bài toán lớn thành các bài toán con độc lập kích thước N/2, giải đệ quy và hợp nhất kết quả trong thời gian tuyến tính.', code: 'void merge_sort(int l, int r) {\n    if (l >= r) return;\n    int mid = l + (r - l) / 2;\n    merge_sort(l, mid); merge_sort(mid + 1, r);\n    // Gộp 2 nửa đã sắp xếp và đếm nghịch thế\n}' },
+    { cat: 'paradigms', id: 'meet-in-middle', title: 'Meet in the Middle', diff: 'Khó', comp: 'O(2^(N/2) log(2^(N/2)))', topics: ['Chia đôi tập N ≤ 40 thành hai nửa 20', 'Sinh tập tổng nửa trái & phải', 'Kết hợp bằng Binary Search / Two Pointers', '4-SUM Problem'], desc: 'Khi N ≈ 40 quá lớn cho vét cạn O(2^40) nhưngN/2 = 20 chỉ có 10^6 trạng thái, ta sinh độc lập 2 nửa rồi ghép nghiệm bằng tìm kiếm nhị phân.', code: '// Sinh tất cả tổng tập con của nửa đầu (L) và nửa sau (R)\nsort(R.begin(), R.end());\nfor (long long x : L) {\n    auto it = upper_bound(R.begin(), R.end(), S - x);\n    if (it != R.begin()) ans = max(ans, x + *prev(it));\n}' },
+
+    // 2. linear-ds (4)
+    { cat: 'linear-ds', id: 'array-vector', title: 'Mảng & Vector', diff: 'Dễ', comp: 'O(1) truy cập', topics: ['Cấp phát động std::vector', 'Mảng cộng dồn 1D/2D (Prefix Sum)', 'Mảng hiệu (Difference Array)', 'Subarray Kadane O(N)'], desc: 'Cấu trúc lưu trữ liên tiếp trong bộ nhớ giúp truy cập ngẫu nhiên O(1) và tối ưu bộ nhớ đệm CPU (Cache locality).', code: 'vector<long long> pref(n + 1, 0);\nfor (int i = 1; i <= n; ++i) pref[i] = pref[i - 1] + a[i];\nauto range_sum = [&](int l, int r) { return pref[r] - pref[l - 1]; };' },
+    { cat: 'linear-ds', id: 'linked-list', title: 'Danh sách liên kết (Linked List)', diff: 'Dễ', comp: 'O(1) chèn/xóa', topics: ['Singly & Doubly Linked List', 'Kỹ thuật Rùa và Thỏ (Floyd Cycle)', 'Mô phỏng bằng mảng tĩnh trong CP', 'LRU Cache'], desc: 'Quản lý các nút liên kết bằng con trỏ hoặc chỉ số mảng, cho phép chèn/xóa phần tử ở vị trí bất kỳ đã biết trong thời gian O(1).', code: '// Phát hiện chu trình Floyd (Tortoise and Hare)\nListNode *slow = head, *fast = head;\nwhile (fast && fast->next) {\n    slow = slow->next; fast = fast->next->next;\n    if (slow == fast) return true;\n}' },
+    { cat: 'linear-ds', id: 'stack', title: 'Ngăn xếp (Stack)', diff: 'Dễ', comp: 'O(N) Monotonic', topics: ['Kiểm tra dãy ngoặc đúng', 'Monotonic Stack (Ngăn xếp đơn điệu)', 'Next Greater Element', 'Hình chữ nhật lớn nhất trong Histogram'], desc: 'Cấu trúc LIFO (Vào sau ra trước) cực mạnh khi kết hợp tính đơn điệu để tìm phần tử lớn hơn/nhỏ hơn gần nhất bên trái và phải của mọi vị trí trong O(N).', code: 'stack<int> st;\nfor (int i = 0; i < n; ++i) {\n    while (!st.empty() && a[st.top()] <= a[i]) st.pop();\n    prev_greater[i] = st.empty() ? -1 : st.top();\n    st.push(i);\n}' },
+    { cat: 'linear-ds', id: 'queue-deque', title: 'Hàng đợi & Deque', diff: 'Dễ', comp: 'O(N) Sliding Min/Max', topics: ['Hàng đợi FIFO std::queue', 'Hàng đợi hai đầu std::deque', 'Tìm Min/Max trên cửa sổ trượt kích thước K', '0-1 BFS'], desc: 'Duy trì Deque đơn điệu để tìm giá trị lớn nhất/nhỏ nhất trong mọi đoạn liên tiếp độ dài K chỉ với O(1) trung bình mỗi bước.', code: 'deque<int> dq;\nfor (int i = 0; i < n; ++i) {\n    if (!dq.empty() && dq.front() <= i - k) dq.pop_front();\n    while (!dq.empty() && a[dq.back()] >= a[i]) dq.pop_back();\n    dq.push_back(i);\n    if (i >= k - 1) ans.push_back(a[dq.front()]);\n}' },
+
+    // 3. nonlinear-ds (3)
+    { cat: 'nonlinear-ds', id: 'tree-bst', title: 'Cây & Cây nhị phân tìm kiếm (BST)', diff: 'Trung bình', comp: 'O(log N)', topics: ['Duyệt Pre-order / In-order / Post-order', 'Tính chất BST (Trái < Gốc < Phải)', 'Cây cân bằng (AVL / Red-Black Tree)', 'Euler Tour trên cây'], desc: 'Tổ chức dữ liệu phân cấp theo quan hệ cha-con, nền tảng của std::set, std::map và các thuật toán truy vấn cây con.', code: 'void inorder(Node* root) {\n    if (!root) return;\n    inorder(root->left);\n    cout << root->val << " ";\n    inorder(root->right);\n}' },
+    { cat: 'nonlinear-ds', id: 'graph-intro', title: 'Đồ thị — Khái niệm & Biểu diễn', diff: 'Trung bình', comp: 'O(V + E) bộ nhớ', topics: ['Đồ thị vô hướng & có hướng', 'Danh sách kề (Adjacency List)', 'Ma trận kề & Danh sách cạnh', 'Bậc vào / Bậc ra'], desc: 'Cách mô hình hóa mạng lưới giao thông, mạng máy tính và quan hệ phụ thuộc bằng tập đỉnh V và tập cạnh E trong C++.', code: 'int n, m;\ncin >> n >> m;\nvector<vector<pair<int,int>>> adj(n + 1);\nfor (int i = 0; i < m; ++i) {\n    int u, v, w; cin >> u >> v >> w;\n    adj[u].push_back({v, w});\n    adj[v].push_back({u, w});\n}' },
+    { cat: 'nonlinear-ds', id: 'hash-table', title: 'Bảng băm (Hash Table)', diff: 'Dễ', comp: 'O(1) trung bình', topics: ['Hàm băm & Xử lý va chạm', 'unordered_map / unordered_set', 'Custom Hash chống Anti-hash test (splitmix64)', 'Đếm tần suất nhanh'], desc: 'Ánh xạ khóa bất kỳ về chỉ số mảng để tra cứu trong O(1), kèm kỹ thuật viết custom_hash chống bị sinh test làm tràn bucket trên Codeforces.', code: 'struct custom_hash {\n    size_t operator()(uint64_t x) const {\n        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();\n        x += FIXED_RANDOM;\n        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;\n        return x ^ (x >> 27);\n    }\n};' },
+
+    // 4. advanced-ds (7)
+    { cat: 'advanced-ds', id: 'dsu', title: 'Disjoint Set Union (DSU / Union-Find)', diff: 'Trung bình', comp: 'O(α(N)) ≈ O(1)', topics: ['Nén đường đi (Path Compression)', 'Gộp theo kích thước/hạng (Union by Size)', 'Kiểm tra tính liên thông động', 'Ứng dụng trong Kruskal MST'], desc: 'Quản lý các tập hợp rời nhau hỗ trợ hai thao tác tìm đại diện find(u) và hợp nhất unite(u, v) trong thời gian gần như hằng số.', code: 'struct DSU {\n    vector<int> p, sz;\n    DSU(int n) : p(n + 1), sz(n + 1, 1) { iota(p.begin(), p.end(), 0); }\n    int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }\n    bool unite(int a, int b) {\n        a = find(a); b = find(b);\n        if (a == b) return false;\n        if (sz[a] < sz[b]) swap(a, b);\n        p[b] = a; sz[a] += sz[b]; return true;\n    }\n};' },
+    { cat: 'advanced-ds', id: 'segment-tree', title: 'Segment Tree (Cây phân đoạn)', diff: 'Khó', comp: 'O(log N) / truy vấn', topics: ['Cập nhật điểm & Truy vấn đoạn', 'Lazy Propagation (Cập nhật đoạn lười)', 'Walk on Segment Tree', 'Merge Sort Tree'], desc: 'Cấu trúc dữ liệu chủ lực trong đề thi HSG Tỉnh và VOI, quản lý thông tin đoạn [L, R] (Tổng, Min, Max, GCD) với độ phức tạp O(log N).', code: 'void update(int id, int l, int r, int pos, long long val) {\n    if (l == r) { seg[id] = val; return; }\n    int mid = (l + r) / 2;\n    if (pos <= mid) update(id * 2, l, mid, pos, val);\n    else update(id * 2 + 1, mid + 1, r, pos, val);\n    seg[id] = max(seg[id * 2], seg[id * 2 + 1]);\n}' },
+    { cat: 'advanced-ds', id: 'fenwick', title: 'Fenwick Tree (BIT)', diff: 'Trung bình', comp: 'O(log N) · Bộ nhớ O(N)', topics: ['Toán tử bit cuối i & -i', 'Cập nhật điểm & Tổng tiền tố', 'Đếm nghịch thế kết hợp nén số', 'Binary Lifting trên BIT'], desc: 'Cây chỉ số nhị phân cài đặt chỉ trong 10 dòng code, hằng số thời gian cực nhỏ và tốn đúng N phần tử bộ nhớ.', code: 'void add(int i, long long delta) {\n    for (; i <= n; i += i & -i) bit[i] += delta;\n}\nlong long query(int i) {\n    long long s = 0;\n    for (; i > 0; i -= i & -i) s += bit[i];\n    return s;\n}' },
+    { cat: 'advanced-ds', id: 'sparse-table', title: 'Sparse Table', diff: 'Trung bình', comp: 'O(1) truy vấn RMQ', topics: ['Tiền xử lý O(N log N)', 'Truy vấn Min/Max/GCD trong O(1)', 'Tính chất lũy đẳng (Idempotent)', 'Ứng dụng trong LCA'], desc: 'Bảng thưa lưu kết quả trên các đoạn có độ dài là lũy thừa của 2, cho phép trả lời truy vấn RMQ (Range Minimum Query) trong đúng O(1).', code: 'int k = __lg(R - L + 1);\nint ans = min(st[k][L], st[k][R - (1 << k) + 1]);' },
+    { cat: 'advanced-ds', id: 'sqrt-decomp', title: 'Chia căn (Sqrt Decomposition)', diff: 'Trung bình', comp: 'O(√N) / truy vấn', topics: ['Chia mảng thành các khối √N', 'Thuật toán Mo (Mo\'s Algorithm)', 'Sắp xếp truy vấn theo Block', 'Chia căn theo trọng số'], desc: 'Chia mảng N phần tử thành √N khối độc lập, giải quyết hiệu quả các bài toán truy vấn đoạn không có tính kết hợp dễ dàng cho Segment Tree.', code: 'int B = max(1, (int)sqrt(n));\nsort(qs.begin(), qs.end(), [&](const Q &a, const Q &b) {\n    if (a.l / B != b.l / B) return a.l / B < b.l / B;\n    return (a.l / B & 1) ? (a.r < b.r) : (a.r > b.r);\n});' },
+    { cat: 'advanced-ds', id: 'set-map', title: 'Set & Map (C++ STL)', diff: 'Dễ', comp: 'O(log N)', topics: ['std::set & std::multiset', 'std::map & Nén tọa độ (Coordinate Compression)', 'lower_bound trên set', 'Kỹ thuật Gộp tập nhỏ vào tập lớn (Small-to-Large)'], desc: 'Cây đỏ-đen tự cân bằng tích hợp sẵn trong C++ STL giúp duy trì tập hợp có thứ tự và tìm phần tử cận trên/cận dưới trong O(log N).', code: 'multiset<long long> ms;\nms.insert(x);\nauto it = ms.lower_bound(target);\nif (it != ms.end()) ms.erase(it); // Chỉ xóa 1 bản sao' },
+    { cat: 'advanced-ds', id: 'priority-queue', title: 'Priority Queue (Hàng đợi ưu tiên)', diff: 'Dễ', comp: 'O(log N) push/pop', topics: ['Max-Heap & Min-Heap', 'Custom Comparator', 'Duy trì K phần tử lớn nhất', 'Hai Heap tìm Trung vị động (Running Median)'], desc: 'Cấu trúc Binary Heap luôn giữ phần tử ưu tiên nhất ở đỉnh top(), là trái tim của thuật toán Dijkstra, Prim và Tham lam nâng cao.', code: '// Min-Heap trong C++17\npriority_queue<long long, vector<long long>, greater<long long>> pq;\npq.push(val);\nlong long smallest = pq.top(); pq.pop();' },
+
+    // 5. graph-algos (8)
+    { cat: 'graph-algos', id: 'bfs-dfs', title: 'BFS & DFS (Duyệt đồ thị)', diff: 'Dễ', comp: 'O(V + E)', topics: ['Tìm đường ngắn nhất không trọng số (BFS)', 'Đếm thành phần liên thông', 'Kiểm tra đồ thị hai phía (Bipartite)', 'Sắp xếp Tô-pô (Topological Sort)'], desc: 'Hai thuật toán nền tảng nhất để khám phá toàn bộ đỉnh và cạnh của đồ thị, truy vết đường đi và phát hiện chu trình.', code: 'queue<int> q;\nq.push(s); dist[s] = 0;\nwhile (!q.empty()) {\n    int u = q.front(); q.pop();\n    for (int v : adj[u]) if (dist[v] == -1) {\n        dist[v] = dist[u] + 1;\n        q.push(v);\n    }\n}' },
+    { cat: 'graph-algos', id: 'dijkstra', title: 'Dijkstra (Đường đi ngắn nhất)', diff: 'Trung bình', comp: 'O((V + E) log V)', topics: ['Đồ thị trọng số không âm', 'Tối ưu bằng Min-Heap priority_queue', 'Dijkstra đa nguồn', 'Đếm số đường đi ngắn nhất'], desc: 'Tìm đường đi ngắn nhất từ một đỉnh nguồn tới mọi đỉnh khác trên đồ thị trọng số dương bằng kỹ thuật nới lỏng cạnh (Relaxation).', code: 'priority_queue<pair<long long,int>, vector<pair<long long,int>>, greater<>> pq;\ndist[s] = 0; pq.push({0, s});\nwhile (!pq.empty()) {\n    auto [d, u] = pq.top(); pq.pop();\n    if (d > dist[u]) continue;\n    for (auto [v, w] : adj[u])\n        if (dist[u] + w < dist[v]) pq.push({dist[v] = dist[u] + w, v});\n}' },
+    { cat: 'graph-algos', id: 'bellman-ford', title: 'Bellman-Ford & SPFA', diff: 'Trung bình', comp: 'O(V · E)', topics: ['Xử lý đồ thị có cạnh trọng số âm', 'Phát hiện chu trình âm (Negative Cycle)', 'Tối ưu bằng hàng đợi SPFA', 'Hệ ràng buộc hiệu (Difference Constraints)'], desc: 'Nới lỏng toàn bộ tập cạnh qua V - 1 vòng lặp để xử lý trọng số âm và phát hiện chu trình âm nếu vòng thứ V vẫn giảm được khoảng cách.', code: 'for (int iter = 1; iter <= n - 1; ++iter)\n    for (auto &e : edges)\n        if (dist[e.u] < INF && dist[e.u] + e.w < dist[e.v])\n            dist[e.v] = dist[e.u] + e.w;' },
+    { cat: 'graph-algos', id: 'floyd-warshall', title: 'Floyd-Warshall (All-Pairs Shortest Path)', diff: 'Trung bình', comp: 'O(V³)', topics: ['Đường đi ngắn nhất giữa mọi cặp đỉnh', 'Thứ tự vòng lặp k -> i -> j', 'Bao đóng bắc cầu (Transitive Closure)', 'Tìm chu trình nhỏ nhất'], desc: 'Quy hoạch động trên đỉnh trung gian k từ 1 đến V chỉ với 3 vòng lặp lồng nhau, lý tưởng cho đồ thị dày có V ≤ 500.', code: 'for (int k = 1; k <= n; ++k)\n    for (int i = 1; i <= n; ++i)\n        for (int j = 1; j <= n; ++j)\n            dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);' },
+    { cat: 'graph-algos', id: 'mst', title: 'MST — Kruskal & Prim', diff: 'Trung bình', comp: 'O(E log E)', topics: ['Cây khung nhỏ nhất (Minimum Spanning Tree)', 'Thuật toán Kruskal + DSU', 'Thuật toán Prim trên đồ thị dày', 'Bài toán Bottleneck Path trên MST'], desc: 'Chọn N - 1 cạnh nối liền toàn bộ N đỉnh sao cho tổng trọng số là nhỏ nhất mà không tạo chu trình.', code: 'sort(edges.begin(), edges.end(), [](auto &a, auto &b){ return a.w < b.w; });\nlong long mst_cost = 0;\nfor (auto &e : edges)\n    if (dsu.unite(e.u, e.v)) mst_cost += e.w;' },
+    { cat: 'graph-algos', id: 'lca', title: 'LCA — Binary Lifting', diff: 'Khó', comp: 'O(log N) / truy vấn', topics: ['Tổ tiên chung gần nhất (Lowest Common Ancestor)', 'Bảng nhảy nhị phân up[u][k]', 'Khoảng cách giữa 2 đỉnh trên cây', 'Cộng đoạn trên đường đi của cây'], desc: 'Tiền xử lý tổ tiên thứ 2^k của mỗi đỉnh trong O(N log N) để tìm LCA và khoảng cách giữa hai đỉnh bất kỳ trên cây trong O(log N).', code: 'int lca(int u, int v) {\n    if (depth[u] < depth[v]) swap(u, v);\n    int diff = depth[u] - depth[v];\n    for (int k = 0; k < LOG; ++k) if ((diff >> k) & 1) u = up[u][k];\n    if (u == v) return u;\n    for (int k = LOG - 1; k >= 0; --k)\n        if (up[u][k] != up[v][k]) { u = up[u][k]; v = up[v][k]; }\n    return up[u][0];\n}' },
+    { cat: 'graph-algos', id: 'scc', title: 'SCC — Tarjan & Kosaraju', diff: 'Khó', comp: 'O(V + E)', topics: ['Thành phần liên thông mạnh (SCC)', 'Thuật toán Tarjan với num[] và low[]', 'Nén đồ thị thành DAG (Condensation Graph)', 'Bài toán 2-SAT'], desc: 'Thu gọn mọi chu trình có hướng thành các siêu đỉnh để biến đồ thị có hướng bất kỳ thành Đồ thị có hướng không chu trình (DAG).', code: 'void dfs(int u) {\n    num[u] = low[u] = ++timer;\n    st.push(u); in_st[u] = true;\n    for (int v : adj[u]) {\n        if (!num[v]) { dfs(v); low[u] = min(low[u], low[v]); }\n        else if (in_st[v]) low[u] = min(low[u], num[v]);\n    }\n}' },
+    { cat: 'graph-algos', id: 'max-flow', title: 'Max Flow — Dinic & Ford-Fulkerson', diff: 'Khó', comp: 'O(V² · E)', topics: ['Luồng cực đại trên mạng (Maximum Flow)', 'Định lý Lát cắt cực tiểu (Min-Cut)', 'Thuật toán Dinic (Level Graph + Blocking Flow)', 'Cặp ghép cực đại trên đồ thị hai phía'], desc: 'Tìm lưu lượng lớn nhất có thể đẩy từ đỉnh nguồn S tới đỉnh đích T trên mạng có giới hạn dung lượng cạnh.', code: '// Dinic: Xây dựng Level Graph bằng BFS và đẩy Blocking Flow bằng DFS có con trỏ ptr[u]' },
+
+    // 6. math (5)
+    { cat: 'math', id: 'gcd-lcm', title: 'GCD & LCM — Ước chung lớn nhất & Bội chung nhỏ nhất', diff: 'Dễ', comp: 'O(log(min(A,B)))', topics: ['Thuật toán Euclid', 'Bổ đề Bézout & Euclid mở rộng', 'Phương trình Diophantine tuyến tính', 'Chống tràn số khi tính LCM'], desc: 'Thuật toán Euclid tìm ước chung lớn nhất trong thời gian logarit và mở rộng để tìm nghiệm nguyên của phương trình a·x + b·y = gcd(a, b).', code: 'long long gcd(long long a, long long b) { return b == 0 ? a : gcd(b, a % b); }\nlong long lcm(long long a, long long b) { return (a / gcd(a, b)) * b; }' },
+    { cat: 'math', id: 'sieve', title: 'Sieve of Eratosthenes & Prime Factorization', diff: 'Trung bình', comp: 'O(N log log N)', topics: ['Sàng nguyên tố Eratosthenes', 'Sàng tuyến tính O(N) với ước nguyên tố nhỏ nhất (SPF)', 'Phân tích thừa số nguyên tố trong O(log N)', 'Sàng trên đoạn [L, R]'], desc: 'Tiền xử lý bảng số nguyên tố và ước nguyên tố nhỏ nhất (SPF) tới 10^7, giúp phân tích mỗi truy vấn số trong O(log N).', code: 'for (int i = 2; i * i <= MAXN; ++i)\n    if (spf[i] == i)\n        for (int j = i * i; j <= MAXN; j += i)\n            if (spf[j] == j) spf[j] = i;' },
+    { cat: 'math', id: 'modular-arithmetic', title: 'Modular Arithmetic & Binary Exponentiation', diff: 'Trung bình', comp: 'O(log B)', topics: ['Đồng dư thức (a + b) % M, (a * b) % M', 'Lũy thừa nhị phân a^b mod M', 'Định lý Fermat nhỏ & Nghịch đảo Modulo', 'Nhân Ấn Độ chống tràn 64-bit'], desc: 'Nền tảng cho mọi bài toán đếm kết quả lớn lấy phần dư theo 10^9 + 7 hoặc 998244353.', code: 'long long binpow(long long a, long long b, long long mod = 1e9 + 7) {\n    long long res = 1; a %= mod;\n    for (; b > 0; b >>= 1) {\n        if (b & 1) res = res * a % mod;\n        a = a * a % mod;\n    }\n    return res;\n}' },
+    { cat: 'math', id: 'combinatorics', title: 'Combinatorics — Tổ hợp & Chỉnh hợp', diff: 'Trung bình', comp: 'O(N) tiền xử lý, O(1) truy vấn', topics: ['Tiền xử lý giai thừa fact[] và inv_fact[]', 'Tổ hợp C(n, k) mod 10^9+7 trong O(1)', 'Bài toán Chia kẹo Euler (Stars and Bars)', 'Nguyên lý Bù trừ (Inclusion-Exclusion)'], desc: 'Tính nhanh tổ hợp chập K của N phần tử với N ≤ 10^6 nhờ tiền xử lý nghịch đảo giai thừa trong thời gian tuyến tính.', code: 'long long C(int n, int k) {\n    if (k < 0 || k > n) return 0;\n    return fact[n] * inv_fact[k] % MOD * inv_fact[n - k] % MOD;\n}' },
+    { cat: 'math', id: 'matrix-exponentiation', title: 'Matrix Exponentiation — Nhân ma trận nâng cao', diff: 'Khó', comp: 'O(K³ log N)', topics: ['Lũy thừa nhanh ma trận chuyển trạng thái', 'Tính số Fibonacci thứ 10^18 trong O(log N)', 'Đếm số đường đi độ dài K trên đồ thị', 'Tối ưu DP tuyến tính bậc K'], desc: 'Biến đổi hệ thức truy hồi tuyến tính thành phép nhân ma trận kích thước K×K, giảm độ phức tạp từ O(N) xuống O(K³ log N) cho N ≤ 10^18.', code: 'Matrix power(Matrix A, long long p) {\n    Matrix res = Matrix::identity(A.n);\n    for (; p > 0; p >>= 1) {\n        if (p & 1) res = res * A;\n        A = A * A;\n    }\n    return res;\n}' },
+
+    // 7. string (3)
+    { cat: 'string', id: 'string-hashing', title: 'String Hashing — Băm chuỗi', diff: 'Trung bình', comp: 'O(1) so sánh xâu con', topics: ['Rolling Hash đa thức (Polynomial Hash)', 'Băm kép (Double Hash) chống va chạm', 'So sánh hai xâu con bất kỳ trong O(1)', 'Tìm xâu đối xứng dài nhất kết hợp Binary Search'], desc: 'Biểu diễn mọi xâu con S[L..R] thành một cặp số nguyên 64-bit để kiểm tra hai xâu con có bằng nhau hay không trong thời gian hằng số O(1).', code: 'long long get_hash(int l, int r) {\n    return (h[r] - h[l - 1] * pw[r - l + 1] % MOD + MOD) % MOD;\n}' },
+    { cat: 'string', id: 'kmp', title: 'KMP Algorithm — Knuth-Morris-Pratt', diff: 'Khó', comp: 'O(|S| + |P|)', topics: ['Mảng tiền tố-hậu tố pi[] (Prefix Function)', 'Tìm mọi vị trí xuất hiện của mẫu P trong S', 'Đếm số lần xuất hiện của mỗi tiền tố', 'Chu kỳ ngắn nhất của xâu'], desc: 'Tìm kiếm xâu mẫu P trong văn bản S với độ phức tạp tuyến tính tuyệt đối O(|S| + |P|) mà không bao giờ phải lùi con trỏ văn bản.', code: 'vector<int> pi(n, 0);\nfor (int i = 1; i < n; ++i) {\n    int j = pi[i - 1];\n    while (j > 0 && s[i] != s[j]) j = pi[j - 1];\n    if (s[i] == s[j]) ++j;\n    pi[i] = j;\n}' },
+    { cat: 'string', id: 'trie', title: 'Trie — Cây tiền tố', diff: 'Trung bình', comp: 'O(|S|) mỗi thao tác', topics: ['Cây tiền tố từ điển a-z', 'Đếm số xâu có cùng tiền tố P', 'Binary Trie (Cây Trie nhị phân)', 'Tìm cặp số có tổng XOR lớn nhất (Max XOR Pair)'], desc: 'Cấu trúc cây lưu trữ tập hợp các xâu hoặc các bit nhị phân, cho phép tìm kiếm tiền tố và giải bài toán Max XOR Subarray trong O(N · 30).', code: 'void insert(const string &s) {\n    int u = 0;\n    for (char c : s) {\n        int k = c - \'a\';\n        if (!nxt[u][k]) nxt[u][k] = ++node_cnt;\n        u = nxt[u][k];\n    }\n    is_end[u] = true;\n}' },
+
+    // 8. geometry (2)
+    { cat: 'geometry', id: 'geo-basics', title: 'Computational Geometry Basics — Vector & Point Operations', diff: 'Trung bình', comp: 'O(1) / O(N)', topics: ['Tích vô hướng (Dot Product) & Tích có hướng (Cross Product)', 'Kiểm tra hướng rẽ CCW (Counter-Clockwise)', 'Giao điểm hai đoạn thẳng', 'Diện tích đa giác bằng công thức Shoelace'], desc: 'Sử dụng số học nguyên với tích có hướng (Cross Product) để kiểm tra vị trí tương đối của điểm, đoạn thẳng và tính diện tích đa giác không sai số dấu phẩy động.', code: 'struct Pt { long long x, y; };\nlong long cross(Pt a, Pt b, Pt c) {\n    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);\n}' },
+    { cat: 'geometry', id: 'convex-hull', title: 'Convex Hull — Bao lồi (Graham Scan / Monotone Chain)', diff: 'Khó', comp: 'O(N log N)', topics: ['Thuật toán Monotone Chain (Andrew)', 'Duy trì chuỗi trên (Upper Hull) & chuỗi dưới (Lower Hull)', 'Chu vi và diện tích bao lồi', 'Kỹ thuật Thước kẹp quay (Rotating Calipers)'], desc: 'Tìm đa giác lồi có diện tích nhỏ nhất bao phủ toàn bộ tập N điểm trên mặt phẳng Oxy trong thời gian O(N log N).', code: 'sort(pts.begin(), pts.end());\n// Xây dựng chuỗi dưới và chuỗi trên bằng điều kiện cross(H[k-2], H[k-1], pts[i]) <= 0' }
+  ];
+
+  var activeCat = 'all';
+  var activeLessonId = 'binary-search';
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function catLabelOf(catId) {
+    for (var i = 0; i < VB_CATS.length; i++) {
+      if (VB_CATS[i].id === catId) return VB_CATS[i].icon + ' ' + VB_CATS[i].label.replace(/\s*\(\d+\)$/, '');
+    }
+    return catId;
+  }
+
+  function selectLesson(lesId) {
+    var les = null;
+    var globalIdx = 1;
+    for (var i = 0; i < VB_LESSONS.length; i++) {
+      if (VB_LESSONS[i].id === lesId) { les = VB_LESSONS[i]; globalIdx = i + 1; break; }
+    }
+    if (!les) return;
+    activeLessonId = les.id;
+
+    var catBadge = document.getElementById('vbReaderCatBadge');
+    var diffBadge = document.getElementById('vbReaderDiffBadge');
+    var titleEl = document.getElementById('vbReaderTitle');
+    var descEl = document.getElementById('vbReaderDesc');
+    var bulletsEl = document.getElementById('vbReaderBullets');
+    var codeEl = document.getElementById('vbReaderCode');
+    var openBtn = document.getElementById('vbReaderOpenLessonBtn');
+
+    if (catBadge) catBadge.textContent = catLabelOf(les.cat);
+    if (diffBadge) diffBadge.textContent = 'Độ khó: ' + les.diff + ' · ' + les.comp;
+    if (titleEl) titleEl.textContent = 'Bài ' + globalIdx + '/42 · ' + les.title;
+    if (descEl) descEl.textContent = les.desc;
+    if (bulletsEl) {
+      bulletsEl.innerHTML = (les.topics || []).map(function(tp) {
+        return '<span style="font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:color-mix(in srgb, var(--text) 4%, transparent);color:var(--text)">✓ ' + esc(tp) + '</span>';
+      }).join('');
+    }
+    if (codeEl) codeEl.textContent = les.code;
+    if (openBtn) {
+      openBtn.href = 'http://127.0.0.1:8000/Lesson/index.html?cat=' + encodeURIComponent(les.cat) + '&id=' + encodeURIComponent(les.id);
+    }
+
+    document.querySelectorAll('.vb-les-item').forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-id') === les.id);
+    });
+  }
+
+  function renderTabs() {
+    var wrap = document.getElementById('vbCatTabs');
+    if (!wrap) return;
+    wrap.innerHTML = VB_CATS.map(function(c) {
+      return '<button type="button" class="vb-cat-pill' + (c.id === activeCat ? ' active' : '') + '" data-cat="' + c.id + '">' +
+        c.icon + ' ' + esc(c.label) + '</button>';
+    }).join('');
+    wrap.querySelectorAll('.vb-cat-pill').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        activeCat = this.getAttribute('data-cat');
+        renderTabs();
+        renderList();
+      });
+    });
+  }
+
+  function renderList() {
+    var listEl = document.getElementById('vbLessonList');
+    var countEl = document.getElementById('vbListCountLabel');
+    var searchInp = document.getElementById('vbLessonSearch');
+    if (!listEl) return;
+    var q = (searchInp && searchInp.value ? searchInp.value : '').trim().toLowerCase();
+
+    var filtered = VB_LESSONS.filter(function(l) {
+      if (activeCat !== 'all' && l.cat !== activeCat) return false;
+      if (!q) return true;
+      return l.title.toLowerCase().indexOf(q) !== -1 ||
+             l.id.toLowerCase().indexOf(q) !== -1 ||
+             l.desc.toLowerCase().indexOf(q) !== -1 ||
+             l.topics.some(function(tp) { return tp.toLowerCase().indexOf(q) !== -1; });
+    });
+
+    if (countEl) {
+      countEl.textContent = 'Đang hiển thị ' + filtered.length + '/42 Bài giảng chuyên sâu';
+    }
+
+    if (!filtered.length) {
+      listEl.innerHTML = '<div style="padding:18px;text-align:center;color:var(--muted);font-size:13px">Không tìm thấy bài giảng phù hợp. Hãy thử từ khóa khác.</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(function(l) {
+      var globalIdx = VB_LESSONS.indexOf(l) + 1;
+      var isAct = l.id === activeLessonId;
+      return '<button type="button" class="vb-les-item' + (isAct ? ' active' : '') + '" data-id="' + l.id + '">' +
+        '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11.5px;font-weight:800;color:var(--accent);min-width:26px">#' + (globalIdx < 10 ? '0' + globalIdx : globalIdx) + '</span>' +
+        '<span style="flex:1;min-width:0">' +
+          '<strong style="display:block;font-size:13.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(l.title) + '</strong>' +
+          '<small style="color:var(--muted);font-size:11.5px">' + esc(catLabelOf(l.cat)) + ' · ' + esc(l.comp) + '</small>' +
+        '</span>' +
+        '<span style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb, var(--text) 7%, transparent);color:var(--muted)">' + esc(l.diff) + '</span>' +
+      '</button>';
+    }).join('');
+
+    listEl.querySelectorAll('.vb-les-item').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        selectLesson(this.getAttribute('data-id'));
+      });
+    });
+
+    if (!filtered.some(function(l) { return l.id === activeLessonId; })) {
+      selectLesson(filtered[0].id);
+    } else {
+      selectLesson(activeLessonId);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    renderTabs();
+    renderList();
+    var searchInp = document.getElementById('vbLessonSearch');
+    if (searchInp) {
+      searchInp.addEventListener('input', renderList);
+    }
+  });
+})();
+</script>
+</body>
+</html>

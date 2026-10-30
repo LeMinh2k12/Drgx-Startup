@@ -1,0 +1,154 @@
+[build]
+  publish = "web"
+  command = "echo 'Static site — no build step'"
+
+# Chặn mọi đường dẫn ngoài thư mục web/ (phòng khi cấu hình dashboard bị đổi nhầm)
+[[redirects]]
+  from = "/presentation/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/app/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/launcher-v2/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/studio/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/extension/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/examples/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/workflows/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/workspace/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/products/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/assets-old/*"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/drgx-ide.exe"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/drgx-studio.exe"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/WebView2Loader.dll"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "*.md"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "*.docx"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "*.pdf"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "*.mp4"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "*.doc"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/drgx.cmd"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/drgx-studio.cmd"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/tauri.ps1"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/app.js"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/app.js.v3"
+  to = "/index.html"
+  status = 404
+  force = true

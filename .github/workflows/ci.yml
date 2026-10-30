@@ -1,0 +1,38 @@
+name: DrgX Ecosystem CI & Health Gate
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  ecosystem-gate:
+    name: Verify All 5 Pillars (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade pip python-docx
+
+      - name: Build Void-bit C++17 OJ Server
+        working-directory: products/void-bit/OJ
+        run: g++ -std=c++17 -O2 -o oj_server.exe oj_server.cpp -lws2_32 -lwinhttp -lpsapi -static
+
+      - name: Run Unified Ecosystem Health Gate
+        run: python -X utf8 scripts/verify_ecosystem.py
+
+      - name: Upload Health Brief Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecosystem-health-brief
+          path: workflows/reports/ecosystem-health-brief.md

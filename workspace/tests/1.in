@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+string s, st;
+
+int main() 
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cin >> s;
+    for (char c : s) 
+    {
+        if (c == '(' || c == '[' || c == '{') st.push_back(c);
+        else 
+        {
+            if (st.empty()) 
+            { 
+                cout << "NO"; 
+                return 0; 
+            }
+            char top = st.back();
+            st.pop_back();
+            if ((c == ')' && top != '(') || (c == ']' && top != '[') || (c == '}' && top != '{')) 
+            {
+                cout << "NO";
+                return 0;
+            }
+        }
+    }
+    if (st.empty()) cout << "YES";
+    else cout << "NO";
+    return 0;
+}

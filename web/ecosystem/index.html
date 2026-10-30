@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="vi" data-skin="obsidian">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hệ sinh thái học tập DrgX — Lộ trình 12 tuần, Khung CLB &amp; 5 Skin Chuyên nghiệp</title>
+<meta name="description" content="Hệ sinh thái học tập DrgX (Bản 2.0): Lộ trình tự học thuật toán 12 tuần (C++/Python), checklist vận hành Câu lạc bộ tin học lưu cục bộ trên máy, 5 Skin Chuyên nghiệp, tài liệu giáo viên và đề tài Showcase.">
+<meta name="robots" content="index, follow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://drgx-web.netlify.app/ecosystem/index.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="DrgX IDE">
+<meta property="og:url" content="https://drgx-web.netlify.app/ecosystem/index.html">
+<meta property="og:title" content="Hệ sinh thái học tập DrgX — Học tin cùng dân Dev (Lộ trình 12 tuần)">
+<meta property="og:description" content="Lộ trình 12 tuần từ cú pháp đến Đồ thị &amp; Quy hoạch động, khung sinh hoạt CLB và 5 Skin Chuyên nghiệp — chạy cục bộ, miễn phí.">
+<meta property="og:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hệ sinh thái học tập DrgX — Lộ trình 12 tuần &amp; Khung CLB">
+<meta name="twitter:description" content="Tự học thuật toán, tổ chức CLB tin học và quản lý bài tập trên lớp cùng DrgX IDE.">
+<meta name="twitter:image" content="https://drgx-web.netlify.app/assets/logo-hd.png">
+
+<meta name="theme-color" content="#08090d">
+<link rel="icon" type="image/png" href="../assets/logo-64.png" onerror="this.href='logo.png'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/site.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "Lộ trình tự học lập trình & giải thuật 12 tuần — DrgX Learn Hub",
+  "description": "Lộ trình 4 chặng từ cú pháp C++/Python, cấu trúc dữ liệu tuyến tính đến Đồ thị & Quy hoạch động kèm bộ khung sinh hoạt Câu lạc bộ tin học.",
+  "provider": {
+    "@type": "Organization",
+    "name": "Nhóm DrgX — Phú Thọ"
+  },
+  "isAccessibleForFree": true,
+  "inLanguage": "vi-VN"
+}
+</script>
+
+<style>
+/* Style bổ trợ chuyên biệt cho Lộ trình 12 tuần & Checklist CLB (kế thừa biến từ site.css + fallback độc lập) */
+.eco-subnav{
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:10px;
+}
+.eco-subnav span.lbl{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:1px;margin-right:4px}
+.hero-card{
+  border:1px solid var(--border-strong);border-radius:24px;padding:24px;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--text) 3.5%, transparent), transparent 45%), var(--card);
+  box-shadow:0 28px 70px var(--shadow);position:relative;overflow:hidden;
+}
+.hc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.hc-head b{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pill{
+  font-family:"JetBrains Mono",monospace;font-size:11px;padding:4px 10px;border-radius:999px;
+  background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok);font-weight:800;
+  border:1px solid color-mix(in srgb, var(--ok) 35%, transparent);
+}
+.meter{height:10px;border-radius:99px;background:color-mix(in srgb, var(--text) 10%, transparent);overflow:hidden;margin:8px 0 6px}
+.meter i{display:block;height:100%;width:0%;border-radius:99px;background:var(--grad);transition:width .35s cubic-bezier(.22,1,.36,1)}
+.meter-row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--faint);margin-bottom:18px}
+.stepline{display:grid;gap:10px}
+.step{
+  display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;
+  background:color-mix(in srgb, var(--text) 3%, transparent);border:1px solid var(--border);
+}
+.step .n{
+  width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:800;
+  background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);
+  border:1px solid color-mix(in srgb, var(--accent) 32%, transparent);flex:none;
+}
+.step b{display:block;font-size:13.5px;color:var(--text);margin-bottom:2px}
+.step span{font-size:12.5px;color:var(--muted)}
+.step.done{
+  border-color:color-mix(in srgb, var(--ok) 38%, transparent);
+  background:color-mix(in srgb, var(--ok) 8%, transparent);
+}
+.step.done .n{
+  background:color-mix(in srgb, var(--ok) 18%, transparent);color:var(--ok);
+  border-color:color-mix(in srgb, var(--ok) 40%, transparent);
+}
+.roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;position:relative}
+.node{
+  border:1px solid var(--border);border-radius:20px;padding:22px 20px;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--text) 3.5%, transparent), transparent 46%), var(--card);
+  position:relative;transition:transform .22s ease, border-color .22s ease;
+}
+.node:hover{transform:translateY(-3px);border-color:color-mix(in srgb, var(--accent) 42%, transparent)}
+.node .lv{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--accent);font-weight:800;text-transform:uppercase}
+.node h3{font-size:18px;font-weight:800;margin:8px 0 4px;color:var(--text)}
+.node .time{font-size:12px;color:var(--ok);font-weight:700;margin-bottom:12px}
+.node ul{list-style:none;display:grid;gap:7px}
+.node li{font-size:13px;color:var(--muted);padding-left:15px;position:relative}
+.node li::before{content:"›";position:absolute;left:0;color:var(--accent);font-weight:800}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.panel{
+  border:1px solid var(--border);border-radius:22px;
+  background:color-mix(in srgb, var(--card) 82%, transparent);padding:26px;
+}
+.panel h3{font-size:20px;font-weight:800;margin-bottom:8px;color:var(--text)}
+.panel p{color:var(--muted);font-size:14px}
+.checklist{display:grid;gap:10px;margin-top:18px}
+.check{
+  display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:13px;
+  border:1px solid var(--border);background:color-mix(in srgb, var(--text) 2.5%, transparent);
+  cursor:pointer;user-select:none;transition:border-color .16s, background .16s;
+}
+.check:hover{border-color:color-mix(in srgb, var(--accent) 45%, transparent);background:color-mix(in srgb, var(--accent) 6%, transparent)}
+.check input{accent-color:var(--accent);margin-top:3px;width:18px;height:18px;flex:none;cursor:pointer}
+.check span{font-size:13.5px;color:var(--text)}
+.check small{display:block;color:var(--muted);font-size:12px;margin-top:3px;font-weight:400}
+.progress-bar-wrap{
+  display:flex;align-items:center;gap:14px;margin-top:22px;padding:16px 20px;
+  border-radius:16px;border:1px solid var(--border);background:color-mix(in srgb, var(--card) 75%, transparent);
+  font-size:13px;color:var(--muted);flex-wrap:wrap;
+}
+.progress-bar-wrap .meter{flex:1;min-width:160px;margin:0}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+  background:var(--card-solid);border:1px solid var(--border-strong);color:var(--text);
+  padding:11px 18px;border-radius:999px;font-size:13px;font-weight:700;
+  opacity:0;pointer-events:none;transition:.25s;z-index:9200;box-shadow:0 16px 44px var(--shadow);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:1040px){
+  .roadmap{grid-template-columns:1fr 1fr}
+  .split{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .roadmap{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+
+<!-- ═══ Top Announcement Bar ═══ -->
+<div class="top-announce" role="region" aria-label="Thông báo phát hành">
+  <span class="ta-badge"><span class="ta-pulse" aria-hidden="true"></span> DRGX LEARN HUB v2.0</span>
+  <span>Lộ trình 12 tuần · Khung sinh hoạt CLB Tin học · Đồng bộ <b>5 Skin Chuyên nghiệp</b></span>
+  <a href="../judge-demo.html">Trải nghiệm Phòng Lab Ảo →</a>
+</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="../index.html">
+      <picture>
+        <source srcset="../assets/logo-64.webp" type="image/webp">
+        <img src="../assets/logo-64.png" onerror="this.src='logo.png'" alt="Logo DrgX IDE" width="32" height="32" decoding="async">
+      </picture>
+      <span>DrgX <b>IDE</b></span>
+      <span class="brand-ver">v2.0</span>
+    </a>
+    <nav class="nav-links" aria-label="Điều hướng chính">
+      <a href="../index.html">Trang chủ</a>
+      <a href="../features.html">Tính năng</a>
+      <a href="index.html" class="active" aria-current="page">Hệ sinh thái</a>
+      <a href="../void-bit.html">Void-bit OJ</a>
+      <a href="../download.html">Tải về</a>
+      <a href="../about.html">Về dự án</a>
+    </nav>
+    <div class="nav-right">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="../judge-demo.html">🧪 Phòng Lab Ảo</a>
+      <a class="btn btn-grad btn-sm" href="../download.html">Tải DrgX ↓</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Mở menu điều hướng">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="mobile-drawer" role="region" aria-label="Menu di động">
+    <nav class="mobile-nav-list" aria-label="Điều hướng di động">
+      <a href="../index.html"><span>Trang chủ</span><span>→</span></a>
+      <a href="../features.html"><span>Tính năng</span><span>→</span></a>
+      <a href="index.html" class="active" aria-current="page"><span>Hệ sinh thái học tập</span><span>→</span></a>
+      <a href="../void-bit.html"><span>Void-bit OJ (47 bài · 42 bài giảng)</span><span>→</span></a>
+      <a href="../download.html"><span>Tải về &amp; Cài đặt</span><span>→</span></a>
+      <a href="../about.html"><span>Về dự án &amp; Giấy phép</span><span>→</span></a>
+    </nav>
+    <div class="mobile-skin-bar">
+      <div class="skin-dots" role="group" aria-label="Chọn skin giao diện">
+        <span class="sd-title">5 Skin</span>
+        <button class="skin-dot active" type="button" data-skin="obsidian" title="Ion / Obsidian Zinc" aria-label="Skin Ion Obsidian Zinc" aria-pressed="true"></button>
+        <button class="skin-dot" type="button" data-skin="nebula" title="Nebula Cyber" aria-label="Skin Nebula Cyber" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="tokyo" title="Tokyo Night" aria-label="Skin Tokyo Night" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="matrix" title="Cyber Matrix" aria-label="Skin Cyber Matrix" aria-pressed="false"></button>
+        <button class="skin-dot" type="button" data-skin="light" title="Dawn / Nordic Clean" aria-label="Skin Dawn Nordic Clean" aria-pressed="false"></button>
+      </div>
+      <a class="btn btn-grad btn-sm" href="../download.html">Cài ngay ↓</a>
+    </div>
+  </div>
+</header>
+
+<main id="main-content" class="wrap">
+
+  <!-- Sub-navigation trong trang Hệ sinh thái -->
+  <nav class="eco-subnav" aria-label="Mục lục trang Hệ sinh thái">
+    <span class="lbl">Mục lục nhanh:</span>
+    <a class="chip" href="#tru-cot">4 Trụ cột</a>
+    <a class="chip" href="#lo-trinh">Lộ trình 12 tuần</a>
+    <a class="chip" href="../void-bit.html#baigiang">📖 42 Bài giảng Void-bit</a>
+    <a class="chip" href="#clb">Checklist CLB</a>
+    <a class="chip" href="#giao-vien">Dành cho Giáo viên</a>
+    <a class="chip" href="#showcase">Đề tài Showcase</a>
+  </nav>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero" id="top" aria-labelledby="eco-heading" style="padding-top:42px">
+    <div>
+      <span class="hero-badge"><span class="dot" aria-hidden="true"></span> Hệ sinh thái học tập DrgX · Bản 2.0 (Offline-ready)</span>
+      <h1 id="eco-heading">Học code.<br><span class="grad">Luyện thi. Làm thật.</span></h1>
+      <p class="sub">Tài liệu học tập tĩnh đi kèm DrgX IDE (mở nhanh bằng <kbd>Ctrl+Alt+L</kbd>): lộ trình 12 tuần, bộ khung vận hành câu lạc bộ tin học và 5 Skin Chuyên nghiệp. <b>Hoàn toàn miễn phí, lưu tiến độ ngay trên máy bạn.</b></p>
+      <div class="hero-cta">
+        <a class="btn btn-grad" href="#lo-trinh">Xem lộ trình 12 tuần ↓</a>
+        <a class="btn btn-ghost" href="../void-bit.html#baigiang">📖 Thư viện 42 Bài giảng Void-bit</a>
+        <a class="btn btn-ghost" href="#clb">Checklist vận hành CLB</a>
+        <a class="btn btn-ghost btn-sm" href="../judge-demo.html">🧪 Phòng Lab Ảo</a>
+      </div>
+      <p class="hero-note">Không cần tài khoản · Không thu thập dữ liệu cá nhân · Tự điều chỉnh nhịp độ theo sức học.</p>
+    </div>
+
+    <aside class="hero-card" aria-label="Tổng quan lộ trình học tập 12 tuần">
+      <div class="hc-head"><b>Lộ trình 12 tuần &amp; Tiến độ CLB</b><span class="pill" id="heroClbBadge">Bản 2.0 · Lưu cục bộ</span></div>
+      <div class="meter" aria-hidden="true"><i id="heroMeterFill" style="width:34%"></i></div>
+      <div class="meter-row"><span>Tiến độ đánh dấu trên máy của bạn</span><span id="heroMeterLabel">0/7 mục CLB</span></div>
+      <div class="stepline">
+        <div class="step done"><span class="n">01</span><div><b>Chặng 1 · Cú pháp &amp; tư duy cơ bản (Tuần 1–3)</b><span>Biến, vòng lặp, hàm, mảng · 10 bài nhập môn</span></div></div>
+        <div class="step done"><span class="n">02</span><div><b>Chặng 2 · Độ phức tạp &amp; CTDL tuyến tính (Tuần 4–6)</b><span>Big-O, sort, tìm kiếm nhị phân, stack, queue, prefix sum · 18 bài</span></div></div>
+        <div class="step"><span class="n">03</span><div><b>Chặng 3 · Đồ thị &amp; Quy hoạch động (Tuần 7–9)</b><span>Đệ quy, quay lui, BFS/DFS, DP cơ bản &amp; Stress test</span></div></div>
+        <div class="step"><span class="n">04</span><div><b>Chặng 4 · Dự án nhỏ &amp; Showcase CLB (Tuần 10–12)</b><span>Làm sản phẩm chạy thật theo sprint 1 tuần &amp; demo sản phẩm</span></div></div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ═══ 4 Trụ cột ═══ -->
+  <section class="content-section" id="tru-cot" style="padding-top:48px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Bốn trụ cột</div>
+      <h2>Không chỉ là nơi gõ code. <span class="grad">Là môi trường trưởng thành.</span></h2>
+      <p class="lead">DrgX kết nối công cụ lập trình với phương pháp tự học: nắm vững bản chất, rèn phản xạ phòng thi và tự tay hoàn thiện sản phẩm nhỏ.</p>
+    </div>
+    <div class="tiles-4 reveal">
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">📚</span>
+        <h3 class="t-name">Lộ trình 12 tuần rõ ràng</h3>
+        <p class="t-desc">Đi từ cú pháp C++/Python đến cấu trúc dữ liệu và giải thuật cốt lõi, chia nhỏ theo từng chặng 3 tuần vừa sức học sinh phổ thông.</p>
+        <div class="tagrow"><span class="tag">Bản 2.0</span><span class="tag">C++ / Python</span></div>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">⚖️</span>
+        <h3 class="t-name">Luyện như thi thật</h3>
+        <p class="t-desc">Chấm đa testcase (<kbd>F9</kbd>), Stress Tester tìm phản ví dụ, đồng hồ đếm giờ, 42 bài giảng VNOI Wiki và Void-bit OJ 47 bài ngay trên máy — không mất tập trung.</p>
+        <div class="tagrow"><span class="tag">AC / WA / TLE</span><span class="tag">Offline</span></div>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">🛠️</span>
+        <h3 class="t-name">Làm sản phẩm thực tế</h3>
+        <p class="t-desc">Gợi ý 4 đề tài mẫu để học sinh áp dụng kiến thức vào làm công cụ CLI, web nhỏ hoặc trò chơi tương tác chạy được thật.</p>
+        <div class="tagrow"><span class="tag">Project-based</span></div>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">🤝</span>
+        <h3 class="t-name">Khung CLB tự vận hành</h3>
+        <p class="t-desc">Quy trình mẫu để nhóm học sinh và anh chị khóa trên tự duy trì sinh hoạt 2 tuần/vòng mà không cần hạ tầng máy chủ phức tạp.</p>
+        <div class="tagrow"><span class="tag">Cộng đồng</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══ Lộ trình 12 tuần ═══ -->
+  <section class="content-section" id="lo-trinh" style="padding-top:32px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Lộ trình 12 tuần · Bản 2.0</div>
+      <h2>Từ “chưa biết bắt đầu ở đâu” đến <span class="grad">“tự tin giải đề &amp; làm dự án”.</span></h2>
+      <p class="lead">Thiết kế cho học sinh THCS/THPT và sinh viên năm nhất. Mỗi chặng kéo dài 3 tuần với đầu ra cụ thể.</p>
+    </div>
+    <div class="roadmap reveal">
+      <article class="node">
+        <div class="lv">Chặng 01</div>
+        <h3>Nhập môn vững chắc</h3>
+        <div class="time">Tuần 1–3 · 12–16 giờ</div>
+        <ul>
+          <li>Cú pháp chuẩn C++17 / Python 3</li>
+          <li>Tư duy phân rã bài toán &amp; điều kiện biên</li>
+          <li>Đọc/ghi dữ liệu chuẩn thi đấu (stdin/stdout, tệp)</li>
+          <li>Thực hành: 10 bài cơ bản với DrgX Judge (<kbd>F9</kbd>)</li>
+        </ul>
+      </article>
+      <article class="node">
+        <div class="lv">Chặng 02</div>
+        <h3>Nền tảng CTDL</h3>
+        <div class="time">Tuần 4–6 · 16–20 giờ</div>
+        <ul>
+          <li>Đánh giá độ phức tạp Big-O &amp; tránh tràn số</li>
+          <li>Sắp xếp, Tìm kiếm nhị phân (Binary Search)</li>
+          <li>Stack, Queue, Mảng cộng dồn (Prefix Sum)</li>
+          <li>Thực hành: 18 bài theo subtask trên Void-bit OJ</li>
+        </ul>
+      </article>
+      <article class="node">
+        <div class="lv">Chặng 03</div>
+        <h3>Giải thuật cốt lõi</h3>
+        <div class="time">Tuần 7–9 · 20–24 giờ</div>
+        <ul>
+          <li>Đệ quy &amp; Quay lui (Backtracking)</li>
+          <li>Đồ thị cơ bản: duyệt BFS &amp; DFS</li>
+          <li>Quy hoạch động (Dynamic Programming) nhập môn</li>
+          <li>Kỹ năng dùng Stress Tester tự bắt lỗi WA</li>
+        </ul>
+      </article>
+      <article class="node">
+        <div class="lv">Chặng 04</div>
+        <h3>Sản phẩm &amp; Tổng duyệt</h3>
+        <div class="time">Tuần 10–12 · 20–30 giờ</div>
+        <ul>
+          <li>Thi thử 90 phút qua DrgX Exam Server</li>
+          <li>Chọn 1 đề tài nhỏ làm theo sprint 1 tuần</li>
+          <li>Viết tài liệu README &amp; đóng gói bản chạy thử</li>
+          <li>Trình bày (Showcase) 5 phút trước CLB</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══ Bộ khung vận hành CLB ═══ -->
+  <section class="content-section" id="clb" style="padding-top:32px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Bộ khung vận hành CLB · Tương tác trực tiếp</div>
+      <h2>Tự tổ chức Câu lạc bộ Tin học tại trường.</h2>
+      <p class="lead">Đánh dấu trực tiếp vào các mục bên dưới để theo dõi tiến độ tổ chức buổi sinh hoạt của nhóm bạn — trạng thái được lưu tự động vào trình duyệt.</p>
+    </div>
+    <div class="split reveal">
+      <div class="panel">
+        <h3>Nhịp sinh hoạt chu kỳ 2 tuần</h3>
+        <p>Mỗi vòng lặp gồm 4 bước gọn gàng, tốn khoảng 4–6 giờ/thành viên.</p>
+        <div class="checklist">
+          <label class="check"><input type="checkbox"><span><b>Tuần A · Buổi Học (60–75 phút)</b><small>Thảo luận 1 chủ đề thuật toán + live coding trên DrgX + giao 5 bài tập về nhà.</small></span></label>
+          <label class="check"><input type="checkbox"><span><b>Tuần A · Tự Luyện tại máy</b><small>Thành viên tự chấm bài qua DrgX Judge (F9) hoặc Void-bit OJ (:8080), tự đọc diff trước khi hỏi.</small></span></label>
+          <label class="check"><input type="checkbox"><span><b>Tuần B · Review &amp; Chữa bài khó</b><small>Phân tích 2–3 lỗi sai phổ biến (tràn số, TLE, sai điều kiện biên) thay vì chỉ chép đáp án.</small></span></label>
+          <label class="check"><input type="checkbox"><span><b>Tuần B · Mini Showcase (5 phút)</b><small>1 thành viên trình bày cách giải tối ưu hoặc demo công cụ nhỏ vừa hoàn thành.</small></span></label>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Phân công vai trò tối thiểu (từ 3 thành viên)</h3>
+        <p>Gọn nhẹ, không hình thức — có thể luân phiên giữa các thành viên mỗi tháng.</p>
+        <div class="checklist">
+          <label class="check"><input type="checkbox"><span><b>Người điều phối (Coordinator)</b><small>Chốt lịch sinh hoạt, nhắc hạn nộp bài và chuẩn bị phòng máy / phòng họp.</small></span></label>
+          <label class="check"><input type="checkbox"><span><b>Mentor kỹ thuật (Senior / Giáo viên)</b><small>Chọn lọc bộ đề vừa sức, chuẩn bị testcase chuẩn và hướng dẫn gỡ lỗi tư duy.</small></span></label>
+          <label class="check"><input type="checkbox"><span><b>Người tổng hợp học liệu (Scribe)</b><small>Lưu lại ghi chú buổi học, bộ test phản ví dụ hay và cập nhật kho đề chung của CLB.</small></span></label>
+        </div>
+        <p class="hero-note" style="margin-top:14px">Gợi ý thực tế: Mỗi mentor phụ trách tối đa 5–6 thành viên để đảm bảo review code kỹ lưỡng.</p>
+      </div>
+    </div>
+    <div class="progress-bar-wrap reveal">
+      <strong style="color:var(--text)">Tiến độ hoàn thành bộ khung CLB:</strong>
+      <div class="meter" aria-label="Thanh tiến độ checklist CLB"><i id="clbMeterFill"></i></div>
+      <span id="clbMeterText" class="mono" style="font-weight:800;color:var(--accent)">0%</span>
+      <button class="btn btn-ghost btn-sm" type="button" id="resetClbBtn">Đặt lại</button>
+    </div>
+  </section>
+
+  <!-- ═══ Dành cho Giáo viên ═══ -->
+  <section class="content-section" id="giao-vien" style="padding-top:32px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Dành cho Giáo viên &amp; Nhà trường</div>
+      <h2>Đưa vào giờ thực hành mà không xáo trộn quy trình.</h2>
+      <p class="lead">DrgX tôn trọng thói quen giảng dạy hiện tại của giáo viên Tin học: bài tập chỉ là thư mục chứa các file <code>.in / .out</code> quen thuộc.</p>
+    </div>
+    <div class="tiles-4 reveal">
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">📦</span>
+        <h3 class="t-name">Đóng gói đề bài đơn giản</h3>
+        <p class="t-desc">Mỗi bài gồm đề PDF/Markdown và thư mục <code>tests/</code>. Học sinh mở bằng CP Studio và bấm <kbd>F9</kbd> là tự chấm được ngay.</p>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">📊</span>
+        <h3 class="t-name">Chẩn đoán đúng điểm nghẽn</h3>
+        <p class="t-desc">Nhìn ngay học sinh đang vướng ở lỗi biên dịch (CE), sai kết quả (WA) hay quá thời gian (TLE) để hướng dẫn sát thực tế.</p>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">🛡️</span>
+        <h3 class="t-name">Kiểm tra tập trung công bằng</h3>
+        <p class="t-desc">Bật <b>Exam Server (cổng 8765)</b> hoặc <b>Void-bit OJ (cổng 8080)</b> để chấm trên máy giáo viên kèm quét tương đồng mã nguồn Winnowing.</p>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">🌐</span>
+        <h3 class="t-name">Sẵn sàng cho phòng máy yếu</h3>
+        <p class="t-desc">Nếu máy trạm khóa quyền cài đặt, bật chế độ <b>DrgX Web Lab</b> để học sinh làm bài trực tiếp trên trình duyệt nội bộ.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══ Showcase — Đề tài mẫu ═══ -->
+  <section class="content-section" id="showcase" style="padding-top:32px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Showcase — Đề tài thực hành</div>
+      <h2>Bốn dự án mẫu cho Tuần 10–12.</h2>
+      <p class="lead">Giúp học sinh vượt qua ranh giới "chỉ giải bài trên giấy" để tạo ra sản phẩm có giao diện hoặc CLI hữu ích.</p>
+    </div>
+    <div class="tiles-4 reveal">
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">🧮</span>
+        <h3 class="t-name">Trình lập lịch ôn thi</h3>
+        <p class="t-desc">Nhập ngày thi, môn học và quỹ thời gian; tự động phân bổ lịch ôn tập theo tuần kèm kiểm thử dữ liệu đầu vào.</p>
+        <div class="tagrow"><span class="tag">Python</span><span class="tag">CLI / JSON</span></div>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">🗺️</span>
+        <h3 class="t-name">Bảng thông tin CLB trường</h3>
+        <p class="t-desc">Trang web tĩnh tra cứu lịch sinh hoạt, kho đề luyện và bảng vinh danh thành viên tích cực theo từng tháng.</p>
+        <div class="tagrow"><span class="tag">HTML / CSS / JS</span><span class="tag">Local-first</span></div>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">⚖️</span>
+        <h3 class="t-name">Bộ sinh test &amp; chấm mini</h3>
+        <p class="t-desc">Tự viết script sinh test ngẫu nhiên (Generator) và đối chiếu kết quả giữa thuật toán ngây thơ với thuật toán tối ưu.</p>
+        <div class="tagrow"><span class="tag">C++17</span><span class="tag">Stress Testing</span></div>
+      </article>
+      <article class="tile">
+        <span class="t-ico" aria-hidden="true">🎮</span>
+        <h3 class="t-name">Game trực quan hóa thuật toán</h3>
+        <p class="t-desc">Mô phỏng trực quan quá trình chạy BFS/DFS trên mê cung hoặc các bước sắp xếp mảng ngay trên màn hình.</p>
+        <div class="tagrow"><span class="tag">JavaScript</span><span class="tag">Canvas UI</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══ Final CTA ═══ -->
+  <section class="final-cta" id="bat-dau">
+    <div class="reveal">
+      <h2>Bắt đầu ngay trong <span class="grad">DrgX IDE.</span></h2>
+      <p>Mở DrgX, bấm <kbd>Ctrl+Alt+L</kbd> để truy cập trang học liệu này bất cứ lúc nào — hoặc tải trọn bộ công cụ để luyện tập ngay hôm nay.</p>
+      <div class="hero-cta">
+        <button class="btn btn-grad" type="button" id="startChecklistBtn">Đánh dấu tiến độ CLB ↑</button>
+        <a class="btn btn-ghost" href="../download.html">Tải về &amp; Cài đặt DrgX</a>
+        <a class="btn btn-ghost" href="../void-bit.html">Mở Void-bit OJ (47 bài)</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <picture>
+            <source srcset="../assets/logo-64.webp" type="image/webp">
+            <img src="../assets/logo-64.png" onerror="this.src='logo.png'" alt="Logo DrgX" width="28" height="28" loading="lazy" decoding="async">
+          </picture>
+          DrgX <b style="color:var(--accent)">&nbsp;IDE</b>
+        </div>
+        <p class="foot-about">Hệ sinh thái học tập đi kèm DrgX IDE — chạy tĩnh cục bộ, không cần tài khoản, không theo dõi người dùng.</p>
+        <div class="foot-domains" aria-label="Cổng dịch vụ chuẩn">
+                    <span class="foot-domain-tag">localhost:8765 (Exam)</span>
+          <span class="foot-domain-tag">localhost:8080 (OJ)</span>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Mục lục học tập</h4>
+        <a href="#tru-cot">4 Trụ cột</a>
+        <a href="#lo-trinh">Lộ trình 12 tuần</a>
+        <a href="#clb">Checklist CLB</a>
+        <a href="#giao-vien">Dành cho Giáo viên</a>
+        <a href="#showcase">Đề tài Showcase</a>
+      </div>
+      <div class="foot-col">
+        <h4>Sản phẩm DrgX</h4>
+        <a href="../index.html">Trang chủ DrgX</a>
+        <a href="../features.html">Chi tiết tính năng</a>
+        <a href="../void-bit.html">Void-bit OJ (47 bài)</a>
+        <a href="../download.html">Tải về &amp; Cài đặt</a>
+      </div>
+      <div class="foot-col">
+        <h4>Dự án &amp; Pháp lý</h4>
+        <a href="../about.html">Về nhóm DrgX — Phú Thọ</a>
+        <a href="../about.html#license">Giấy phép MIT</a>
+        <a href="#top">Lên đầu trang ↑</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nhóm DrgX — Phú Thọ • Học tin cùng dân Dev • Bản 2.0 (Local-first · 68/68 PASS)</span>
+      <span class="mono">Mở trong IDE bằng Ctrl+Alt+L</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../assets/site.js"></script>
+<script>
+(function(){
+  "use strict";
+  var KEY = "drgx.learn.v1";
+  var checks = Array.prototype.slice.call(document.querySelectorAll(".check input"));
+  function loadState(){
+    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){ return {}; }
+  }
+  function saveState(obj){
+    try { localStorage.setItem(KEY, JSON.stringify(obj)); } catch(e){}
+  }
+  var state = loadState();
+  checks.forEach(function(c, idx){
+    c.checked = !!state[idx];
+    c.addEventListener("change", function(){
+      state[idx] = c.checked;
+      saveState(state);
+      updateMeter();
+      showToast(c.checked ? "Đã lưu tiến độ vào máy ✓" : "Đã cập nhật trạng thái");
+    });
+  });
+
+  function updateMeter(){
+    var doneCount = checks.filter(function(c){ return c.checked; }).length;
+    var total = checks.length || 1;
+    var pct = Math.round((doneCount * 100) / total);
+    var fill = document.getElementById("clbMeterFill");
+    var text = document.getElementById("clbMeterText");
+    var heroFill = document.getElementById("heroMeterFill");
+    var heroLabel = document.getElementById("heroMeterLabel");
+    if (fill) fill.style.width = pct + "%";
+    if (text) text.textContent = pct + "% (" + doneCount + "/" + checks.length + ")";
+    if (heroFill) heroFill.style.width = Math.max(pct, 12) + "%";
+    if (heroLabel) heroLabel.textContent = doneCount + "/" + checks.length + " mục CLB (" + pct + "%)";
+  }
+  updateMeter();
+
+  var startBtn = document.getElementById("startChecklistBtn");
+  if (startBtn) {
+    startBtn.addEventListener("click", function(){
+      var first = document.querySelector("#clb .check input");
+      if (first) {
+        first.scrollIntoView({ behavior: "smooth", block: "center" });
+        first.focus();
+      }
+      showToast("Hãy tích chọn các bước nhóm bạn đã thực hiện");
+    });
+  }
+
+  var resetBtn = document.getElementById("resetClbBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", function(){
+      state = {};
+      saveState(state);
+      checks.forEach(function(c){ c.checked = false; });
+      updateMeter();
+      showToast("Đã đặt lại toàn bộ checklist CLB về 0%");
+    });
+  }
+
+  var toastTimer;
+  function showToast(msg){
+    var el = document.getElementById("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2200);
+  }
+})();
+</script>
+</body>
+</html>

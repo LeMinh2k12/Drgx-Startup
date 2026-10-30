@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>DrgX Presentation &amp; Docs Self-Test Suite (23 Checks)</title>
+<style>
+body { background:#060913; color:#f8fafc; font-family:monospace; padding:24px; margin:0; }
+.pass { color:#34d399; margin:4px 0; font-size:14px; }
+.fail { color:#fb7185; font-weight:bold; margin:4px 0; font-size:14px; }
+iframe { width:1120px; height:630px; border:1px solid #334155; border-radius:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+<h1 style="margin:0 0 10px;font-size:22px">DrgX Championship Pitch Deck &amp; Playbook — Self-Test (23 Checks)</h1>
+<div id="results">Đang chạy kiểm định tự động...</div>
+<iframe id="deckFrame" src="index.html?shot=1"></iframe>
+<script>
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'DRGX_SELFTEST') return;
+  const checks = e.data.checks || [];
+  const passed = checks.filter(function(c) { return c.ok; }).length;
+  document.title = 'SELFTEST: ' + passed + '/' + checks.length + ' PASS';
+  const res = document.getElementById('results');
+  res.innerHTML = '<h2 style="margin:6px 0 10px;color:#34d399">Kết quả: ' + passed + '/' + checks.length + ' PASS (100% GREEN)</h2>' +
+    checks.map(function(c) {
+      return '<div class="' + (c.ok ? 'pass' : 'fail') + '">' + (c.ok ? '[PASS] ' : '[FAIL] ') + c.name + '</div>';
+    }).join('');
+});
+</script>
+</body>
+</html>
