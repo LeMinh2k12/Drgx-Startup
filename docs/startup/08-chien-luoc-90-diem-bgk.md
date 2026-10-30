@@ -23,7 +23,7 @@ Bảng dưới đây chỉ rõ **21 tiêu chí thành phần** của Phụ lục
 | 1.3 | Đánh giá đối tượng, phân khúc khách hàng | 5,0 | 4,7 | Không phân biệt người dùng (HS) và người trả tiền (Trường/PH) | **Bảng 2 Thuyết minh:** Tách rõ 4 phân khúc B2C (HS đại trà, HSG/SV) và B2B (Giáo viên/CLB, Nhà trường) với sản phẩm riêng. |
 | 1.4 | Ứng dụng KH&CN giải quyết thực tế | 5,0 | 4,7 | Công nghệ đơn giản (chỉ là web tĩnh hoặc CRUD cơ bản) | Bám sát **Quyết định 1131/QĐ-TTg**: Local-first AI Bridge, C++17 Native Judge (`oj_server.cpp`), SSE Streaming, thuật toán băm trượt **Winnowing $k$-gram**. |
 | **2** | **Tính khả thi, tiềm năng dự án** | **15,0** | **14,0** | | |
-| 2.1 | Tính khả thi trong kế hoạch, nguồn lực SXKD | 5,0 | 4,8 | Sản phẩm mới dừng ở ý tưởng hoặc bản vẽ Figma | **6 mảnh ghép đã chạy thật**, vượt qua **67/67 chốt chặn tự động (`verify_ecosystem.py`)** và **11/11 smoke test đa luồng (`smoke_test.py`)**. |
+| 2.1 | Tính khả thi trong kế hoạch, nguồn lực SXKD | 5,0 | 4,8 | Sản phẩm mới dừng ở ý tưởng hoặc bản vẽ Figma | **6 mảnh ghép đã chạy thật**, vượt qua **68/68 chốt chặn tự động (`verify_ecosystem.py`)** và **11/11 smoke test đa luồng (`smoke_test.py`)**. |
 | 2.2 | Cơ cấu chi phí và mức độ cạnh tranh | 5,0 | 4,6 | Chi phí vận hành Cloud/AI quá cao làm âm biên lợi nhuận | Kiến trúc **Local-First**: biên dịch & chấm bài trên CPU máy khách → chi phí biến đổi ~0đ, **biên lợi nhuận gộp đạt 82–85%** (Bảng 4). |
 | 2.3 | Tính khả thi của kế hoạch bán hàng | 3,0 | 2,8 | Đòi bán trực tiếp cho hàng vạn học sinh bằng quảng cáo đắt đỏ | Chiến lược **B2B2C Land-and-Expand**: 1 Giáo viên dùng Exam Server miễn phí trên lớp → kéo theo 40–120 học sinh cài app → Trường mua gói Lab. |
 | 2.4 | Triển khai cộng đồng đơn giản, thân thiện | 2,0 | 1,8 | Cài đặt phức tạp, đòi quyền Admin trên máy trường | Khởi chạy 1 lệnh `drgx.cmd start`; phòng máy khóa quyền cài đặt dùng ngay **DrgX Web Lab** trên trình duyệt Chrome/Edge. |
@@ -85,7 +85,7 @@ Giám khảo công nghệ và đầu tư sẽ tin ngay lập tức khi thấy s�
 ```
 +-----------------------------------------------------------------------------------+
 |                        POSTER A3 & BANNER NHẬN DIỆN DrgX                          |
-|         (Trình bày rõ: 6-8 công cụ -> 1 | QĐ 1131/QĐ-TTg | 67/67 PASS)            |
+|         (Trình bày rõ: 6-8 công cụ -> 1 | QĐ 1131/QĐ-TTg | 68/68 PASS)            |
 +---------------------------+---------------------------+---------------------------+
 |         TRẠM SỐ 1         |         TRẠM SỐ 2         |         TRẠM SỐ 3         |
 |   PHÒNG THI LAN MINH BẠCH |   MÔ HÌNH HÓA THUẬT TOÁN  |  KIOSK GIÁM KHẢO & STEM   |
@@ -109,7 +109,7 @@ Giám khảo rất thích những đội mà **mọi thành viên đều hiểu 
 2. **Thành viên 2 (Giám đốc Kỹ thuật — C++17 / Rust / AI / Server):** Trực tiếp thao tác Demo trên máy tính và trả lời các câu hỏi chuyên sâu về Kiến trúc C++17 Judge, Thuật toán Winnowing, Stress Test, Exam Server đa luồng, bảo mật và giấy phép MIT (`NOTICE.md`).
 3. **Thành viên 3 (Thiết kế Trải nghiệm & Mở rộng STEM):** Trả lời các câu hỏi về Tính thân thiện giao diện, 5 bộ Skin chống mỏi mắt, Web Lab cho máy cấu hình yếu và khả năng tích hợp mô hình hóa / lập trình vi điều khiển STEM (Tiêu chí 3.3).
 4. **Thành viên 4 (Tài chính & Truyền thông):** Trả lời ngay lập tức các câu hỏi về Bảng dòng tiền 3 năm, Unit Economics (`LTV/CAC = 6,2x–7,9x`, biên lợi nhuận gộp `82–85%`), điểm hòa vốn Quý 3/2028, kịch bản giảm 30% doanh thu và chiến lược Marketing B2B2C.
-5. **Thành viên 5 (Kiểm thử QA & Học liệu Sư phạm):** Trả lời các câu hỏi về Lộ trình học 12 tuần (Learn Hub), mô hình CLB Sprint 2 tuần, bộ 47 bài toán chuẩn HSG và quy trình kiểm định chất lượng `67/67 PASS`.
+5. **Thành viên 5 (Kiểm thử QA & Học liệu Sư phạm):** Trả lời các câu hỏi về Lộ trình học 12 tuần (Learn Hub), mô hình CLB Sprint 2 tuần, bộ 47 bài toán chuẩn HSG và quy trình kiểm định chất lượng `68/68 PASS`.
 
 ---
 
@@ -117,7 +117,7 @@ Giám khảo rất thích những đội mà **mọi thành viên đều hiểu 
 
 ### 4 KHÔNG (Tuyệt đối tránh):
 1. **KHÔNG trình bày mơ hồ về kiến trúc phần mềm:** Luôn chủ động nói rõ ngay từ đầu: *“Hệ sinh thái DrgX tuân thủ giấy phép mã nguồn mở MIT & Apache-2.0 hợp pháp; giá trị cốt lõi do nhóm tự xây là kiến trúc Kép CP/Dev Studio, máy chủ C++17 Judge, thuật toán Winnowing, Stress Test, Exam Server LAN, 5 skin gốc và Learn Hub.”* Sự rõ ràng và hiểu luật này ghi điểm tuyệt đối về pháp lý (Tiêu chí 6.2).
-2. **KHÔNG bịa số liệu doanh thu đã thu tiền thật:** Phân biệt rạch ròi giữa **Kết quả kỹ thuật đã kiểm chứng thật** (`67/67 PASS`, `11/11 smoke test`, `47 bài tập`, `Winnowing (chép đổi tên biến: 100%)`) và **Dự phóng tài chính thận trọng sau giai đoạn Pilot** (`Bảng 6, 7, 8, 9`).
+2. **KHÔNG bịa số liệu doanh thu đã thu tiền thật:** Phân biệt rạch ròi giữa **Kết quả kỹ thuật đã kiểm chứng thật** (`68/68 PASS`, `11/11 smoke test`, `47 bài tập`, `Winnowing (chép đổi tên biến: 100%)`) và **Dự phóng tài chính thận trọng sau giai đoạn Pilot** (`Bảng 6, 7, 8, 9`).
 3. **KHÔNG để sót bất kỳ dấu `[[...]]` nào khi in nộp:** Chạy lệnh `python -X utf8 scripts/check_placeholders.py` trước khi đi in.
 4. **KHÔNG phụ thuộc vào Wi-Fi hội trường khi thi Chung kết:** Mọi bản Demo (`CP Studio`, `Exam Server :8765`, `Void-bit OJ :8080`, `Web Hub :3000`) đều chạy trên `127.0.0.1` (Localhost).
 

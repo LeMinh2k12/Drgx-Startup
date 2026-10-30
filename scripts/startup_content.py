@@ -87,7 +87,7 @@ COVER = {
     "subtitle": "Gồm DrgX CP Studio (thi đấu cách ly AI), DrgX Dev Studio (trợ lý AI học tập), Void-bit C++17 Online Judge, Exam Server LAN và Learn Hub 12 tuần",
     "field": "01 — Công nghiệp, chế tạo, trí tuệ nhân tạo AI, STEM",
     "team_heading": "NHÓM / CÁ NHÂN THỰC HIỆN (danh sách không quá 05 thành viên)",
-    "team": "Lê Tiến Dũng, Lê Bình Minh, Minh Đăng, Minh Quang",
+    "team": "Lê Tiến Dũng, Lê Bình Minh, Nguyễn Minh Quang, Nguyễn Minh Đăng",
     "unit": "ĐƠN VỊ: Trường THCS Sông Lô (Lớp 9A2)",
     "place_date": "Phú Thọ, Tháng 11/2026",
 }
@@ -110,8 +110,8 @@ P("4. Email: …………………………………………………………�
 P("5. Danh sách thành viên trong nhóm (tên, trường, không quá 05 người).")
 P("Họ và tên: Lê Tiến Dũng (Trưởng nhóm — 9A2)\tSố điện thoại: …………………")
 P("Họ và tên: Lê Bình Minh (Phó nhóm — 9A2)\tSố điện thoại: …………………")
-P("Họ và tên: Minh Đăng (Thành viên — 9A2)\tSố điện thoại: …………………")
-P("Họ và tên: Minh Quang (Thành viên — 9A2)\tSố điện thoại: …………………")
+P("Họ và tên: Nguyễn Minh Quang (Thành viên — 9A2)\tSố điện thoại: …………………")
+P("Họ và tên: Nguyễn Minh Đăng (Thành viên — 9A2)\tSố điện thoại: …………………")
 P("Họ và tên: …………………………………\tSố điện thoại: …………………")
 P("6. Họ và tên giáo viên, người hướng dẫn: ……………\tSố điện thoại: …………………")
 PAGEBREAK()

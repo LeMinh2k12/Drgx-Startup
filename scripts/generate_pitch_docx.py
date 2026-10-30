@@ -211,9 +211,9 @@ def cover(doc: Document, toc_items, title='CẨM NANG & KỊCH BẢN THUYẾT TR
     t.style = 'Table Grid'
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     meta = [
-        ('Đơn vị & Đội ngũ', 'Lớp 9A2 — Trường THCS Sông Lô (Lê Tiến Dũng, Lê Bình Minh, Minh Đăng, Minh Quang)'),
-        ('Lời thoại 2 phút', '18 Slide chính + Slide Mở đầu (25–28 từ/slide, cam kết nghiêm ngặt ≤ 50 từ/slide)'),
-        ('Bản trình chiếu', 'presentation/index.html — 24 slide, 3 chế độ: Toàn bộ · 2 phút (18 slide) · Video 3 phút'),
+        ('Đơn vị & Đội ngũ', 'Lớp 9A2 — Trường THCS Sông Lô (Lê Tiến Dũng, Lê Bình Minh, Nguyễn Minh Quang, Nguyễn Minh Đăng)'),
+        ('Lời thoại 2 phút', '12 Slide chính S01–S12 (1 phút 54 giây, ≤ 2 phút, đủ 4 thành viên thuyết trình)'),
+        ('Bản trình chiếu', 'presentation/index.html — 12 slide chính (S01–S12) + 5 slide phụ lục hỏi đáp (PL1–PL5)'),
         ('Số liệu kiểm định', 'Đã đối chiếu với số đo thật 68/68 chốt chặn tự động (verify_ecosystem.py)'),
         ('Ngày cập nhật', datetime.date.today().strftime('%d/%m/%Y')),
     ]
@@ -422,7 +422,7 @@ def main():
         saved_2min = build_docx(
             md_2min,
             OUT_2MIN_DOCX,
-            title='LỜI THOẠI THUYẾT TRÌNH 2 PHÚT (18 SLIDE · ≤ 50 TỪ / SLIDE)',
+            title='LỜI THOẠI THUYẾT TRÌNH 2 PHÚT (12 SLIDE · ĐỦ 4 THÀNH VIÊN 9A2)',
             include_toc=False,
         )
         try:

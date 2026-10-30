@@ -758,39 +758,32 @@
 
   /* ---------- Audio Auto-Sync & Live Voice Recording Studio ---------- */
   const DEFAULT_CUES = {
-    S00: 0.0,
-    S01: 6.2,
-    S02: 12.5,
-    S03: 18.8,
-    S04: 25.3,
-    S05: 32.0,
-    S06: 38.8,
-    S07: 45.3,
-    S08: 52.5,
-    S09: 59.7,
-    S10: 66.7,
-    S11: 73.2,
-    S12: 80.0,
-    S13: 86.5,
-    S14: 93.0,
-    S15: 100.0,
-    S16: 106.8,
-    S17: 113.5,
-    S18: 120.5
+    S01: 0.0,
+    S02: 9.0,
+    S03: 18.5,
+    S04: 28.0,
+    S05: 37.5,
+    S06: 47.5,
+    S07: 57.5,
+    S08: 67.5,
+    S09: 77.0,
+    S10: 86.0,
+    S11: 95.5,
+    S12: 105.0
   };
-  const DEFAULT_DURATION = 128.0;
+  const DEFAULT_DURATION = 115.0;
   const mainSlidesList = () => slides.filter(s => !isApx(s));
 
   let voiceCues = Object.assign({}, DEFAULT_CUES);
   try {
-    const savedCues = window.DRGX_EMBEDDED_CUES || JSON.parse(store.get('drgx-voice-cues') || 'null');
+    const savedCues = window.DRGX_EMBEDDED_CUES || JSON.parse(store.get('drgx-voice-cues-12') || 'null');
     if (savedCues && typeof savedCues === 'object') {
       Object.assign(voiceCues, savedCues);
     }
   } catch (e) { /* ignore */ }
 
   const saveVoiceCues = () => {
-    store.set('drgx-voice-cues', JSON.stringify(voiceCues));
+    store.set('drgx-voice-cues-12', JSON.stringify(voiceCues));
   };
 
   const voiceAudio = $('#voiceAudio');
@@ -832,7 +825,7 @@
     if (hasCustomAudio && voiceAudio && Number.isFinite(voiceAudio.duration) && voiceAudio.duration > 0.5) {
       return voiceAudio.duration;
     }
-    const maxCue = Math.max(...Object.values(voiceCues), 120);
+    const maxCue = Math.max(...Object.values(voiceCues), 105);
     return Math.max(DEFAULT_DURATION, maxCue + 7.5);
   };
 
@@ -1013,7 +1006,7 @@
         stopVoiceRecording();
       } else if (isTapSyncing) {
         stopAutoPlay();
-        toast('✅ Đã chốt xong toàn bộ 19 mốc Slide!');
+        toast('✅ Đã chốt xong toàn bộ 12 mốc Slide!');
         toggleVoiceModal(true);
       }
       return true;
@@ -1046,20 +1039,20 @@
         const reader = new FileReader();
         reader.onload = () => {
           loadAudioDataUrl(String(reader.result), 'Ban-thu-am-truc-tiep-DrgX.webm', false);
-          toast('✅ Đã lưu bản thu âm & 19 mốc nhảy Slide! Bấm ▶️ Tự chạy để xem lại ngay.');
+          toast('✅ Đã lưu bản thu âm & 12 mốc nhảy Slide! Bấm ▶️ Tự chạy để xem lại ngay.');
           toggleVoiceModal(true);
         };
         reader.readAsDataURL(blob);
       };
 
       go(0);
-      voiceCues.S00 = 0.0;
+      voiceCues.S01 = 0.0;
       saveVoiceCues();
       recStartPerf = performance.now();
       isRecordingVoice = true;
       mediaRecorder.start(200);
       if (!autoRaf) autoRaf = requestAnimationFrame(syncLoop);
-      toast('🎙️ Đang thu âm Slide S00! Đọc xong câu nào hãy bấm [→] hoặc [Space].');
+      toast('🎙️ Đang thu âm Slide S01! Đọc xong câu nào hãy bấm [→] hoặc [Space].');
     } catch (err) {
       toast('Không mở được Microphone — hãy cấp quyền Mic hoặc dùng nút Chọn File Ghi Âm');
     }
@@ -1083,7 +1076,7 @@
     const list = mainSlidesList();
     const weights = list.map(s => {
       const words = (s.dataset.notes || '').trim().split(/\s+/).filter(Boolean).length || 26;
-      const bonus = ['S07', 'S08', 'S09'].includes(s.dataset.code) ? 3 : 0;
+      const bonus = ['S05', 'S06', 'S07'].includes(s.dataset.code) ? 3 : 0;
       return words + bonus;
     });
     const totalW = weights.reduce((a, b) => a + b, 0);
@@ -1119,11 +1112,11 @@
       const dur = voiceAudio.duration;
       const stEl = $('#vmAudioStatus');
       if (stEl) {
-        stEl.textContent = `Đã nạp "${audioFileName}" (${fmtSec(dur)}) — Sẵn sàng tự nhảy 19 Slide!`;
+        stEl.textContent = `Đã nạp "${audioFileName}" (${fmtSec(dur)}) — Sẵn sàng tự nhảy 12 Slide!`;
       }
       if (autoScale && Number.isFinite(dur) && dur > 5) {
         autoScaleCuesToDuration(dur);
-        toast(`🎵 Đã nạp "${audioFileName}" (${fmtSec(dur)}) & tự chia đều 19 mốc Slide!`);
+        toast(`🎵 Đã nạp "${audioFileName}" (${fmtSec(dur)}) & tự chia đều 12 mốc Slide!`);
       }
       updateVoiceUI(0);
     };
@@ -1212,7 +1205,7 @@
       a.download = 'index.html';
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-      toast('📦 Đã xuất file index.html nhúng sẵn Ghi âm & 19 mốc tự nhảy Slide!');
+      toast('📦 Đã xuất file index.html nhúng sẵn Ghi âm & 12 mốc tự nhảy Slide!');
     } catch (err) {
       toast('Lỗi khi xuất HTML: ' + String(err));
     }
@@ -1257,7 +1250,7 @@
       }
       toggleVoiceModal(false);
       go(0);
-      voiceCues.S00 = 0.0;
+      voiceCues.S01 = 0.0;
       saveVoiceCues();
       startAutoPlay(0);
       isTapSyncing = true;
@@ -1269,7 +1262,7 @@
   if ($('#vmAutoScale')) {
     $('#vmAutoScale').onclick = () => {
       autoScaleCuesToDuration(getTotalVoiceDuration());
-      toast(`⚡ Đã tự chia đều 19 mốc theo thời lượng ${fmtSec(getTotalVoiceDuration())}!`);
+      toast(`⚡ Đã tự chia đều 12 mốc theo thời lượng ${fmtSec(getTotalVoiceDuration())}!`);
     };
   }
   if ($('#vmResetCues')) {
@@ -1278,7 +1271,7 @@
       saveVoiceCues();
       renderCueTable();
       updateVoiceUI(0);
-      toast('↺ Đã khôi phục 19 mốc thời gian chuẩn 2 phút (128s)');
+      toast('↺ Đã khôi phục 12 mốc thời gian chuẩn ≤ 2 phút (115s)');
     };
   }
   if ($('#vmPlayTest')) {
@@ -1342,7 +1335,7 @@
       try {
         const checks = [];
         const chk = (name, cond) => checks.push({ name, ok: !!cond });
-        chk('1. Đủ Slide trình chiếu (gồm Slide Đội ngũ Lớp 9A2 & Phụ lục Q&A)', slides.length >= 23);
+        chk('1. Đủ 12 Slide trình chiếu chính (S01–S12) & 5 Phụ lục Q&A (PL1–PL5)', mainSlidesList().length === 12 && slides.length === 17);
         chk('2. Có khung Broadcast Stage Frame (.stage-frame) & 4 góc định vị', !!$('.stage-frame .tl'));
         chk('3. Thanh Chương (#rail) có huy hiệu trạng thái (#railRubric)', !!$('#railRubric'));
         chk('4. Thanh Điều khiển (#hud) hiển thị đồng hồ (#hudTimer) + nút Docs + nút Kiosk + nút 👁 F2 (#bHideHud)', !!$('#hudTimer') && !!$('#bHideHud'));

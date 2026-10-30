@@ -9,7 +9,7 @@
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-extension-3178C6?style=flat-square" />
     <img alt="Windows" src="https://img.shields.io/badge/Windows-10%2F11-0078D4?style=flat-square" />
     <img alt="MVP" src="https://img.shields.io/badge/status-v2.0%20SHIP%20READY-34D399?style=flat-square" />
-    <img alt="Health Gate" src="https://img.shields.io/badge/Health%20Gate-67%2F67%20PASS%20(100%25)-10B981?style=flat-square" />
+    <img alt="Health Gate" src="https://img.shields.io/badge/Health%20Gate-68%2F68%20PASS%20(100%25)-10B981?style=flat-square" />
     <img alt="Skins" src="https://img.shields.io/badge/Skins-5%20Pro%20Themes-38BDF8?style=flat-square" />
     <img alt="Security" src="https://img.shields.io/badge/Security-Hardened-F59E0B?style=flat-square" />
   </p>
@@ -110,7 +110,7 @@ DrgX trả lời bằng một quy trình duy nhất: **cài một lần → F9 c
 Không cần cấu hình phức tạp — sử dụng trực tiếp công cụ điều phối hợp nhất [`drgx.cmd`](drgx.cmd) ngay tại thư mục gốc:
 
 ```powershell
-.\drgx.cmd verify   # Chạy 67/67 bài kiểm thử tự động toàn hệ sinh thái (5 trụ cột)
+.\drgx.cmd verify   # Chạy 68/68 bài kiểm thử tự động toàn hệ sinh thái (5 trụ cột)
 .\drgx.cmd doctor   # Kiểm tra toolchain (Python, G++ C++17, Node, DrgX IDE)
 .\drgx.cmd start    # Khởi động đồng thời cả 3 dịch vụ nền (:8000 Web, :8080 C++17 OJ, :8765 Exam Server)
 .\drgx.cmd studio   # Mở DrgX Studio App độc lập (:45280 — Editor, Judge, Stress, AI Bug-Fix, 47 bài OJ)
@@ -237,10 +237,13 @@ Chi tiết tài chính: [`docs/startup/financial-model.csv`](docs/startup/financ
 ## Hồ sơ dự thi khởi nghiệp 2026–2027
 
 Dự án tham dự **Cuộc thi “Học sinh, sinh viên với ý tưởng khởi nghiệp” tỉnh Phú Thọ** — lĩnh vực **01: Công nghiệp, chế tạo, AI, STEM**.
+- **Đơn vị & Đội ngũ thực hiện:** Tập thể **Lớp 9A2 — Trường THCS Sông Lô (Phú Thọ)** gồm 4 thành viên: **Lê Tiến Dũng** (Nhóm trưởng), **Lê Bình Minh** (Nhóm phó · Kỹ thuật & AI), **Nguyễn Minh Quang** (Thành viên · Phòng thi LAN, STEM & QA) và **Nguyễn Minh Đăng** (Thành viên · Tài chính, Học liệu & Truyền thông).
 
+- [Web thuyết trình tương tác 12 Slide (`S01 → S12`)](presentation/index.html) — trình chiếu trực tiếp + 5 Slide phụ lục hỏi đáp (`PL1 → PL5`).
+- [Kịch bản lời thoại 2 phút (12 Slide · Đủ 4 thành viên 9A2)](presentation/KICH-BAN-2-PHUT.md) — [bản DOCX](presentation/Loi-thoai-thuyet-trinh-2-phut-DrgX.docx) · [bản PDF](presentation/Loi-thoai-thuyet-trinh-2-phut-DrgX.pdf).
 - [README hồ sơ](docs/startup/README.md) — tóm tắt cuộc thi, checklist, cách in.
-- [Bài thuyết minh (DOCX)](docs/startup/print/bai-thi-drgx-ide.docx) — A4, Times New Roman 14, 24 trang.
-- [Bài thuyết minh (PDF)](docs/startup/print/bai-thi-drgx-ide.pdf).
+- [Bài thuyết minh (DOCX)](docs/startup/print/bai-thi-drgx-ide.docx) — A4, Times New Roman 14; [bản PDF](docs/startup/print/bai-thi-drgx-ide.pdf).
+- [Biên bản xác nhận Pilot (DOCX)](docs/startup/print/bien-ban-xac-nhan-pilot.docx) — [bản PDF](docs/startup/print/bien-ban-xac-nhan-pilot.pdf).
 - [Bản đăng ký dự thi (DOCX)](docs/startup/print/dang-ky-du-thi.docx) — 1 trang, đơn vị điền và đóng dấu; [bản PDF](docs/startup/print/dang-ky-du-thi.pdf).
 - [Kịch bản video 3 phút](docs/startup/02-kich-ban-video.md).
 - [Pitch deck](docs/startup/pitch/pitch.html) — 12 slide, trình chiếu bằng `←` `→`; [bản PDF](docs/startup/pitch/pitch.pdf).
@@ -263,7 +266,7 @@ Dự án tham dự **Cuộc thi “Học sinh, sinh viên với ý tưởng kh�
 
 ## Cộng đồng, Đóng góp & Quản trị Mã nguồn mở
 
-Dự án được phát triển bởi **Nhóm DrgX (Phú Thọ, Việt Nam)** với mục tiêu nâng tầm trải nghiệm học tập và thi đấu lập trình tại các trường phổ thông & đại học.
+Dự án được phát triển bởi **Nhóm DrgX — Lớp 9A2, Trường THCS Sông Lô (Phú Thọ, Việt Nam)** với mục tiêu nâng tầm trải nghiệm học tập và thi đấu lập trình tại các trường phổ thông & đại học.
 
 - 🤝 **Đóng góp mã nguồn & bộ đề**: Xem hướng dẫn chi tiết tại [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - 🛡️ **Báo cáo bảo mật**: Xem mô hình đe dọa và chính sách công bố lỗ hổng tại [`SECURITY.md`](SECURITY.md).

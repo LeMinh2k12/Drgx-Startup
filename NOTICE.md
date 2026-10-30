@@ -2,10 +2,15 @@
 
 DrgX IDE được xây dựng dựa trên các thành phần mã nguồn mở. Tài liệu này ghi công và nêu giấy phép của các thành phần chính. Khi phân phối sản phẩm, các thông báo này phải được giữ nguyên.
 
-## 1. Nhân soạn thảo mã nguồn mở (MIT Workbench Core)
+## 1. Mã nguồn mở của VS Code (`Code - OSS`) & Tác tử AI `OpenCode`
 
-- **Giấy phép:** MIT
-- **Cách DrgX sử dụng:** nền tảng nhân soạn thảo và chế độ Web Lab cục bộ. Toàn bộ kiến trúc sản phẩm, nhận diện thương hiệu, logo, 5 bộ giao diện và hệ thống chấm bài/khảo thí do nhóm DrgX thiết kế và phát triển.
+- **Thành phần kế thừa:**
+  1. **VS Code Open Source (`Code - OSS`):** https://github.com/microsoft/vscode — Bản quyền Microsoft Corporation, phân phối theo **Giấy phép MIT**.
+  2. **OpenCode (AI Coding Agent):** https://github.com/anomalyco/opencode — Phân phối theo **Giấy phép MIT**.
+- **Cách DrgX sử dụng và phần nhóm tự phát triển:**
+  - Nhóm sử dụng hợp pháp mã nguồn mở của **VS Code (`Code - OSS`)** làm nhân trình soạn thảo cho `DrgX CP Studio`, `DrgX Dev Studio` và chế độ `Web Lab (:8123)`.
+  - Trong chế độ tự học (`DrgX Dev Studio`), nhóm tích hợp tác tử AI mã nguồn mở **OpenCode** qua cầu nối cục bộ (`127.0.0.1:45290`) để hỗ trợ giải thích lỗi và hướng dẫn thuật toán bằng tiếng Việt; trong chế độ khảo thí (`DrgX CP Studio`), mô-đun OpenCode và mọi kết nối AI đều bị gỡ bỏ/khóa hoàn toàn để đảm bảo kỳ thi minh bạch.
+  - Toàn bộ kiến trúc tách đôi `CP Studio / Dev Studio`, tiện ích mở rộng `drgx-vscode-extension (.vsix v1.0.0)`, máy chấm `Void-bit C++17 Online Judge (oj_server.cpp)`, công cụ `Differential Stress Test 3 cột`, bộ lọc đạo văn `Winnowing k-gram`, máy chủ phòng thi `Exam Server LAN (:8765)` tương thích Themis, bộ tự sửa 25 mẫu lỗi C++17 tiếng Việt và 5 bộ giao diện (`Ion, Nebula, Tokyo, Matrix, Dawn`) là tài sản trí tuệ do nhóm DrgX (Lớp 9A2, Trường THCS Sông Lô) trực tiếp thiết kế và phát triển.
 
 ### MIT License
 
@@ -82,5 +87,5 @@ Giấy phép đầy đủ của từng crate có trong `Cargo.lock` và kho mã 
 
 ## 9. Liên hệ
 
-**Nhóm DrgX** — [[Trường/Xã/Phường]], tỉnh Phú Thọ.
-Email: [[Email]] · Điện thoại: [[SĐT]]
+**Nhóm DrgX** — Lớp 9A2, Trường THCS Sông Lô, tỉnh Phú Thọ.
+Email: dotruongphuc206@gmail.com · Điện thoại: 0987024912

@@ -21,7 +21,7 @@ FFMPEG = r"C:\Users\Le Minh\AppData\Local\Programs\Python\Python312\Lib\site-pac
 # (slide_code, người nói, nội dung) — viết kiểu nói tự nhiên: điệm từ "à/ạ/đây",
 # chèn "..." để TTS ngắt nghỉ như người thở, chữ mượt hơn chữ viết.
 SCRIPT = [
-    ("S00", "dung",  "Em chào Ban Giám khảo ạ... Chúng em gồm Tiến Dũng, Bình Minh, Minh Đăng, Minh Quang, đến từ lớp 9A2, trường THCS Sông Lô."),
+    ("S00", "dung",  "Em chào Ban Giám khảo ạ... Chúng em gồm Tiến Dũng, Bình Minh, Nguyễn Minh Đăng, Nguyễn Minh Quang, đến từ lớp 9A2, trường THCS Sông Lô."),
     ("S01", "dung",  "Mỗi lần cài C++ để học... tụi em mất gần hai tiếng đấy để sửa lỗi. Với DrgX, mở máy lên, sáu mươi giây là code được ngay à."),
     ("S02", "dung",  "DrgX gói trọn năm công cụ vào một ứng dụng chạy thật... là chạy thật luôn nhé... và đã vượt qua toàn bộ sáu mươi tám bài kiểm định tự động."),
     ("S03", "dung",  "Ở phòng máy ấy... học sinh dễ bị không điểm oan vì sai tên file Themis... còn thầy cô thì mất tới bốn mươi phút để gom bài qua USB."),

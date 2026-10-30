@@ -50,9 +50,9 @@ Chính sách có thể được cập nhật khi sản phẩm thay đổi. Phiê
 
 ## 8. Liên hệ
 
-**Nhóm DrgX** — [[Trường/Xã/Phường]], tỉnh Phú Thọ.
+**Nhóm DrgX** — Lớp 9A2, Trường THCS Sông Lô, tỉnh Phú Thọ.
 
-- Email: [[Email]]
-- Điện thoại: [[SĐT]]
+- Email: dotruongphuc206@gmail.com
+- Điện thoại: 0987024912
 
 > Tài liệu này mô tả nguyên tắc thiết kế và luồng dữ liệu dự kiến; trước khi triển khai thương mại, nhóm sẽ rà soát với chuyên gia pháp lý để bảo đảm tuân thủ Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân và các quy định liên quan.
