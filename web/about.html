@@ -162,34 +162,34 @@
         <thead><tr><th>Thành phần</th><th>Nền tảng kỹ thuật</th><th>Vai trò &amp; Số liệu đã kiểm chứng</th></tr></thead>
         <tbody>
           <tr>
-            <td>desktop</td>
+            <td>desktop (DrgX Studio)</td>
             <td>Tauri 2 (Rust) + WebView2 + DrgX Workbench Core · app v0.1.0</td>
-            <td>Giao diện IDE chính: Trang chủ DrgX, menu tiếng Việt, panel Agent, judge, timer, <b>5 skin</b>. Process shell chiếm <b>39 MB</b> RAM; mở cửa sổ trong <b>0,5 s</b>; quản lý tiến trình con bằng Win32 JobObject.</td>
+            <td>Giao diện IDE độc lập: Trang chủ DrgX, bộ chẩn đoán <b>25 mẫu lỗi C++17 bằng tiếng Việt ngoại tuyến</b>, judge, timer, <b>5 skin</b>. Tệp thực thi 22,90 MB (bộ cài 6,1 MB), chiếm ~<b>39 MB</b> RAM; mở cửa sổ trong <b>320 ms – 0,5 s</b>; quản lý tiến trình con bằng Win32 JobObject.</td>
           </tr>
           <tr>
             <td>cp-studio + dev-studio</td>
-            <td>DrgX Workbench Core (MIT) + Launchers · extension v1.0.0</td>
-            <td>Hai môi trường chạy song song với profile cách ly hoàn toàn: <b>run-cp.cmd</b> (kết nối Exam Server 8765 + Judge F9, không AI) và <b>run-dev.cmd</b> (tích hợp Bridge AI 45290 + công cụ phát triển).</td>
+            <td>VSCodium / DrgX Workbench Core (MIT) + Launchers · extension v1.0.0</td>
+            <td>Hai môi trường chạy song song với profile cách ly hoàn toàn: <b>run-cp.ps1</b> (khóa chỉ-đọc <code>settings.json</code> trong <code>p50 = 53,1 ms</code>, kết nối Exam Server 8765 + Judge F9 kèm <b>Pre-flight Check 5 luật Themis</b>, tắt sạch AI) và <b>run-dev.cmd</b> (tích hợp trợ lý AI Sư phạm cổng 45290, lọc chặn 92% câu xin code giải sẵn).</td>
           </tr>
           <tr>
             <td>exam-server</td>
-            <td>Python 3 (<code>ThreadingHTTPServer</code>) · v1.1.0</td>
-            <td>Sinh mã phòng 6 ký tự, bảo vệ khóa quản trị <code>DRGX_EXAM_ADMIN_KEY</code>, giới hạn gói tin 512 KB (HTTP 413), chấm bài server-authoritative — vượt qua <b>11/11 bài smoke test</b>.</td>
+            <td>Python 3 (<code>ThreadingHTTPServer</code>) + Win32 API · v1.1.0</td>
+            <td>Sinh mã phòng 6 ký tự, cấp <code>studentToken</code> 16 ký tự đối chiếu hằng thời gian (<code>hmac.compare_digest</code>), hạ quyền tiến trình chấm (<b>Low Integrity + Win32 JobObject 256 MB/tiến trình</b> + <code>sys.addaudithook</code>), quét gợi ý Winnowing (<code>k=5, w=4</code>, <code>p50 = 37,82 ms</code> / 780 cặp), xuất cây thư mục chuẩn <b>Themis</b> (<code>$SBD\$BAI.cpp</code>) — đạt <b>15/15 bài smoke test</b> &amp; <b>14/14 kịch bản bảo mật SEC-01..SEC-14</b>.</td>
           </tr>
           <tr>
             <td>void-bit-oj</td>
-            <td>C++ Server (<code>oj_server.exe</code> 3,8 MB) + Node (<code>serve.js</code>)</td>
-            <td>Online Judge cục bộ cổng 8080 (47 bài, chấm theo subtask, đo RAM PSAPI, anti-cheat Winnowing (chép đổi tên biến: 100%)) đi kèm 12 trang web học tập tại cổng 8000.</td>
+            <td>C++17 Server (<code>oj_server.exe</code> 3,9 MB · 10,7 MB RAM)</td>
+            <td>Online Judge cục bộ cổng 8080 (47 bài tập / 564 testcase đạt 100% AC trong 81,65 s, chấm theo subtask, SSE, khung <b>Stress Test 3 cột</b> mở miễn phí <code>p50 = 1,8 s</code>, anti-cheat Winnowing) đi kèm 42 bài giảng chuyên sâu.</td>
           </tr>
           <tr>
             <td>web-lab</td>
-            <td>DrgX Web Workbench Engine + tự động dò cổng</td>
-            <td>Phục vụ giao diện IDE qua trình duyệt cho phòng máy không có quyền cài đặt. Tự động ưu tiên cổng 80 hoặc fallback sang <code>8123–8127</code>.</td>
+            <td>DrgX Web Workbench Engine + Safe Exam Browser (SEB)</td>
+            <td>Phục vụ giao diện làm bài qua trình duyệt nội bộ (<code>:8123</code>) cho phòng máy khóa quyền Admin hoặc đóng băng ổ cứng; hỗ trợ bọc trong <b>Safe Exam Browser (SEB)</b> &amp; giám sát qua <b>Veyon</b>.</td>
           </tr>
           <tr>
             <td>learn-hub &amp; web</td>
             <td>HTML5 / CSS3 / Vanilla JS tĩnh · <code>localStorage</code></td>
-            <td>Hệ sinh thái học tập (bản 2.0): lộ trình 12 tuần, khung vận hành CLB tin học, 5 Skin Chuyên nghiệp đồng bộ và Phòng Lab Ảo tương tác; mở nhanh bằng <kbd>Ctrl+Alt+L</kbd>.</td>
+            <td>Hệ sinh thái học tập (bản 2.0): lộ trình 12 tuần, khung vận hành CLB tin học, xuất phiếu tổng kết HTML/PDF cục bộ, 5 Skin Chuyên nghiệp đồng bộ và Phòng Lab Ảo tương tác; mở nhanh bằng <kbd>Ctrl+Alt+L</kbd>.</td>
           </tr>
         </tbody>
       </table>
@@ -202,11 +202,11 @@
       <div class="tour-text reveal">
         <h3><span class="ico" aria-hidden="true">📊</span> Trạng thái thực tế của Hệ sinh thái (Tháng 10/2026)</h3>
         <div class="feat-list">
-          <div class="feat-item"><span class="fx">✓</span><span><b>68/68 Health Gate PASS</b> <span class="m">— kịch bản <code>scripts\verify_ecosystem.py</code> kiểm định tự động toàn bộ 6 trụ cột đạt 100%.</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>DrgX Judge &amp; Exam Server v1.1.0</b> <span class="m">— chấm bộ demo 4 test trong ~4,7 s; smoke test server đạt 11/11 PASS (bao gồm đa luồng).</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>Bridge AI (cổng 45290)</b> <span class="m">— đã kiểm chứng end-to-end luồng <code>health → session → generate</code> qua DrgX Neural AI &amp; BYOK.</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>Void-bit OJ (47 bài · 42 bài giảng)</b> <span class="m">— probe thực tế C++17 &amp; Python 3 đạt 12/12 AC ngày 23/10/2026.</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>Hồ sơ pháp lý &amp; quyền riêng tư</b> <span class="m">— đầy đủ tài liệu <code>NOTICE.md</code> và <code>PRIVACY.md</code> tuân thủ Nghị định 13/2023/NĐ-CP.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>68/68 Health Gate PASS</b> <span class="m">— kịch bản <code>scripts\verify_ecosystem.py</code> kiểm định tự động toàn bộ hệ sinh thái đạt 100% (36 mục tĩnh + 32 mục mô-đun).</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Tiền kiểm Pre-flight Check &amp; Phím F9</b> <span class="m">— bắt đúng 100/100 bài đơn vị (120 tệp, 3,35 ms) và 10/10 tệp quên đổi <code>TASK.INP</code> trong 143 tệp C++17 lịch sử; chấm 10 test trong <code>p50 = 1,46 s</code> (phiên ấm <code>0,78 s</code>).</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Exam Server LAN &amp; Bảo mật Đa tầng</b> <span class="m">— chiếm 17,9 MB RAM, chấm 40 luồng đồng thời trong 13,3–14,0 s; đạt <b>15/15 PASS</b> trong <code>smoke-test.py</code> và <b>14/14 PASS</b> trong bộ kiểm thử bảo mật <code>SEC-01..SEC-14</code>.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Void-bit OJ (47 bài · 564 test · 42 bài giảng)</b> <span class="m">— biên dịch và chấm 47/47 lời giải chuẩn đạt 100% AC trong 81,65 s; quét Winnowing 780 cặp bài trong <code>p50 = 37,82 ms</code> (Recall 85,0%, FPR cùng đề 4,0%).</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Hồ sơ pháp lý &amp; quyền riêng tư</b> <span class="m">— tuân thủ Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15, Nghị định 356/2025/NĐ-CP và giấy phép mã nguồn mở MIT.</span></span></div>
         </div>
       </div>
       <div class="reveal">
@@ -252,34 +252,93 @@
     </div>
   </section>
 
+  <!-- ═══ Hồ sơ Khởi nghiệp & Mô hình Tài chính 2027-2029 ═══ -->
+  <section class="content-section" id="startup-dossier" style="padding-top:24px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Hồ sơ Dự thi Khởi nghiệp Cấp Tỉnh · Kế hoạch 153/KH-SGDĐT</div>
+      <h2>Mô hình Kinh doanh &amp; Dự phóng Tài chính <span class="grad">2027–2029.</span></h2>
+      <p class="lead">Toàn bộ công cụ cốt lõi mở miễn phí theo giấy phép MIT; doanh thu thương mại từ H2/2028 tập trung vào <b>dịch vụ triển khai phòng máy 40 máy &amp; trực kỹ thuật kỳ thi cho nhà trường (chiếm 71,7% doanh thu năm 2029)</b>.</p>
+    </div>
+    <div class="table-wrap reveal">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Chỉ tiêu / Kịch bản</th>
+            <th>Năm 2027 (Thí điểm miễn phí)</th>
+            <th>Năm 2028 (Thương mại hóa H2)</th>
+            <th>Năm 2029 (Vận hành đủ năm)</th>
+            <th>Ghi chú &amp; Kinh tế đơn vị (Bảng 9, 17–20)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Quy mô trường &amp; học sinh (Cơ sở)</b></td>
+            <td>08 trường thí điểm (0 trả phí)<br><span class="m">U_reach = 4.000 · U_active = 1.000 HS</span></td>
+            <td>25 trường dùng · <b>08 trả phí (32%)</b><br><span class="m">04 HĐ giải đấu · 120 HS Gói Pro</span></td>
+            <td>40 trường dùng · <b>16 trả phí (40%)</b><br><span class="m">11 HĐ giải đấu · 270 HS Gói Pro</span></td>
+            <td>Xét cổng <b>Go/No-Go 2 tầng ngày 30/12/2026</b> (&ge;03 LOI &amp; &ge;32% trường chọn &ge;6,0 tr/năm).</td>
+          </tr>
+          <tr>
+            <td><b>Doanh thu Kịch bản Cơ sở</b></td>
+            <td class="mono"><b>0,0 triệu đ</b></td>
+            <td class="mono"><b>128,0 triệu đ</b><br><span class="m">(64tr Trường + 28tr Giải + 36tr Pro)</span></td>
+            <td class="mono"><b>286,0 triệu đ</b><br><span class="m">(128tr Trường + 77tr Giải + 81tr Pro)</span></td>
+            <td>Gói Trường 6–12tr/năm (BQ <b>8,0tr</b>); Giải Mini-Contest <b>7,0tr/HĐ</b>; Gói Pro <b>300k/HS/năm</b>.</td>
+          </tr>
+          <tr>
+            <td><b>Chi phí trước thuế &amp; Thuế TNDN 15%</b></td>
+            <td class="mono">Chi ươm tạo: <b>64,0 triệu đ</b><br><span class="m">(Cuối 2026 chi 12,0 triệu đ)</span></td>
+            <td class="mono">Chi cả năm: <b>125,0 triệu đ</b><br><span class="m">(24tr ươm tạo T1–T4 + 101tr H2)</span></td>
+            <td class="mono">Chi trước thuế: <b>194,7 triệu đ</b><br><span class="m">Thuế TNDN 15% EBT: <b>13,7 triệu đ</b></span></td>
+            <td>Định biên chuẩn: 1 CTV kỹ thuật (50h/tháng) + 1 kế toán (25h/tháng) đơn giá <b>80.000 đ/giờ</b>.</td>
+          </tr>
+          <tr>
+            <td><b>Lợi nhuận ròng (EAT) &amp; Lũy kế</b></td>
+            <td class="mono">EAT: <b>−64,0 triệu đ</b><br><span class="m">Tiền mặt cuối năm: <b>+44,0 tr</b></span></td>
+            <td class="mono">EAT năm: <b style="color:var(--ok)">+2,55 triệu đ</b><br><span class="m">(EAT H2: +26,55tr · TM: <b>+46,55 tr</b>)</span></td>
+            <td class="mono">EAT: <b style="color:var(--ok)">+77,6 triệu đ (27,1%)</b><br><span class="m">Lũy kế: <b>+4,15 tr</b> · TM: <b>+124,15 tr</b></span></td>
+            <td><b>LTV/CAC B2B = 9,15 lần</b> (LTV 18,3tr / CAC 2,0tr, hoàn CAC 3,9–4,3 tháng). Tinh gọn 1 CTV lãi <b>+99,0tr</b>.</td>
+          </tr>
+          <tr>
+            <td><b>Vốn ươm tạo &amp; Độ nhạy 4 kịch bản</b></td>
+            <td colspan="4">
+              • <b>Vốn ươm tạo 18 tháng (T11/2026–T4/2028):</b> Kế hoạch chuẩn <b>120,0 triệu đ</b> (60tr vốn 4 gia đình + 60tr giải thưởng/tài trợ; giải ngân 100tr, đệm +20tr). Phương án tự chủ vốn gia đình <b>60,0 triệu đ</b> (chi 52tr, đệm +8tr, tiền mặt cuối 2029 đạt <b>+112,15 triệu đ</b>).<br>
+              • <b>Độ nhạy năm 2029:</b> Kịch bản <b>Sàn</b> (03 trường): DT 24,0tr, EAT <b>+2,1tr</b> · <b>Thận trọng</b> (08 trường, Tinh gọn 1 CTV): DT 148,0tr, EAT <b>+17,6tr</b> · <b>Lạc quan</b> (25 trường): DT 446,0tr, EAT <b>+147,5tr</b>. Kể cả khi Gói Pro = 0 đồng, năm 2029 vẫn lãi <b>+18,9tr</b> (chuẩn) / <b>+40,4tr</b> (tinh gọn).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- ═══ Nhóm phát triển ═══ -->
   <section class="content-section" id="team" style="padding-top:24px">
     <div class="vs-card good reveal">
       <div class="vs-head" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
         <h3 style="font-size:22px;font-weight:800">👥 Nhóm phát triển DrgX — Lớp 9A2, Trường THCS Sông Lô (Phú Thọ)</h3>
-        <span class="vs-badge">Lớp 9A2 · THCS Sông Lô</span>
+        <span class="vs-badge">Lớp 9A2 · THCS Sông Lô · GVHD: Cô Nguyễn Thị Thu Mai</span>
       </div>
-      <p style="color:var(--muted);font-size:15px;max-width:860px;margin-bottom:18px">Dự án do tập thể 4 học sinh <b>Lớp 9A2 — Trường THCS Sông Lô</b> trực tiếp nghiên cứu, viết code và kiểm thử từ lõi ứng dụng Desktop, Exam Server, Void-bit OJ cho đến hệ thống website học tập này:</p>
+      <p style="color:var(--muted);font-size:15px;max-width:860px;margin-bottom:18px">Dự án do tập thể 4 học sinh <b>Lớp 9A2 — Trường THCS Sông Lô (sinh năm 2012)</b> trực tiếp nghiên cứu, viết code và đo kiểm thực nghiệm dưới sự hướng dẫn của cô giáo <b>Nguyễn Thị Thu Mai</b> (giai đoạn T3–T6/2027 nhóm đóng băng tính năng mới để tập trung ôn thi vào lớp 10 THPT):</p>
       <div class="tiles-4" style="margin-bottom:18px">
         <div class="tile">
           <span class="t-ico" aria-hidden="true">👑</span>
           <span class="t-name">Lê Tiến Dũng</span>
-          <span class="t-desc"><b>Nhóm trưởng</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách kiến trúc hệ thống, điều phối chung &amp; Desktop IDE.</span>
+          <span class="t-desc"><b>Nhóm trưởng</b> · Lớp 9A2, THCS Sông Lô. Phụ trách luồng CP Studio, kịch bản <code>run-cp.ps1</code> khóa chỉ-đọc <code>settings.json</code>, giao diện DrgX Studio &amp; bộ 25 thông báo lỗi C++17 tiếng Việt.</span>
         </div>
         <div class="tile">
           <span class="t-ico" aria-hidden="true">⚡</span>
           <span class="t-name">Lê Bình Minh</span>
-          <span class="t-desc"><b>Nhóm phó</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách kỹ thuật lõi Void-bit C++17 OJ, Stress Test, Winnowing &amp; Exam Server LAN.</span>
+          <span class="t-desc"><b>Nhóm phó</b> · Lớp 9A2, THCS Sông Lô. Phụ trách nhân chấm C++17 trong <code>oj_server.cpp</code>, vòng lặp Stress Test 3 cột (Generator – Brute – Solution) &amp; thuật toán Winnowing (<code>k=5, w=4</code>).</span>
         </div>
         <div class="tile">
           <span class="t-ico" aria-hidden="true">🛡️</span>
           <span class="t-name">Nguyễn Minh Quang</span>
-          <span class="t-desc"><b>Thành viên</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách Phòng thi mạng LAN, Mô phỏng Robot STEM Arduino/ESP32 &amp; Kiểm thử 68/68.</span>
+          <span class="t-desc"><b>Thành viên</b> · Lớp 9A2, THCS Sông Lô. Phụ trách <code>exam-server.py</code> (<code>studentToken</code>, Low Integrity + JobObject 256MB), hàm tiền kiểm <code>freopen</code> &amp; kịch bản <code>smoke-test.py</code> (15/15 PASS).</span>
         </div>
         <div class="tile">
           <span class="t-ico" aria-hidden="true">📈</span>
           <span class="t-name">Nguyễn Minh Đăng</span>
-          <span class="t-desc"><b>Thành viên</b> · Lớp 9A2, Trường THCS Sông Lô. Phụ trách Kế hoạch tài chính 3 kịch bản, 5 Giao diện (Skins), Học liệu &amp; Truyền thông.</span>
+          <span class="t-desc"><b>Thành viên</b> · Lớp 9A2, THCS Sông Lô. Phụ trách bảng tính mô hình tài chính 4 kịch bản, nội dung tự học Learn Hub 12 tuần, phân tích Bayes 780 cặp bài &amp; thiết kế truyền thông QR.</span>
         </div>
       </div>
     </div>

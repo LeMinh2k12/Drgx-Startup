@@ -80,6 +80,7 @@ def save_data(data):
     payload = json.dumps(data, ensure_ascii=False, indent=2)
     tmp_file.write_text(payload, encoding='utf-8')
     os.replace(tmp_file, DATA_FILE)
+    _apply_win32_sddl_label(DATA_FILE, 'S:(ML;OICI;NRNWNX;;;ME)')
 
 
 def random_code():
@@ -98,7 +99,7 @@ def find_expected_file(test_in: Path):
 # WINNOWING K-GRAM ANTI-CHEAT ENGINE (Chuẩn hóa Token + Băm trượt k=5, w=4)
 # ---------------------------------------------------------------------------
 def normalize_code_tokens(code: str) -> str:
-    """Chuẩn hóa mã nguồn: bỏ comment/directive, biến tên biến/hàm thành '@', số thành '0', chuỗi thành '$'."""
+    """Chuẩn hóa mã nguồn: bỏ comment/directive và khung nhập xuất mẫu (boilerplate), biến tên biến/hàm thành '@', số thành '0', chuỗi thành '$'."""
     no_block = re.sub(r'/\*[\s\S]*?\*/', ' ', code)
     lines = []
     for ln in no_block.splitlines():
@@ -108,6 +109,11 @@ def normalize_code_tokens(code: str) -> str:
         ln = re.sub(r'//.*$', '', ln)
         lines.append(ln)
     clean = '\n'.join(lines)
+    # Loại bỏ khung mẫu C++ phổ biến để tránh cảnh báo giả trên bài ngắn 20-50 dòng
+    clean = re.sub(r'\busing\s+namespace\s+std\s*;', ' ', clean)
+    clean = re.sub(r'\bios(?:_base)?\s*::\s*sync_with_stdio\s*\([^)]*\)\s*;?', ' ', clean)
+    clean = re.sub(r'\b(?:cin|cout)\s*\.\s*tie\s*\([^)]*\)\s*;?', ' ', clean)
+    clean = re.sub(r'\bfreopen\s*\([^)]*\)\s*;?', ' ', clean)
     clean = re.sub(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'', '$', clean)
     raw_tokens = re.findall(r'[A-Za-z_]\w*|\d+|==|!=|<=|>=|<<|>>|&&|\|\||[+\-*/%=<>!&|^~(){}\[\];,:]', clean)
     norm = []
@@ -149,13 +155,24 @@ def winnow_fingerprints(norm_str: str, k: int = 5, w: int = 4) -> list[int]:
     return fps
 
 
+MIN_NORM_LEN_FOR_FLAG = 60
+MIN_FP_COUNT_FOR_FLAG = 15
+
+
 def compare_submissions_winnowing(code_a: str, code_b: str) -> dict:
     norm_a = normalize_code_tokens(code_a)
     norm_b = normalize_code_tokens(code_b)
     fp_a = winnow_fingerprints(norm_a, 5, 4)
     fp_b = winnow_fingerprints(norm_b, 5, 4)
     if not fp_a or not fp_b:
-        return {'similarity': 0.0, 'flagged': False, 'shared_fingerprints': 0, 'norm_a': norm_a[:120], 'norm_b': norm_b[:120]}
+        return {
+            'similarity': 0.0,
+            'flagged': False,
+            'short_code_guard': True,
+            'shared_fingerprints': 0,
+            'norm_a': norm_a[:120],
+            'norm_b': norm_b[:120],
+        }
     counts_b = {}
     for h in fp_b:
         counts_b[h] = counts_b.get(h, 0) + 1
@@ -165,9 +182,11 @@ def compare_submissions_winnowing(code_a: str, code_b: str) -> dict:
             shared += 1
             counts_b[h] -= 1
     sim = round((200.0 * shared) / (len(fp_a) + len(fp_b)), 1)
+    short_guard = (min(len(norm_a), len(norm_b)) < MIN_NORM_LEN_FOR_FLAG) or (min(len(fp_a), len(fp_b)) < MIN_FP_COUNT_FOR_FLAG)
     return {
         'similarity': sim,
-        'flagged': sim >= 65.0,
+        'flagged': (sim >= 65.0) and (not short_guard),
+        'short_code_guard': short_guard,
         'shared_fingerprints': shared,
         'total_fingerprints_a': len(fp_a),
         'total_fingerprints_b': len(fp_b),
@@ -177,36 +196,61 @@ def compare_submissions_winnowing(code_a: str, code_b: str) -> dict:
 
 
 def scan_exam_plagiarism(exam: dict) -> dict:
-    """Quét N×N các bài nộp mới nhất của từng học sinh trong phòng thi."""
+    """Quét N×N các bài nộp mới nhất của từng học sinh trong phòng thi (có tiền xử lý bộ nhớ đệm O(N) vân tay)."""
     latest_by_student = {}
     for sub in exam.get('submissions', []):
         st = sub.get('student', 'anonymous')
         if sub.get('code'):
             latest_by_student[st] = sub
     students = sorted(latest_by_student.keys())
+    # Tiền xử lý chuẩn hóa token và vân tay k-gram 1 lần cho mỗi học sinh (O(N) thay vì O(N^2))
+    cached_fp = {}
+    for s in students:
+        code_str = latest_by_student[s].get('code', '')
+        norm_s = normalize_code_tokens(code_str)
+        fp_s = winnow_fingerprints(norm_s, 5, 4)
+        short_s = (len(norm_s) < MIN_NORM_LEN_FOR_FLAG) or (len(fp_s) < MIN_FP_COUNT_FOR_FLAG)
+        counts_s = {}
+        for h in fp_s:
+            counts_s[h] = counts_s.get(h, 0) + 1
+        cached_fp[s] = (norm_s, fp_s, counts_s, short_s)
+
     pairs = []
     max_sim_by_student = {s: 0.0 for s in students}
     for i in range(len(students)):
+        sa = students[i]
+        norm_a, fp_a, _, short_a = cached_fp[sa]
+        if short_a or not fp_a:
+            continue
+        sub_a = latest_by_student[sa]
         for j in range(i + 1, len(students)):
-            sa, sb = students[i], students[j]
-            sub_a, sub_b = latest_by_student[sa], latest_by_student[sb]
-            cmp_res = compare_submissions_winnowing(sub_a.get('code', ''), sub_b.get('code', ''))
-            sim = cmp_res['similarity']
+            sb = students[j]
+            norm_b, fp_b, counts_b_orig, short_b = cached_fp[sb]
+            if short_b or not fp_b:
+                continue
+            counts_b = counts_b_orig.copy()
+            shared = 0
+            for h in fp_a:
+                if counts_b.get(h, 0) > 0:
+                    shared += 1
+                    counts_b[h] -= 1
+            sim = round((200.0 * shared) / (len(fp_a) + len(fp_b)), 1)
             if sim > max_sim_by_student[sa]:
                 max_sim_by_student[sa] = sim
             if sim > max_sim_by_student[sb]:
                 max_sim_by_student[sb] = sim
             if sim >= 50.0:
+                sub_b = latest_by_student[sb]
                 pairs.append({
                     'student_a': sa,
                     'student_b': sb,
                     'language_a': sub_a.get('language', 'cpp'),
                     'language_b': sub_b.get('language', 'cpp'),
                     'similarity': sim,
-                    'flagged': cmp_res['flagged'],
-                    'shared_fingerprints': cmp_res['shared_fingerprints'],
-                    'norm_a': cmp_res['norm_a'],
-                    'norm_b': cmp_res['norm_b'],
+                    'flagged': sim >= 65.0,
+                    'shared_fingerprints': shared,
+                    'norm_a': norm_a[:140],
+                    'norm_b': norm_b[:140],
                     'code_a': sub_a.get('code', ''),
                     'code_b': sub_b.get('code', ''),
                 })
@@ -221,11 +265,352 @@ def scan_exam_plagiarism(exam: dict) -> dict:
     }
 
 
+def _build_safe_child_env(workdir: Path) -> dict:
+    """Tạo môi trường tối giản cho tiến trình bài nộp, loại bỏ hoàn toàn DRGX_ADMIN_TOKEN và biến nhạy cảm."""
+    safe = {}
+    for k in ('SystemRoot', 'WINDIR', 'COMSPEC', 'PATHEXT', 'PATH'):
+        val = os.environ.get(k)
+        if val:
+            safe[k] = val
+    safe['TEMP'] = str(workdir)
+    safe['TMP'] = str(workdir)
+    safe['PYTHONIOENCODING'] = 'utf-8'
+    return safe
+
+
+def _assign_win32_job_limits(proc_handle, mem_limit_bytes: int = 256 * 1024 * 1024, max_procs: int = 2):
+    """Gắn tiến trình bài làm vào Windows Job Object để giới hạn RAM (256MB), số tiến trình con và tự hủy khi đóng."""
+    if os.name != 'nt':
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+
+        class IO_COUNTERS(ctypes.Structure):
+            _fields_ = [('ReadOperationCount', ctypes.c_uint64), ('WriteOperationCount', ctypes.c_uint64),
+                        ('OtherOperationCount', ctypes.c_uint64), ('ReadTransferCount', ctypes.c_uint64),
+                        ('WriteTransferCount', ctypes.c_uint64), ('OtherTransferCount', ctypes.c_uint64)]
+
+        class JOBOBJECT_BASIC_LIMIT_INFORMATION(ctypes.Structure):
+            _fields_ = [('PerProcessUserTimeLimit', ctypes.c_int64), ('PerJobUserTimeLimit', ctypes.c_int64),
+                        ('LimitFlags', wintypes.DWORD), ('MinimumWorkingSetSize', ctypes.c_size_t),
+                        ('MaximumWorkingSetSize', ctypes.c_size_t), ('ActiveProcessLimit', wintypes.DWORD),
+                        ('Affinity', ctypes.c_size_t), ('PriorityClass', wintypes.DWORD),
+                        ('SchedulingClass', wintypes.DWORD)]
+
+        class JOBOBJECT_EXTENDED_LIMIT_INFORMATION(ctypes.Structure):
+            _fields_ = [('BasicLimitInformation', JOBOBJECT_BASIC_LIMIT_INFORMATION),
+                        ('IoInfo', IO_COUNTERS), ('ProcessMemoryLimit', ctypes.c_size_t),
+                        ('JobMemoryLimit', ctypes.c_size_t), ('PeakProcessMemoryUsed', ctypes.c_size_t),
+                        ('PeakJobMemoryUsed', ctypes.c_size_t)]
+
+        k32.CreateJobObjectW.restype = ctypes.c_void_p
+        k32.SetInformationJobObject.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
+        k32.AssignProcessToJobObject.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        job = k32.CreateJobObjectW(None, None)
+        if not job:
+            return None
+        info = JOBOBJECT_EXTENDED_LIMIT_INFORMATION()
+        # 0x00000100 = PROCESS_MEMORY, 0x00002000 = KILL_ON_JOB_CLOSE, 0x00000008 = ACTIVE_PROCESS, 0x00000400 = DIE_ON_UNHANDLED_EXCEPTION
+        info.BasicLimitInformation.LimitFlags = 0x00000100 | 0x00000200 | 0x00002000 | 0x00000008 | 0x00000400
+        info.BasicLimitInformation.ActiveProcessLimit = max_procs
+        info.ProcessMemoryLimit = mem_limit_bytes
+        info.JobMemoryLimit = mem_limit_bytes
+        k32.SetInformationJobObject(ctypes.c_void_p(job), 9, ctypes.byref(info), ctypes.sizeof(info))
+        k32.AssignProcessToJobObject(ctypes.c_void_p(job), ctypes.c_void_p(proc_handle))
+        return job
+    except Exception as e:
+        print('JOB_ERR:', e)
+        return None
+
+
+def _close_win32_handle(handle):
+    if handle and os.name == 'nt':
+        try:
+            import ctypes
+            k32 = ctypes.windll.kernel32
+            k32.CloseHandle.argtypes = [ctypes.c_void_p]
+            h_val = handle.value if isinstance(handle, ctypes.c_void_p) else int(handle)
+            if h_val:
+                k32.CloseHandle(ctypes.c_void_p(h_val))
+        except Exception:
+            pass
+
+
+
+# ---------------------------------------------------------------------------
+# WINDOWS KERNEL MANDATORY INTEGRITY CONTROL (MIC) & RESTRICTED TOKEN SANDBOX
+# ---------------------------------------------------------------------------
+FORBIDDEN_INCLUDE_RE = re.compile(
+    r'#\s*include\s*[<"]([^>"]+)[>"]', re.IGNORECASE
+)
+WIN_DEVICE_NAMES = {
+    'CON', 'PRN', 'AUX', 'NUL',
+    'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+}
+FORBIDDEN_HEADERS = {
+    'windows.h', 'winsock.h', 'winsock2.h', 'ws2tcpip.h', 'wininet.h',
+    'tlhelp32.h', 'psapi.h', 'shlobj.h', 'shellapi.h', 'sys/socket.h',
+}
+
+
+MACRO_INCLUDE_RE = re.compile(r'^\s*#\s*include\s+(?![<"])(\S+)', re.IGNORECASE | re.MULTILINE)
+FORBIDDEN_CPP_CALL_RE = re.compile(
+    r'\b(?:__asm__|__asm|asm|WinExec|CreateProcessA|CreateProcessW|CreateProcessAsUserW|'
+    r'ShellExecuteA|ShellExecuteW|WSAStartup|URLDownloadToFileA|URLDownloadToFileW|'
+    r'VirtualAllocEx|WriteProcessMemory|OpenProcess)\b'
+)
+
+
+def _scan_cpp_security(code_text: str) -> str | None:
+    """Quét chặn #include đường dẫn tuyệt đối, '..', thiết bị DOS, macro #include động và API hệ thống."""
+    m_mac = MACRO_INCLUDE_RE.search(code_text)
+    if m_mac:
+        return f'Từ chối biên dịch: Không cho phép #include thông qua macro ({m_mac.group(1)}).'
+    for m in FORBIDDEN_INCLUDE_RE.finditer(code_text):
+        inc = m.group(1).strip().replace('\\', '/')
+        low = inc.lower()
+        if low.startswith('/') or (len(low) >= 2 and low[1] == ':') or '..' in low:
+            return f'Từ chối biên dịch: #include chứa đường dẫn tuyệt đối hoặc ".." ({inc}).'
+        base = low.split('/')[-1].split('.')[0].upper()
+        if base in WIN_DEVICE_NAMES:
+            return f'Từ chối biên dịch: #include trỏ tới tên thiết bị hệ thống ({inc}).'
+        if low in FORBIDDEN_HEADERS:
+            return f'Từ chối biên dịch: Không cho phép thư viện hệ thống/mạng ({inc}) trong bài thi thuật toán.'
+    m_call = FORBIDDEN_CPP_CALL_RE.search(code_text)
+    if m_call:
+        return f'Từ chối biên dịch: Phát hiện từ khóa/API hệ thống bị cấm ({m_call.group(0)}).'
+    return None
+
+
+def _compile_cpp_in_job(src: Path, exe: Path, workdir: Path, safe_env: dict, timeout_sec: float = 12.0, mem_limit_bytes: int = 256 * 1024 * 1024):
+    """Biên dịch g++ bên trong Windows Job Object (giới hạn 256 MB RAM, tự hủy cây tiến trình cc1plus.exe khi vượt ngưỡng)."""
+    cmd = ['g++', '-O2', '-std=c++17', '-fmax-errors=5', '-ftemplate-depth=64', str(src), '-o', str(exe)]
+    creationflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, encoding='utf-8', errors='replace', cwd=str(workdir), env=safe_env,
+        creationflags=creationflags
+    )
+    job_handle = _assign_win32_job_limits(getattr(proc, '_handle', None), mem_limit_bytes=mem_limit_bytes, max_procs=8)
+    try:
+        out, err = proc.communicate(timeout=timeout_sec)
+        return proc.returncode, out, err, False
+    except subprocess.TimeoutExpired:
+        try:
+            proc.kill()
+        except Exception:
+            pass
+        return -1, '', 'Quá thời gian biên dịch (12 giây).', True
+    finally:
+        _close_win32_handle(job_handle)
+
+
+PY_SANDBOX_GUARD = """import sys, builtins
+_BLOCKED_PREFIXES = (
+    'socket.', 'subprocess.', 'os.system', 'os.popen', 'os.spawn', 'os.exec',
+    'os.fork', 'os.kill', 'os.remove', 'os.unlink', 'os.rmdir', 'os.rename',
+    'os.replace', 'os.chmod', 'os.chown', 'shutil.', 'ctypes.', 'winreg.',
+    'urllib.', 'http.', 'ftplib.', 'smtplib.', 'telnetlib.', 'webbrowser.',
+    'multiprocessing.', 'concurrent.'
+)
+def _drgx_audit(event, args):
+    if event.startswith(_BLOCKED_PREFIXES) or event in ('os.system', 'os.popen', 'os.remove', 'os.unlink', 'os.rmdir', 'ctypes.dlopen', 'ctypes.cdll'):
+        raise PermissionError('DrgX Sandbox blocked event: ' + event)
+sys.addaudithook(_drgx_audit)
+with open('main.py', 'r', encoding='utf-8') as _f:
+    _code = compile(_f.read(), 'main.py', 'exec')
+exec(_code, {'__name__': '__main__'})
+"""
+
+
+_MIC_LOCK = threading.Lock()
+_SPAWN_LOCK = threading.Lock()
+
+if os.name == 'nt':
+    import ctypes
+    from ctypes import wintypes
+    _adv = ctypes.windll.advapi32
+    _k32 = ctypes.windll.kernel32
+    _k32.GetCurrentProcess.restype = ctypes.c_void_p
+    _k32.CreateFileW.restype = ctypes.c_void_p
+    _k32.CloseHandle.argtypes = [ctypes.c_void_p]
+    _k32.LocalFree.argtypes = [ctypes.c_void_p]
+    _k32.ResumeThread.argtypes = [ctypes.c_void_p]
+    _k32.WaitForSingleObject.argtypes = [ctypes.c_void_p, wintypes.DWORD]
+    _k32.TerminateProcess.argtypes = [ctypes.c_void_p, wintypes.UINT]
+    _k32.GetExitCodeProcess.argtypes = [ctypes.c_void_p, ctypes.POINTER(wintypes.DWORD)]
+    _adv.OpenProcessToken.argtypes = [ctypes.c_void_p, wintypes.DWORD, ctypes.POINTER(ctypes.c_void_p)]
+    _adv.GetLengthSid.argtypes = [ctypes.c_void_p]
+    _adv.GetLengthSid.restype = wintypes.DWORD
+    _adv.SetTokenInformation.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
+
+
+def _apply_win32_sddl_label(path_obj: Path, sddl: str) -> bool:
+    if os.name != 'nt' or not path_obj.exists():
+        return False
+    if path_obj.is_file():
+        sddl = sddl.replace('OICI;', ';')
+    try:
+        pSD = ctypes.c_void_p()
+        if not _adv.ConvertStringSecurityDescriptorToSecurityDescriptorW(ctypes.c_wchar_p(sddl), 1, ctypes.byref(pSD), None):
+            return False
+        pSacl = ctypes.c_void_p()
+        bPresent = wintypes.BOOL()
+        bDefaulted = wintypes.BOOL()
+        _adv.GetSecurityDescriptorSacl(pSD, ctypes.byref(bPresent), ctypes.byref(pSacl), ctypes.byref(bDefaulted))
+        err = _adv.SetNamedSecurityInfoW(
+            ctypes.c_wchar_p(str(path_obj)), 1, 0x00000010, None, None, None, pSacl
+        )
+        _k32.LocalFree(pSD)
+        return err == 0
+    except Exception:
+        return False
+
+
+_PROTECTED_ONCE = False
+def _protect_server_secret_paths():
+    """Đặt nhãn Mandatory Integrity S:(ML;OICI;NRNWNX;;;ME) (NO_READ_UP | NO_WRITE_UP) lên exams.json và tests/."""
+    global _PROTECTED_ONCE
+    with _MIC_LOCK:
+        _apply_win32_sddl_label(DATA_FILE, "S:(ML;OICI;NRNWNX;;;ME)")
+        if not _PROTECTED_ONCE:
+            _apply_win32_sddl_label(TESTS_DIR, "S:(ML;OICI;NRNWNX;;;ME)")
+            _PROTECTED_ONCE = True
+
+
+def _run_in_low_integrity_sandbox(
+    run_cmd: list[str],
+    workdir: Path,
+    inp_data: str,
+    timeout_sec: float = 3.0,
+    mem_limit_bytes: int = 256 * 1024 * 1024,
+    max_procs: int = 1,
+) -> tuple[int, str, str, bool]:
+    """
+    Thực thi tiến trình bài nộp dưới Windows Restricted Token + Low Integrity Level (S-1-16-4096)
+    kết hợp Windows Job Object (giới hạn RAM 256MB và số tiến trình con).
+    """
+    if os.name != 'nt':
+        safe_env = _build_safe_child_env(workdir)
+        proc = subprocess.Popen(
+            run_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding='utf-8', errors='replace', cwd=str(workdir), env=safe_env
+        )
+        try:
+            out, err = proc.communicate(input=inp_data, timeout=timeout_sec)
+            return proc.returncode, out, err, False
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            return -1, '', 'TLE', True
+
+    class SID_AND_ATTRIBUTES(ctypes.Structure):
+        _fields_ = [("Sid", ctypes.c_void_p), ("Attributes", wintypes.DWORD)]
+
+    class SECURITY_ATTRIBUTES(ctypes.Structure):
+        _fields_ = [("nLength", wintypes.DWORD), ("lpSecurityDescriptor", ctypes.c_void_p), ("bInheritHandle", wintypes.BOOL)]
+
+    class STARTUPINFOW(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD), ("lpReserved", wintypes.LPWSTR), ("lpDesktop", wintypes.LPWSTR),
+            ("lpTitle", wintypes.LPWSTR), ("dwX", wintypes.DWORD), ("dwY", wintypes.DWORD),
+            ("dwXSize", wintypes.DWORD), ("dwYSize", wintypes.DWORD), ("dwXCountChars", wintypes.DWORD),
+            ("dwYCountChars", wintypes.DWORD), ("dwFillAttribute", wintypes.DWORD), ("dwFlags", wintypes.DWORD),
+            ("wShowWindow", wintypes.WORD), ("cbReserved2", wintypes.WORD), ("lpReserved2", ctypes.c_void_p),
+            ("hStdInput", ctypes.c_void_p), ("hStdOutput", ctypes.c_void_p), ("hStdError", ctypes.c_void_p),
+        ]
+
+    class PROCESS_INFORMATION(ctypes.Structure):
+        _fields_ = [
+            ("hProcess", ctypes.c_void_p), ("hThread", ctypes.c_void_p),
+            ("dwProcessId", wintypes.DWORD), ("dwThreadId", wintypes.DWORD),
+        ]
+
+    in_path = workdir / "_stdin.tmp"
+    out_path = workdir / "_stdout.tmp"
+    err_path = workdir / "_stderr.tmp"
+    in_path.write_text(inp_data, encoding="utf-8")
+    out_path.write_text("", encoding="utf-8")
+    err_path.write_text("", encoding="utf-8")
+
+    pi = PROCESS_INFORMATION()
+    job_handle = None
+    with _SPAWN_LOCK:
+        hTok = ctypes.c_void_p()
+        hRestricted = ctypes.c_void_p()
+        pLowSid = ctypes.c_void_p()
+        hIn = hOut = hErr = None
+        try:
+            if not _adv.OpenProcessToken(ctypes.c_void_p(_k32.GetCurrentProcess()), 0x000F01FF, ctypes.byref(hTok)):
+                raise OSError("OpenProcessToken failed")
+            if not _adv.CreateRestrictedToken(hTok, 0x1 | 0x2, 0, None, 0, None, 0, None, ctypes.byref(hRestricted)):
+                raise OSError("CreateRestrictedToken failed")
+            _adv.ConvertStringSidToSidW(ctypes.c_wchar_p("S-1-16-4096"), ctypes.byref(pLowSid))
+            tml = SID_AND_ATTRIBUTES(pLowSid, 0x00000020)
+            _adv.SetTokenInformation(hRestricted, 25, ctypes.byref(tml), ctypes.sizeof(tml) + _adv.GetLengthSid(pLowSid))
+
+            sa = SECURITY_ATTRIBUTES(ctypes.sizeof(SECURITY_ATTRIBUTES), None, True)
+            hIn = _k32.CreateFileW(ctypes.c_wchar_p(str(in_path)), 0x80000000, 1, ctypes.byref(sa), 3, 0x80, None)
+            hOut = _k32.CreateFileW(ctypes.c_wchar_p(str(out_path)), 0x40000000, 3, ctypes.byref(sa), 2, 0x80, None)
+            hErr = _k32.CreateFileW(ctypes.c_wchar_p(str(err_path)), 0x40000000, 3, ctypes.byref(sa), 2, 0x80, None)
+
+            si = STARTUPINFOW()
+            si.cb = ctypes.sizeof(STARTUPINFOW)
+            si.dwFlags = 0x00000100
+            si.hStdInput = hIn
+            si.hStdOutput = hOut
+            si.hStdError = hErr
+
+            cmd_line = subprocess.list2cmdline(run_cmd)
+            cmd_buf = ctypes.create_unicode_buffer(cmd_line)
+
+            safe_env = _build_safe_child_env(workdir)
+            env_block = "".join(f"{k}={v}\x00" for k, v in sorted(safe_env.items(), key=lambda x: x[0].upper())) + "\x00"
+            env_buf = ctypes.create_unicode_buffer(env_block)
+
+            flags = 0x08000000 | 0x00000400 | 0x00000004
+            ok = _adv.CreateProcessAsUserW(
+                hRestricted, None, cmd_buf, None, None, True, flags,
+                ctypes.cast(env_buf, ctypes.c_void_p), ctypes.c_wchar_p(str(workdir)), ctypes.byref(si), ctypes.byref(pi)
+            )
+            if not ok:
+                raise OSError(f"CreateProcessAsUserW failed: {ctypes.GetLastError()}")
+            job_handle = _assign_win32_job_limits(pi.hProcess, mem_limit_bytes=mem_limit_bytes, max_procs=max_procs)
+            _k32.ResumeThread(ctypes.c_void_p(pi.hThread))
+        finally:
+            for h in (hIn, hOut, hErr, hRestricted, hTok):
+                if h:
+                    _close_win32_handle(h)
+            if pLowSid:
+                _k32.LocalFree(pLowSid)
+
+    try:
+        wait_ms = int(timeout_sec * 1000)
+        wait_res = _k32.WaitForSingleObject(ctypes.c_void_p(pi.hProcess), wait_ms)
+        if wait_res == 0x00000102:
+            _k32.TerminateProcess(ctypes.c_void_p(pi.hProcess), 1)
+            return -1, "", "TLE", True
+        exit_code = wintypes.DWORD(0)
+        _k32.GetExitCodeProcess(ctypes.c_void_p(pi.hProcess), ctypes.byref(exit_code))
+        rc = int(exit_code.value)
+    finally:
+        _close_win32_handle(pi.hProcess)
+        _close_win32_handle(pi.hThread)
+        _close_win32_handle(job_handle)
+
+    stdout_str = out_path.read_text(encoding="utf-8", errors="replace") if out_path.exists() else ""
+    stderr_str = err_path.read_text(encoding="utf-8", errors="replace") if err_path.exists() else ""
+    return rc, stdout_str, stderr_str, False
+
+
 def judge_submission(exam_code: str, language: str, code_text: str):
-    """Chấm bài trên server dựa vào tests/<exam_code>/*.in + *.out|*.ans|*.a (hoặc tests/default)."""
+    """Chấm bài trên server dưới Windows Restricted Token + Low Integrity Level (S-1-16-4096) + Job Object."""
+    _protect_server_secret_paths()
     safe_code = exam_code if SAFE_CODE_RE.match(exam_code or '') else 'default'
     tdir = TESTS_DIR / safe_code
-    if not tdir.exists():
+    if not tdir.exists() and safe_code.lower() in ('default', 'demo'):
         tdir = TESTS_DIR / 'default'
     inputs = sorted(tdir.glob('*.in')) if tdir.exists() else []
     if not inputs:
@@ -233,28 +618,41 @@ def judge_submission(exam_code: str, language: str, code_text: str):
 
     workdir = TMP_DIR / f'{int(time.time() * 1000)}_{os.getpid()}_{threading.get_ident()}_{random_code()}'
     workdir.mkdir(parents=True, exist_ok=True)
+    _apply_win32_sddl_label(workdir, 'S:(ML;OICI;NW;;;LW)')
+    safe_env = _build_safe_child_env(workdir)
     results = []
     try:
         if language == 'cpp':
+            sec_err = _scan_cpp_security(code_text)
+            if sec_err:
+                return {'verdict': 'CE', 'compile_error': sec_err, 'tests': []}
             src = workdir / 'main.cpp'
             exe = workdir / ('main.exe' if os.name == 'nt' else 'main')
             src.write_text(code_text, encoding='utf-8')
-            try:
-                comp = subprocess.run(['g++', '-O2', '-std=c++17', str(src), '-o', str(exe)],
-                                      capture_output=True, text=True, timeout=30)
-            except subprocess.TimeoutExpired:
-                return {'verdict': 'CE', 'compile_error': 'Quá thời gian biên dịch (30 giây).', 'tests': []}
-            if comp.returncode != 0:
-                return {'verdict': 'CE', 'compile_error': comp.stderr[:1000], 'tests': []}
+            rc_c, out_c, err_c, to_c = _compile_cpp_in_job(src, exe, workdir, safe_env, timeout_sec=12.0, mem_limit_bytes=256 * 1024 * 1024)
+            if to_c:
+                return {'verdict': 'CE', 'compile_error': err_c, 'tests': []}
+            if rc_c != 0 or not exe.exists():
+                return {'verdict': 'CE', 'compile_error': (err_c or out_c or 'Compiler killed by Job Object memory limit (256 MB).')[:1000], 'tests': []}
             run_cmd = [str(exe)]
+            max_child_procs = 1
         elif language == 'python':
             src = workdir / 'main.py'
             src.write_text(code_text, encoding='utf-8')
-            comp = subprocess.run([sys.executable, '-m', 'py_compile', str(src)],
-                                  capture_output=True, text=True, timeout=10)
-            if comp.returncode != 0:
-                return {'verdict': 'CE', 'compile_error': (comp.stderr or comp.stdout)[:1000], 'tests': []}
-            run_cmd = [sys.executable, str(src)]
+            try:
+                compile(code_text, 'main.py', 'exec')
+            except SyntaxError as se:
+                return {'verdict': 'CE', 'compile_error': f'SyntaxError line {se.lineno}: {se.msg}', 'tests': []}
+            guarded_code = (
+                "import sys\n"
+                "def _drgx_audit(e, a):\n"
+                "    if e.startswith(('socket.','subprocess.','os.system','os.popen','os.spawn','os.exec','ctypes.','winreg.','urllib.','http.','ftplib.','smtplib.','multiprocessing.')):\n"
+                "        raise PermissionError('Blocked: ' + e)\n"
+                "sys.addaudithook(_drgx_audit)\n"
+                + code_text
+            )
+            run_cmd = [sys.executable, '-I', '-c', guarded_code]
+            max_child_procs = 2
         else:
             return {'verdict': 'BAD_LANG', 'tests': []}
 
@@ -264,30 +662,33 @@ def judge_submission(exam_code: str, language: str, code_text: str):
             expected = out_file.read_text(encoding='utf-8').strip() if out_file else ''
             inp_data = test.read_text(encoding='utf-8')
             t0 = time.perf_counter()
-            try:
-                proc = subprocess.run(run_cmd, input=inp_data, capture_output=True, text=True, timeout=3)
-                elapsed_ms = int((time.perf_counter() - t0) * 1000)
-                if proc.returncode != 0:
-                    verdict = 'RE'
-                    overall = 'FAIL'
-                else:
-                    got = proc.stdout.strip()
-                    if got == expected:
-                        verdict = 'AC'
-                    else:
-                        verdict = 'WA'
-                        overall = 'FAIL'
-                results.append({
-                    'name': test.stem,
-                    'verdict': verdict,
-                    'ms': elapsed_ms,
-                    'expected': expected[:240],
-                    'got': (proc.stdout or '').strip()[:240],
-                    'stderr': (proc.stderr or '').strip()[:240]
-                })
-            except subprocess.TimeoutExpired:
+            rc, stdout_str, stderr_str, timed_out = _run_in_low_integrity_sandbox(
+                run_cmd, workdir, inp_data, timeout_sec=3.0,
+                mem_limit_bytes=256 * 1024 * 1024, max_procs=max_child_procs
+            )
+            elapsed_ms = int((time.perf_counter() - t0) * 1000)
+            if timed_out:
                 overall = 'FAIL'
                 results.append({'name': test.stem, 'verdict': 'TLE', 'ms': 3000})
+                continue
+            if rc != 0:
+                verdict = 'RE'
+                overall = 'FAIL'
+            else:
+                got = (stdout_str or '').strip()
+                if got == expected:
+                    verdict = 'AC'
+                else:
+                    verdict = 'WA'
+                    overall = 'FAIL'
+            results.append({
+                'name': test.stem,
+                'verdict': verdict,
+                'ms': elapsed_ms,
+                'expected': expected[:240],
+                'got': (stdout_str or '').strip()[:240],
+                'stderr': (stderr_str or '').strip()[:240]
+            })
         return {'verdict': overall, 'tests': results}
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
@@ -529,7 +930,7 @@ pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10p
     <div class="kpi"><b id="kpiRoom">—</b><span>Mã Phòng Thi LAN (6 ký tự)</span></div>
     <div class="kpi"><b id="kpiStudents">0</b><span>Học sinh trong phòng</span></div>
     <div class="kpi"><b id="kpiAc">0 / 0</b><span>Bài nộp đạt AC (100% test)</span></div>
-    <div class="kpi"><b id="kpiPlag" style="color:var(--good)">0 cặp</b><span>Cảnh báo đạo văn Winnowing (≥ 65%)</span></div>
+    <div class="kpi"><b id="kpiPlag" style="color:var(--good)">0 cặp</b><span>Gợi ý giáo viên đối chiếu (≥ 65%, ≥ 15 vân tay)</span></div>
   </div>
 
   <div class="grid-2">
@@ -680,7 +1081,7 @@ async function runAntiCheat() {
   kpiPlag.style.color = flagged > 0 ? 'var(--bad)' : 'var(--good)';
 
   document.getElementById('plagSummary').innerHTML =
-    `Đã quét <b>${res.students_scanned} học sinh</b> (${res.total_pairs_compared} cặp đối chiếu). Phát hiện <b style="color:${flagged > 0 ? 'var(--bad)' : 'var(--good)'}">${flagged} cặp nghi vấn đạo văn cấu trúc (≥ 65%)</b>:`;
+    `Đã quét <b>${res.students_scanned} học sinh</b> (${res.total_pairs_compared} cặp đối chiếu, đã lọc bỏ khung nhập xuất mẫu & bài ngắn < 15 vân tay). Có <b style="color:${flagged > 0 ? 'var(--bad)' : 'var(--good)'}">${flagged} cặp gợi ý giáo viên đối chiếu thủ công (≥ 65%, không tự động kết luận gian lận)</b>:`;
 
   const listEl = document.getElementById('plagList');
   if (lastPlagPairs.length === 0) {
@@ -705,7 +1106,7 @@ function showPlagPair(i) {
   const p = lastPlagPairs[i];
   if (!p) return;
   document.getElementById('diffCard').style.display = 'block';
-  document.getElementById('diffTitle').textContent = `🚨 CẢNH BÁO WINNOWING: ${p.student_a} ↔ ${p.student_b} (Độ tương đồng cấu trúc: ${p.similarity}%)`;
+  document.getElementById('diffTitle').textContent = `⚖️ GỢI Ý GIÁO VIÊN ĐỐI CHIẾU: ${p.student_a} ↔ ${p.student_b} (Độ tương đồng cấu trúc: ${p.similarity}%)`;
   document.getElementById('diffLabelA').textContent = `${p.student_a} (Token: ${p.norm_a.slice(0, 45)}...)`;
   document.getElementById('diffCodeA').textContent = p.code_a;
   document.getElementById('diffLabelB').textContent = `${p.student_b} (Token: ${p.norm_b.slice(0, 45)}...)`;
@@ -779,10 +1180,14 @@ class Handler(BaseHTTPRequestHandler):
                 'features': ['dashboard', 'winnowing-anti-cheat', 'csv-export', 'burst-40']
             })
         if self.path == '/exams':
+            if not self._is_admin_authorized():
+                return self._send(403, {'error': 'Cần quyền Admin (localhost hoặc X-DrgX-Admin-Token)'})
             with DATA_LOCK:
                 data = load_data()
             return self._send(200, data)
         if self.path.startswith('/exam/') and self.path.endswith('/export.csv'):
+            if not self._is_admin_authorized():
+                return self._send(403, {'error': 'Cần quyền Admin (localhost hoặc X-DrgX-Admin-Token)'})
             code = self.path.split('/exam/', 1)[1].rsplit('/export.csv', 1)[0].strip().upper()
             with DATA_LOCK:
                 data = load_data()
@@ -793,14 +1198,14 @@ class Handler(BaseHTTPRequestHandler):
             max_sim = plag_res.get('max_sim_by_student', {})
             buf = io.StringIO()
             writer = csv.writer(buf)
-            writer.writerow(['STT', 'Mã phòng', 'Họ và tên học sinh', 'Ngôn ngữ', 'Kết quả (Verdict)', 'Số test đạt', 'Tổng thời gian (ms)', 'Độ tương đồng Winnowing cao nhất (%)', 'Trạng thái đạo văn', 'Thời điểm nộp'])
+            writer.writerow(['STT', 'Mã phòng', 'Họ và tên học sinh', 'Ngôn ngữ', 'Kết quả (Verdict)', 'Số test đạt', 'Tổng thời gian (ms)', 'Độ tương đồng Winnowing cao nhất (%)', 'Cờ gợi ý rà soát kỹ thuật', 'Thời điểm nộp'])
             for idx, sub in enumerate(exam.get('submissions', []), 1):
                 st = sub.get('student', 'anonymous')
                 tests = sub.get('tests', [])
                 ac_cnt = sum(1 for t in tests if t.get('verdict') == 'AC')
                 tot_ms = sum(t.get('ms', 0) for t in tests)
                 sim = max_sim.get(st, 0.0)
-                flag_txt = 'NGHI VẤN SAO CHÉP' if sim >= 65.0 else 'Hợp lệ'
+                flag_txt = 'CẦN GIÁO VIÊN ĐỐI CHIẾU' if sim >= 65.0 else 'Bình thường'
                 ts_str = datetime.datetime.fromtimestamp(sub.get('timestamp', int(time.time()))).strftime('%Y-%m-%d %H:%M:%S')
                 writer.writerow([idx, code, st, sub.get('language', 'cpp').upper(), sub.get('verdict', ''), f'{ac_cnt}/{len(tests)}', tot_ms, f'{sim}%', flag_txt, ts_str])
             csv_bytes = ('\ufeff' + buf.getvalue()).encode('utf-8')
@@ -812,6 +1217,8 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(csv_bytes)
             return
         if self.path.startswith('/exam/'):
+            if not self._is_admin_authorized():
+                return self._send(403, {'error': 'Cần quyền Admin (localhost hoặc X-DrgX-Admin-Token)'})
             code = self.path.split('/exam/', 1)[1].strip().upper()
             with DATA_LOCK:
                 data = load_data()
@@ -853,15 +1260,36 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == '/exam/join':
             code = str(payload.get('code', '')).strip().upper()
             name = str(payload.get('name', 'hoc-sinh')).strip()[:64] or 'hoc-sinh'
+            client_ip = self.client_address[0] if self.client_address else ''
+            req_token = str(payload.get('studentToken', '')).strip()
             with DATA_LOCK:
                 data = load_data()
                 exam = data['exams'].get(code)
                 if not exam:
                     return self._send(404, {'error': 'Mã phòng không tồn tại'})
+                tokens = exam.setdefault('studentTokens', {})
+                ips = exam.setdefault('studentIps', {})
+                if name in tokens:
+                    # Nếu học sinh đã đăng ký từ một máy khác và không gửi đúng studentToken thì từ chối giả mạo
+                    if req_token and req_token != tokens[name]:
+                        return self._send(403, {'error': 'Sai mã phiên học sinh (studentToken)'})
+                    if not req_token and ips.get(name) and ips.get(name) != client_ip and client_ip not in ('127.0.0.1', '::1'):
+                        return self._send(403, {'error': 'Tên học sinh này đã được đăng ký từ một máy trạm khác trong phòng thi'})
+                    st_token = tokens[name]
+                else:
+                    st_token = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+                    tokens[name] = st_token
+                    ips[name] = client_ip
                 if name not in exam['participants']:
                     exam['participants'].append(name)
                 save_data(data)
-            return self._send(200, {'status': 'joined', 'exam': exam})
+                safe_exam = {
+                    'code': exam['code'],
+                    'title': exam.get('title', ''),
+                    'createdAt': exam.get('createdAt', 0),
+                    'participants': list(exam.get('participants', [])),
+                }
+            return self._send(200, {'status': 'joined', 'studentToken': st_token, 'exam': safe_exam})
 
         if self.path == '/exam/simulate-burst':
             if not self._is_admin_authorized():
@@ -885,6 +1313,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {'status': 'simulated', 'code': code, 'count': count, 'exam': exam})
 
         if self.path == '/exam/anti-cheat':
+            if not self._is_admin_authorized():
+                return self._send(403, {'error': 'Cần quyền Admin (localhost hoặc X-DrgX-Admin-Token)'})
             code = str(payload.get('code', '')).strip().upper()
             with DATA_LOCK:
                 data = load_data()
@@ -896,13 +1326,23 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == '/submit':
             code = str(payload.get('examCode', '')).strip().upper()
-            with DATA_LOCK:
-                data = load_data()
-                if code not in data['exams']:
-                    return self._send(404, {'error': 'Mã phòng không tồn tại'})
             lang = str(payload.get('language', 'cpp')).strip().lower()
             src = str(payload.get('code', ''))
             student = str(payload.get('student', 'anonymous')).strip()[:64] or 'anonymous'
+            req_token = str(payload.get('studentToken', '')).strip()
+            client_ip = self.client_address[0] if self.client_address else ''
+            with DATA_LOCK:
+                data = load_data()
+                exam = data['exams'].get(code)
+                if not exam:
+                    return self._send(404, {'error': 'Mã phòng không tồn tại'})
+                tokens = exam.get('studentTokens', {})
+                ips = exam.get('studentIps', {})
+                if student != 'anonymous' and student in tokens:
+                    if req_token and not __import__('hmac').compare_digest(str(req_token), str(tokens[student])):
+                        return self._send(403, {'error': 'Mã phiên học sinh (studentToken) không hợp lệ'})
+                    if not req_token and ips.get(student) and ips.get(student) != client_ip and client_ip not in ('127.0.0.1', '::1'):
+                        return self._send(403, {'error': 'Không được nộp bài mạo danh học sinh ở máy trạm khác'})
             with GRADE_SLOTS:
                 res = judge_submission(code, lang, src)
             record = {
@@ -938,8 +1378,19 @@ class ExamServer(ThreadingHTTPServer):
 def main():
     host = os.environ.get('DRGX_CP_SERVER_HOST', '127.0.0.1')
     port = int(os.environ.get('DRGX_CP_SERVER_PORT', '8765'))
-    print(f'[DrgX CP Exam Server] http://{host}:{port} (Dashboard: http://{host}:{port}/dashboard | Queue={ExamServer.request_queue_size})')
-    ExamServer((host, port), Handler).serve_forever()
+    srv = ExamServer((host, port), Handler)
+    cert_file = os.environ.get('DRGX_TLS_CERT', '').strip()
+    key_file = os.environ.get('DRGX_TLS_KEY', '').strip()
+    scheme = 'http'
+    if cert_file and key_file and Path(cert_file).exists() and Path(key_file).exists():
+        import ssl
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+        ctx.load_cert_chain(certfile=cert_file, keyfile=key_file)
+        srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
+        scheme = 'https'
+    print(f'[DrgX CP Exam Server] {scheme}://{host}:{port} (Dashboard: {scheme}://{host}:{port}/dashboard | Queue={ExamServer.request_queue_size})')
+    srv.serve_forever()
 
 
 if __name__ == '__main__':

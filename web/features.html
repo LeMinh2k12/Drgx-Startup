@@ -124,35 +124,37 @@
     <h1>Mọi công cụ luyện thi &amp; phát triển <span class="grad">trong một IDE.</span></h1>
     <p class="lead">Tất cả tính năng dưới đây đều đã chạy thật và được chụp trực tiếp trên máy thử nghiệm: từ <b>Judge đa testcase cục bộ</b>, <b>Stress Tester</b>, <b>Exam Server chống gian lận</b> cho tới <b>AI Copilot BYOK</b>, <b>5 Skin Chuyên nghiệp</b> và <b>Web Lab</b>.</p>
     <div class="chip-row" style="margin-top:18px">
-      <a class="chip" href="#judge">01 · DrgX Judge (F9)</a>
-      <a class="chip" href="#exam-integrity">02 · Exam Integrity 4 lớp</a>
+      <a class="chip" href="#judge">01 · DrgX Judge &amp; Tiền kiểm Themis (F9)</a>
+      <a class="chip" href="#exam-integrity">02 · Exam Integrity 6 lớp</a>
       <a class="chip" href="#ai">03 · AI Copilot BYOK</a>
       <a class="chip" href="#editor">04 · Editor &amp; 5 Skin</a>
       <a class="chip" href="#weblab">05 · Web Lab (:8123)</a>
       <a class="chip" href="#exam-server">06 · Exam Server (:8765)</a>
       <a class="chip" href="#learn">07 · Học tập &amp; OJ</a>
+      <a class="chip" href="/studio">🚀 Mở DrgX Studio (Web IDE)</a>
+      <a class="chip" href="/presentation">🎬 Slide Thuyết trình</a>
     </div>
   </section>
 
   <!-- ═══ 01. Judge ═══ -->
   <section class="content-section" id="judge">
     <div class="sec-head reveal">
-      <div class="eyebrow">Tour — 01 · DrgX Judge</div>
-      <h2>Chấm toàn bộ testcase trên chính máy bạn.</h2>
-      <p class="lead">Không xếp hàng trên judge online. Bấm <kbd>Ctrl+Alt+J</kbd> hoặc <kbd>F9</kbd> — judge tự động đọc toàn bộ
+      <div class="eyebrow">Tour — 01 · DrgX Judge &amp; Pre-flight Check 5 Luật Themis</div>
+      <h2>Tiền kiểm 0,19&nbsp;ms &amp; chấm 10 testcase trong 1,46&nbsp;giây.</h2>
+      <p class="lead">Không xếp hàng trên judge online. Bấm <kbd>Ctrl+Alt+J</kbd> hoặc <kbd>F9</kbd> — hệ thống chạy <b>Pre-flight Check 5 luật quy chế tệp Themis</b> trong <code>0,19 ms</code> rồi tự động đọc toàn bộ
         <b class="mono">tests/*.in</b> đối chiếu với <b class="mono">*.out / *.a / *.ans</b>, trả về
-        <b>AC / WA / RE / TLE</b> kèm thời gian từng test và <b>diff</b> đầu ra ngay trong IDE.</p>
+        <b>AC / WA / RE / TLE</b> kèm thời gian từng test (<code>p50 = 1,46 s</code> / 10 test) và <b>diff</b> đầu ra ngay trong IDE.</p>
     </div>
     <div class="tour">
       <div class="tour-text reveal">
-        <h3><span class="ico" aria-hidden="true">⚖️</span> Judge cục bộ, đa testcase</h3>
+        <h3><span class="ico" aria-hidden="true">⚖️</span> Judge cục bộ + Tiền kiểm 5 luật quy chế tệp Themis</h3>
         <div class="feat-list">
-          <div class="feat-item"><span class="fx">✓</span><span><b>Chấm mọi test ngay trên máy</b> <span class="m">— không cần mạng, không chờ lượt.</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>Verdict + thời gian từng test</b> <span class="m">— AC / WA / RE / TLE, giới hạn mặc định 6.000&nbsp;ms (tùy chỉnh qua <span class="mono">drgxCp.timeLimit</span>).</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>Diff đầu ra &amp; stderr trực quan</b> <span class="m">— chỉ rõ dòng kỳ vọng / dòng nhận được và lỗi biên dịch kèm theo.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Pre-flight Check 5 luật Themis (0,19 ms/tệp)</b> <span class="m">— bắt 100% lỗi mất điểm 0 oan trước khi biên dịch: thiếu <code>freopen</code>, lệch tên tệp <code>.INP/.OUT</code> (<code>ERR_WRONG_FILENAME</code>), đường dẫn tuyệt đối cứng <code>C:\...</code>, thư viện cấm <code>&lt;conio.h&gt;</code> và lệnh <code>cout</code> in thừa câu dẫn (đạt 100/100 bài kiểm thử đơn vị &amp; bắt sống 10/10 tệp C++17 lịch sử quên sửa <code>TASK.INP</code>).</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Chấm 10 test trong p50 = 1,46 giây</b> <span class="m">— biên dịch <code>g++ -O2 -std=c++17</code> (0,69 s) + chạy 10 test (0,76 s, ~0,18 s/luồng); phiên ấm đạt <code>0,78 s</code>.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Diff đầu ra &amp; 25 mẫu lỗi C++17 tiếng Việt ngoại tuyến</b> <span class="m">— chỉ rõ dòng kỳ vọng / dòng nhận được và dịch thông báo trình biên dịch sang tiếng Việt kèm gợi ý sửa (hoạt động 100% không cần mạng).</span></span></div>
           <div class="feat-item"><span class="fx">✓</span><span><b>Kết quả gom vào kênh "DrgX Judge"</b> <span class="m">— thông báo tóm tắt gọn gàng, bảng chi tiết lưu trong Output panel.</span></span></div>
         </div>
-        <div class="hotkeys"><span class="lbl">Phím tắt:</span><kbd>Ctrl+Alt+J</kbd><span style="color:var(--faint)">chấm toàn bộ</span> · <kbd>F9</kbd><span style="color:var(--faint)">chạy nhanh</span></div>
+        <div class="hotkeys"><span class="lbl">Phím tắt:</span><kbd>Ctrl+Alt+J</kbd><span style="color:var(--faint)">chấm toàn bộ</span> · <kbd>F9</kbd><span style="color:var(--faint)">tiền kiểm + chạy nhanh</span></div>
       </div>
       <figure class="shot-frame reveal">
         <div class="glow" aria-hidden="true"></div>
@@ -175,13 +177,13 @@
   <section class="content-section" id="exam-integrity" style="padding-top:40px">
     <div class="tour rev">
       <div class="tour-text reveal">
-        <h3><span class="ico" aria-hidden="true">🛡️</span> Exam Integrity 4 lớp bảo vệ chuyên sâu</h3>
-        <p class="desc">DrgX CP Studio được thiết kế theo mô hình <b>Zero-Trust Client</b> với <b>4 lớp bảo vệ kỹ thuật</b> đồng bộ từ trình soạn thảo tới máy chủ chấm thi, đã kiểm chứng bằng smoke test thực tế:</p>
+        <h3><span class="ico" aria-hidden="true">🛡️</span> Exam Integrity 6 lớp bảo vệ chuyên sâu</h3>
+        <p class="desc">DrgX CP Studio được thiết kế theo mô hình <b>Zero-Trust Client</b> với <b>6 lớp bảo vệ kỹ thuật</b> đồng bộ từ trình soạn thảo tới máy chủ chấm thi, đã kiểm chứng bằng <code>15/15 Smoke PASS</code> và <code>14/14 SEC PASS</code>:</p>
         <div class="feat-list">
-          <div class="feat-item"><span class="fx">✓</span><span><b>Lớp 1 — Verdict server-authoritative</b> <span class="m">— server tự biên dịch và chấm bằng g++/Python; client chỉ gửi mã nguồn.</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>Lớp 2 — Mã phòng do server sinh ngẫu nhiên &amp; Admin Guard</b> <span class="m">— client không tự đặt mã; nộp vào phòng không tồn tại bị từ chối (HTTP 404).</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Lớp 1 — Verdict server-authoritative &amp; Cô lập tiến trình</b> <span class="m">— server tự biên dịch và hạ quyền tiến trình chấm xuống <code>Low Integrity</code> + <code>Win32 Job Object</code> (trần RAM 256 MB/tiến trình) + nhãn MIC <code>NO_READ_UP</code>/<code>NO_WRITE_UP</code> + <code>sys.addaudithook</code>.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Lớp 2 — Mã phòng ngẫu nhiên &amp; Khóa phiên <code>studentToken</code></b> <span class="m">— cấp token 16 ký tự đối chiếu bằng <code>hmac.compare_digest</code>, chặn nộp hộ khác máy (HTTP 403) và phòng không tồn tại (HTTP 404).</span></span></div>
           <div class="feat-item"><span class="fx">✓</span><span><b>Lớp 3 — Bảo vệ thí sinh khi phòng chưa có test &amp; chống ngập payload</b> <span class="m">— trả về <span class="mono">NO_TESTS</span> thay vì chấm 0 điểm oan; từ chối gói tin quá 512 KB (HTTP 413).</span></span></div>
-          <div class="feat-item"><span class="fx">✓</span><span><b>Lớp 4 — Nhật ký thời gian thực + Profile cách ly</b> <span class="m">— CP Studio chạy profile riêng không có extension AI, không gợi ý code.</span></span></div>
+          <div class="feat-item"><span class="fx">✓</span><span><b>Lớp 4 — Nhật ký thời gian thực + Profile cách ly</b> <span class="m">— CP Studio chạy profile riêng không có extension AI (<code>SEC-09</code> đồng bộ trong <code>53,1 ms</code>) + quét vân tay Winnowing <code>780 cặp / 37,82 ms</code>.</span></span></div>
         </div>
       </div>
       <figure class="shot-frame reveal">
@@ -189,14 +191,15 @@
         <div class="term">
           <div class="term-head"><i class="tdot r"></i><i class="tdot y"></i><i class="tdot g"></i><span class="tname">DrgX Judge — nộp bài lên Exam Server</span></div>
           <div class="term-body"><span class="dim">Nộp bài vào phòng C8YGPD lúc 2026-10-20T09:14:07Z</span>
-<span class="ok">AC — đạt 2/2 test trên server</span>
-<span class="dim">  1: AC (34ms)</span>
-<span class="dim">  2: AC (31ms)</span>
+<span class="ok">AC — đạt 2/2 test trên server (Low Integrity + JobObject 256MB)</span>
+<span class="dim">  1: AC (34ms) · studentToken hợp lệ</span>
+<span class="dim">  2: AC (31ms) · Winnowing: 37,82 ms / 780 cặp</span>
 <span class="dim">──────────────────────────────</span>
+<span class="warn">Nộp hộ sai studentToken     → server từ chối (403)</span>
 <span class="warn">Nộp vào phòng không tồn tại → server từ chối (404)</span>
 <span class="warn">Phòng chưa nạp testcase    → verdict: NO_TESTS</span></div>
         </div>
-        <figcaption><span>Mỗi lớp bảo vệ được kiểm chứng tự động qua smoke test 11/11 PASS</span></figcaption>
+        <figcaption><span>Mỗi lớp bảo vệ được kiểm chứng tự động qua smoke test 15/15 PASS &amp; 14/14 SEC PASS</span></figcaption>
       </figure>
     </div>
   </section>
@@ -356,11 +359,11 @@
       </div>
       <div class="reveal">
         <div class="term">
-          <div class="term-head"><i class="tdot r"></i><i class="tdot y"></i><i class="tdot g"></i><span class="tname">exam-server.py — luồng phòng thi thật (smoke test 11/11 PASS)</span></div>
+          <div class="term-head"><i class="tdot r"></i><i class="tdot y"></i><i class="tdot g"></i><span class="tname">exam-server.py — luồng phòng thi thật (smoke test 15/15 PASS &amp; 14/14 SEC PASS)</span></div>
           <div class="term-body"><span class="warn">⚡ Server-authoritative — "server quyết verdict, client chỉ nộp bài"</span>
 <span class="dim">POST /exam/create</span>            <span class="dim">→</span> <span class="acc">{"code":"C8YGPD"}</span>   mã phòng do server sinh
-<span class="dim">POST /exam/join</span>  <span class="dim">{code,name}</span> <span class="dim">→</span> <span class="ok">{"status":"joined"}</span>
-<span class="dim">POST /submit</span>     <span class="dim">{examCode,language,code}</span>
+<span class="dim">POST /exam/join</span>  <span class="dim">{code,name}</span> <span class="dim">→</span> <span class="ok">{"status":"joined","studentToken":"..."}</span>
+<span class="dim">POST /submit</span>     <span class="dim">{examCode,studentToken,language,code}</span>
 <span class="dim">  bài đúng</span>                    <span class="dim">→</span> <span class="ok">{"verdict":"AC","tests":[1,2]}</span>  2/2 test đạt
 <span class="dim">  bài sai</span>                     <span class="dim">→</span> <span class="warn">{"verdict":"FAIL","tests":[WA]}</span>  kèm expected/got
 <span class="dim">  lỗi biên dịch</span>               <span class="dim">→</span> <span class="bad">{"verdict":"CE"}</span>            kèm stderr từ server

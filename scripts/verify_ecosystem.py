@@ -198,12 +198,15 @@ def verify_exam_server_pillar() -> dict:
                 time.sleep(0.15)
         checks.append(('Khởi động exam-server.py (ThreadingHTTPServer)', ready))
 
-        # Run full smoke-test.py (11 checks including 4 concurrent submissions)
+        # Run full smoke-test.py (15 checks including 4 concurrent submissions & security checks)
         smoke = subprocess.run(
             [sys.executable, '-X', 'utf8', str(srv_dir / 'smoke-test.py')],
             cwd=str(srv_dir), env=env, capture_output=True, text=True, timeout=60
         )
-        checks.append(('Chạy smoke-test.py (11/11 kịch bản C++, Python & 4 luồng song song)',
+        if smoke.returncode != 0:
+            print('   [SMOKE STDOUT]:', smoke.stdout.strip(), flush=True)
+            print('   [SMOKE STDERR]:', smoke.stderr.strip(), flush=True)
+        checks.append(('Chạy smoke-test.py (15/15 kịch bản C++, Python, Low Integrity & 4 luồng song song)',
                        smoke.returncode == 0 and 'ALL SMOKE TESTS PASSED' in smoke.stdout))
 
         # Verify 413 Payload Too Large protection (> 512 KB)
@@ -302,36 +305,48 @@ def verify_voidbit_pillar() -> dict:
                 time.sleep(0.15)
         checks.append((f'GET /api/problems trả về danh sách bài tập ({len(probs)} bài)', ready))
 
-        st_c, contests = http_json(base_url + '/api/contests', timeout=5)
+        try:
+            st_c, contests = http_json(base_url + '/api/contests', timeout=5)
+        except Exception:
+            st_c, contests = 0, []
         checks.append((f'GET /api/contests trả về danh sách kỳ thi ({len(contests)} kỳ thi)',
                        st_c == 200 and len(contests) >= 2))
 
         # Test C++17 judge + compiler_path sanitization (injected compiler_path must be ignored safely!)
         cpp_sol = (oj_dir / 'data' / 'judge-probe' / 'greedy_activity_001.cpp').read_text(encoding='utf-8')
-        st_j, jr_cpp = http_json(base_url + '/api/judge', {
-            'problem_id': 'greedy_activity_001',
-            'language': 'cpp',
-            'code': cpp_sol,
-            'compiler_path': 'cmd.exe /c echo INJECTED &&'
-        }, method='POST', timeout=30)
+        try:
+            st_j, jr_cpp = http_json(base_url + '/api/judge', {
+                'problem_id': 'greedy_activity_001',
+                'language': 'cpp',
+                'code': cpp_sol,
+                'compiler_path': 'cmd.exe /c echo INJECTED &&'
+            }, method='POST', timeout=30)
+        except Exception:
+            st_j, jr_cpp = 0, {}
         checks.append(('POST /api/judge (C++17 AC + chặn đứng command injection qua compiler_path)',
                        st_j == 200 and jr_cpp.get('verdict') == 'AC' and jr_cpp.get('passed') == jr_cpp.get('total')))
 
         # Test Python 3 judge
         py_sol = (oj_dir / 'data' / 'judge-probe' / 'greedy_activity_001.py').read_text(encoding='utf-8')
-        st_p, jr_py = http_json(base_url + '/api/judge', {
-            'problem_id': 'greedy_activity_001',
-            'language': 'python',
-            'code': py_sol
-        }, method='POST', timeout=30)
+        try:
+            st_p, jr_py = http_json(base_url + '/api/judge', {
+                'problem_id': 'greedy_activity_001',
+                'language': 'python',
+                'code': py_sol
+            }, method='POST', timeout=30)
+        except Exception:
+            st_p, jr_py = 0, {}
         checks.append(('POST /api/judge (Python 3 AC)',
                        st_p == 200 and jr_py.get('verdict') == 'AC'))
 
         # Test Winnowing Anti-Cheat API: bài giống hệt = 100%; chép + đổi tên biến/hàm/chú thích vẫn bị gắn cờ; thuật toán khác thì không
-        st_ac, ac_res = http_json(base_url + '/api/anti-cheat/compare', {
-            'code_a': cpp_sol,
-            'code_b': cpp_sol
-        }, method='POST', timeout=10)
+        try:
+            st_ac, ac_res = http_json(base_url + '/api/anti-cheat/compare', {
+                'code_a': cpp_sol,
+                'code_b': cpp_sol
+            }, method='POST', timeout=10)
+        except Exception:
+            st_ac, ac_res = 0, {}
         import re as _re
         renamed_src = cpp_sol
         reserved = {'int', 'long', 'double', 'float', 'char', 'bool', 'void', 'auto', 'const', 'unsigned', 'return', 'if', 'else',
@@ -344,29 +359,41 @@ def verify_voidbit_pillar() -> dict:
         for idx, ident in enumerate(ids):
             renamed_src = _re.sub(r'\b' + _re.escape(ident) + r'\b', f'ten_{idx}', renamed_src)
         renamed_src = '// da doi ten bien\n' + renamed_src.replace('\n', ' // ghi chu\n', 3)
-        st_rn, rn_res = http_json(base_url + '/api/anti-cheat/compare', {'code_a': cpp_sol, 'code_b': renamed_src},
-                                  method='POST', timeout=10)
+        try:
+            st_rn, rn_res = http_json(base_url + '/api/anti-cheat/compare', {'code_a': cpp_sol, 'code_b': renamed_src},
+                                      method='POST', timeout=10)
+        except Exception:
+            st_rn, rn_res = 0, {}
         other_algo = '#include <iostream>\nusing namespace std;\nint main(){ long long s = 0, x; while (cin >> x) s += x * x; cout << s << "\\n"; }\n'
-        st_ot, ot_res = http_json(base_url + '/api/anti-cheat/compare', {'code_a': cpp_sol, 'code_b': other_algo},
-                                  method='POST', timeout=10)
+        try:
+            st_ot, ot_res = http_json(base_url + '/api/anti-cheat/compare', {'code_a': cpp_sol, 'code_b': other_algo},
+                                      method='POST', timeout=10)
+        except Exception:
+            st_ot, ot_res = 0, {}
         checks.append(('POST /api/anti-cheat/compare (Winnowing: giống hệt = 100%, đổi tên biến/chú thích vẫn gắn cờ, thuật toán khác không gắn cờ)',
                        st_ac == 200 and ac_res.get('similarity') == 100.0 and ac_res.get('flagged') is True
                        and st_rn == 200 and rn_res.get('flagged') is True
                        and st_ot == 200 and ot_res.get('flagged') is False))
 
         # Test Differential Stress Testing Engine (/api/stress-test catching a real counterexample)
-        st_st, st_res = http_json(base_url + '/api/stress-test', {
-            'solution_code': '#include <iostream>\nusing namespace std;\nint main(){ int a,b; if(!(cin>>a>>b)) return 0; cout << (a == 2 ? 42 : a + b) << "\\n"; }',
-            'brute_code': '#include <iostream>\nusing namespace std;\nint main(){ int a,b; if(!(cin>>a>>b)) return 0; cout << a + b << "\\n"; }',
-            'generator_code': '#include <iostream>\nusing namespace std;\nint main(){ cout << "2 3\\n"; }',
-            'iterations': 3,
-            'language': 'cpp'
-        }, method='POST', timeout=30)
+        try:
+            st_st, st_res = http_json(base_url + '/api/stress-test', {
+                'solution_code': '#include <iostream>\nusing namespace std;\nint main(){ int a,b; if(!(cin>>a>>b)) return 0; cout << (a == 2 ? 42 : a + b) << "\\n"; }',
+                'brute_code': '#include <iostream>\nusing namespace std;\nint main(){ int a,b; if(!(cin>>a>>b)) return 0; cout << a + b << "\\n"; }',
+                'generator_code': '#include <iostream>\nusing namespace std;\nint main(){ cout << "2 3\\n"; }',
+                'iterations': 3,
+                'language': 'cpp'
+            }, method='POST', timeout=30)
+        except Exception:
+            st_st, st_res = 0, {}
         checks.append(('POST /api/stress-test (Differential Stress Engine bắt sống counterexample MISMATCH)',
                        st_st == 200 and st_res.get('status') == 'MISMATCH' and st_res.get('expected_output', '').strip() == '5'))
 
         # Test GET /api/health endpoint
-        st_hl, hl_res = http_json(base_url + '/api/health', timeout=5)
+        try:
+            st_hl, hl_res = http_json(base_url + '/api/health', timeout=5)
+        except Exception:
+            st_hl, hl_res = 0, {}
         checks.append(('GET /api/health trả trạng thái ready (v2.0.0)',
                        st_hl == 200 and hl_res.get('status') == 'ready' and hl_res.get('version') == '2.0.0'))
 

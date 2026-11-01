@@ -1,22 +1,22 @@
 # DrgX Ecosystem `/loop-me` Release & Health Brief
 
-- **Timestamp**: `2026-10-30 18:05:13`
+- **Timestamp**: `2026-11-01 23:53:02`
 - **Status**: **SHIP READY (100% GREEN)**
-- **Total Checks**: `68/68` passed in `27709 ms`
+- **Total Checks**: `68/68` passed in `46354 ms`
 
 ## 1. Per-Pillar Telemetry Summary
 
 | Pillar | Passed | Latency | Status |
 | :--- | :---: | :---: | :---: |
-| 1. Startup Dossier (`docs/startup/`) | `18/18` | `7246 ms` | **PASS** |
-| 2. Website & Cổng Học Tập (`web/`) | `18/18` | `6 ms` | **PASS** |
-| 3. DrgX Studio Extensions (`drgx-cp` & `drgx-dev`) | `16/16` | `3 ms` | **PASS** |
-| 4. Classroom Exam Server (`products/drgx-cp/server/`) | `3/3` | `12952 ms` | **PASS** |
-| 5. Void-bit Platform & C++17 OJ (`products/void-bit/`) | `13/13` | `7498 ms` | **PASS** |
+| 1. Startup Dossier (`docs/startup/`) | `18/18` | `17188 ms` | **PASS** |
+| 2. Website & Cổng Học Tập (`web/`) | `18/18` | `7 ms` | **PASS** |
+| 3. DrgX Studio Extensions (`drgx-cp` & `drgx-dev`) | `16/16` | `4 ms` | **PASS** |
+| 4. Classroom Exam Server (`products/drgx-cp/server/`) | `3/3` | `18466 ms` | **PASS** |
+| 5. Void-bit Platform & C++17 OJ (`products/void-bit/`) | `13/13` | `10685 ms` | **PASS** |
 
 ## 2. Detailed Verification Checklist
 
-### 1. Startup Dossier (`docs/startup/`) (`18/18` — `7246 ms`)
+### 1. Startup Dossier (`docs/startup/`) (`18/18` — `17188 ms`)
 - [x] File tồn tại & chuẩn hóa: docs\startup\01-bai-thuyet-minh.md
 - [x] File tồn tại & chuẩn hóa: docs\startup\08-chien-luoc-90-diem-bgk.md
 - [x] File tồn tại & chuẩn hóa: docs\startup\print\bai-thi-drgx-ide.html
@@ -36,7 +36,7 @@
 - [x] Hồ sơ thuyết minh có đủ 5 Skins (Ion/Nebula/Tokyo/Matrix/Dawn) & sạch không rò rỉ nội bộ
 - [x] Hồ sơ thuyết minh bám sát QĐ 1131/QĐ-TTg, Unit Economics, chuẩn xuất bản MIT (0 cắt bảng, 0 placeholder)
 
-### 2. Website & Cổng Học Tập (`web/`) (`18/18` — `6 ms`)
+### 2. Website & Cổng Học Tập (`web/`) (`18/18` — `7 ms`)
 - [x] HTML chuẩn cấu trúc + 5 Skins: web/index.html
 - [x] HTML chuẩn cấu trúc + 5 Skins: web/features.html
 - [x] HTML chuẩn cấu trúc + 5 Skins: web/void-bit.html
@@ -56,7 +56,7 @@
 - [x] Web asset sẵn sàng: web/assets/shot-stress.webp
 - [x] Web asset sẵn sàng: web/assets/logo-64.webp
 
-### 3. DrgX Studio Extensions (`drgx-cp` & `drgx-dev`) (`16/16` — `3 ms`)
+### 3. DrgX Studio Extensions (`drgx-cp` & `drgx-dev`) (`16/16` — `4 ms`)
 - [x] drgx-cp: package.json v1.0.0 có đủ 5 themes & drgxCp.skin + drgxCp.learn + drgxCp.intro
 - [x] drgx-cp: video intro khởi động app (media/drgx-intro.mp4) sẵn sàng
 - [x] drgx-cp: theme JSON hợp lệ (DrgX Ion)
@@ -74,12 +74,12 @@
 - [x] drgx-dev: theme JSON hợp lệ (DrgX Dawn)
 - [x] drgx-dev: gói cài đặt drgx-dev.vsix sẵn sàng (196 KB)
 
-### 4. Classroom Exam Server (`products/drgx-cp/server/`) (`3/3` — `12952 ms`)
+### 4. Classroom Exam Server (`products/drgx-cp/server/`) (`3/3` — `18466 ms`)
 - [x] Khởi động exam-server.py (ThreadingHTTPServer)
-- [x] Chạy smoke-test.py (11/11 kịch bản C++, Python & 4 luồng song song)
+- [x] Chạy smoke-test.py (15/15 kịch bản C++, Python, Low Integrity & 4 luồng song song)
 - [x] Chống DoS bộ nhớ: từ chối payload > 512KB với HTTP 413
 
-### 5. Void-bit Platform & C++17 OJ (`products/void-bit/`) (`13/13` — `7498 ms`)
+### 5. Void-bit Platform & C++17 OJ (`products/void-bit/`) (`13/13` — `10685 ms`)
 - [x] Void-bit UI có đủ 5 Skins chuyên nghiệp (Dawn/Ion/Nebula/Tokyo/Matrix)
 - [x] Void-bit stresstest.html không còn lỗi template string newline
 - [x] Void-bit Navbar & courses.html/docs.html/web/void-bit.html tích hợp đầy đủ 8 chuyên đề — 42 bài giảng

@@ -29,6 +29,25 @@ if (-not $codePath -or -not (Test-Path $codePath)) {
     exit 1
 }
 if (-not (Test-Path $profile)) { New-Item -ItemType Directory -Path $profile | Out-Null }
+$userSettingsDir = Join-Path $profile 'User'
+if (-not (Test-Path $userSettingsDir)) { New-Item -ItemType Directory -Path $userSettingsDir | Out-Null }
+$settingsFile = Join-Path $userSettingsDir 'settings.json'
+if (Test-Path $settingsFile) {
+    Set-ItemProperty -Path $settingsFile -Name IsReadOnly -Value $false -ErrorAction SilentlyContinue
+}
+@'
+{
+  "workbench.colorTheme": "DrgX Ion",
+  "chat.disableAIFeatures": true,
+  "chat.commandCenter.enabled": false,
+  "chat.agent.enabled": false,
+  "editor.inlineSuggest.enabled": false,
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "telemetry.telemetryLevel": "off"
+}
+'@ | Set-Content -Path $settingsFile -Encoding UTF8 -Force
+Set-ItemProperty -Path $settingsFile -Name IsReadOnly -Value $true -ErrorAction SilentlyContinue
 if (-not (Test-Path $extensions)) { New-Item -ItemType Directory -Path $extensions | Out-Null }
 
 $extSource = Join-Path $base 'extension'

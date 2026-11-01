@@ -302,14 +302,14 @@
     </div>
 
     <div class="metric-grid reveal">
-      <div class="metric"><div class="v">0,5 s</div><div class="k">Mở cửa sổ chính</div><div class="note">Tính từ lúc kích hoạt đến khi cửa sổ "DrgX" hiển thị sẵn sàng.</div></div>
-      <div class="metric"><div class="v">39 MB</div><div class="k">RAM process shell</div><div class="note">WorkingSet của riêng tiến trình <code>drgx-ide.exe</code> (private ~6 MB), trung bình 3 mẫu đo.</div></div>
-      <div class="metric"><div class="v">68/68</div><div class="k">Health Gate PASS</div><div class="note">Kiểm định tự động toàn bộ 6 trụ cột của hệ sinh thái qua <code>verify_ecosystem.py</code>.</div></div>
-      <div class="metric"><div class="v">11/11</div><div class="k">Smoke test Exam Server</div><div class="note">Kiểm chứng tự động đủ các nhánh AC / WA / CE / TLE / NO_TESTS / 404 &amp; đa luồng.</div></div>
-      <div class="metric"><div class="v">4,7 s</div><div class="k">Judge bộ demo 4 test</div><div class="note">Bao gồm cả bước biên dịch <code>g++</code>; mỗi testcase thực thi hết ~32–38 ms.</div></div>
+      <div class="metric"><div class="v">0,5 s</div><div class="k">Mở cửa sổ chính</div><div class="note">Tính từ lúc kích hoạt đến khi cửa sổ "DrgX" hiển thị sẵn sàng (<code>drgx-studio.exe</code> mở trong 320 ms).</div></div>
+      <div class="metric"><div class="v">39 MB</div><div class="k">RAM process shell</div><div class="note">WorkingSet của tiến trình <code>drgx-ide.exe</code> (~39 MB); <code>exam-server.py</code> 17,9 MB; <code>oj_server.exe</code> 10,7 MB.</div></div>
+      <div class="metric"><div class="v">68/68</div><div class="k">Health Gate PASS</div><div class="note">Kiểm định tự động toàn bộ hệ sinh thái qua <code>verify_ecosystem.py</code> + <code>47/47</code> bài OJ đạt 100% AC (81,65 s).</div></div>
+      <div class="metric"><div class="v">15/15</div><div class="k">Smoke &amp; 14/14 SEC PASS</div><div class="note">Kiểm chứng tự động đủ các nhánh AC / WA / CE / TLE / NO_TESTS / 403 / 404, <code>Low Integrity</code> &amp; 40 luồng LAN (13,3–14,0 s).</div></div>
+      <div class="metric"><div class="v">1,46 s</div><div class="k">Phím F9 chấm 10 test</div><div class="note">Tiền kiểm 5 luật Themis (0,19 ms) + biên dịch <code>g++</code> (0,69 s) + chạy 10 test (0,76 s); bộ demo 4 test đạt 4,7 s.</div></div>
       <div class="metric"><div class="v">87 KB</div><div class="k">Extension bundle</div><div class="note">Kích thước đóng gói gọn nhẹ giúp khởi động nhanh cả hai bản CP &amp; Dev Studio (v1.0.0).</div></div>
       <div class="metric"><div class="v">16 lệnh</div><div class="k">Extension commands</div><div class="note">Đi kèm 10 tổ hợp phím tắt, 5 skin chuyên nghiệp đồng bộ và Video Intro.</div></div>
-      <div class="metric"><div class="v">8765</div><div class="k">Cổng Exam Server</div><div class="note">Đa luồng <code>ThreadingHTTPServer</code>, chống ngập payload 413, tự tái sử dụng nếu đang chạy.</div></div>
+      <div class="metric"><div class="v">8765</div><div class="k">Cổng Exam Server</div><div class="note">Đa luồng <code>ThreadingHTTPServer</code>, <code>studentToken</code> 16 ký tự, chống ngập payload 413, tự tái sử dụng nếu đang chạy.</div></div>
     </div>
 
     <p class="hero-note reveal" style="margin-top:16px"><b>Cơ chế thu hồi tài nguyên cấp nhân:</b> Toàn bộ tiến trình con của DrgX được gắn trực tiếp vào <b>Win32 JobObject</b> với cờ <code>KILL_ON_JOB_CLOSE</code> — khi đóng cửa sổ ứng dụng, hệ điều hành thu hồi 100% RAM và giải phóng sạch cổng mạng, không để lại tiến trình chạy ngầm.</p>

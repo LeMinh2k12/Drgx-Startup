@@ -251,7 +251,7 @@
     else { const t0 = performance.now(); (function tick(t) { const p = Math.min(1, (t - t0) / 1600); txt.textContent = Math.round(sim * (1 - Math.pow(1 - p, 3))) + '%'; if (p < 1) requestAnimationFrame(tick); })(t0); }
     later(() => { txt.textContent = Math.round(sim) + '%'; }, instant ? 0 : 1700);   // guarantee final value even if rAF is throttled
     const v = $('#winVerdict');
-    v.innerHTML = sim >= 65 ? '<span class="bad">⚠ Nghi vấn sao chép cấu trúc</span><br><span class="muted" style="font-size:19px">Tên biến khác hoàn toàn — thuật toán giống nhau</span>'
+    v.innerHTML = sim >= 65 ? '<span class="warn">⚠ CẦN GIÁO VIÊN ĐỐI CHIẾU</span><br><span class="muted" style="font-size:19px">Đã lọc khung nhập xuất mẫu — cấu trúc thuật toán trùng khớp</span>'
       : sim >= 40 ? '<span class="warn">Tương đồng trung bình — cần giáo viên xem xét</span>' : '<span class="good">✓ Bài làm độc lập</span>';
     $('#winTok').textContent = `${ta.length}/${tb.length} token · ${fa.size}/${fb.size} vân tay · ${inter} trùng`;
     // Show what the machine sees: first tokens, highlighting positions where both streams agree.
@@ -335,10 +335,10 @@
     ['ok', '[PASS] 1. Hồ sơ Dự án & Tài chính ... 18/18'],
     ['ok', '[PASS] 2. Cổng Web & Kiosk Trực quan . 18/18'],
     ['ok', '[PASS] 3. CP Studio & Dev Studio .... 16/16'],
-    ['ok', '[PASS] 4. Classroom Exam Server .....  3/3'],
+    ['ok', '[PASS] 4. Exam Server (Smoke 15/15) ..  3/3'],
     ['ok', '[PASS] 5. Void-bit & C++17 OJ ....... 13/13'],
     ['faint', '──────────────────────────────────────────'],
-    ['ok cur', 'ALL 5 PILLARS PASSED (100% GREEN) · 68/67'.replace('67', '68')],
+    ['ok cur', 'ALL 5 PILLARS PASSED · 68/68 (36 tĩnh + 32 mô-đun)'],
   ];
   function typeProof(instant) {
     const el = $('#proofTerm'); el.innerHTML = '';
@@ -759,19 +759,19 @@
   /* ---------- Audio Auto-Sync & Live Voice Recording Studio ---------- */
   const DEFAULT_CUES = {
     S01: 0.0,
-    S02: 9.0,
-    S03: 18.5,
-    S04: 28.0,
-    S05: 37.5,
-    S06: 47.5,
-    S07: 57.5,
-    S08: 67.5,
-    S09: 77.0,
-    S10: 86.0,
-    S11: 95.5,
-    S12: 105.0
+    S02: 10.131,
+    S03: 19.835,
+    S04: 29.624,
+    S05: 39.328,
+    S06: 48.52,
+    S07: 57.285,
+    S08: 65.773,
+    S09: 73.749,
+    S10: 82.195,
+    S11: 91.547,
+    S12: 101.163
   };
-  const DEFAULT_DURATION = 115.0;
+  const DEFAULT_DURATION = 110.107;
   const mainSlidesList = () => slides.filter(s => !isApx(s));
 
   let voiceCues = Object.assign({}, DEFAULT_CUES);

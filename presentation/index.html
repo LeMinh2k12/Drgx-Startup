@@ -66,11 +66,11 @@
             Hợp nhất trình soạn thảo, trợ lý AI sư phạm, máy chấm C++17 cục bộ (&lt; 0,5s) và phòng thi mạng LAN 40 máy không cần Internet.
           </p>
           <div class="pillar-strip rv d4" style="margin-top:8px">
-            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 01</span><b>Desktop IDE</b><span>Tauri 2 · vỏ ≈ 39 MB RAM</span></div>
-            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 02</span><b>CP Studio</b><span>Thi sạch AI · F9 Judge</span></div>
-            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 03</span><b>Dev Studio</b><span>Trợ lý AI Sư phạm</span></div>
-            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 04</span><b>Void-bit OJ</b><span>47 bài · 42 bài giảng</span></div>
-            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 05</span><b>Exam Server</b><span>Phòng thi LAN :8765</span></div>
+            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 01</span><b>CP Studio</b><span>Tắt Chat/AI · F9 Judge</span></div>
+            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 02</span><b>Dev Studio</b><span>Trợ lý AI Sư phạm</span></div>
+            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 03</span><b>Void-bit OJ</b><span>47 bài · 42 bài giảng</span></div>
+            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 04</span><b>Exam Server</b><span>Phòng thi LAN :8765</span></div>
+            <div class="pillar-mini"><span class="pm-num">TRỤ CỘT 05</span><b>Learn Hub &amp; Studio</b><span>Tauri 2 · ~39 MB RAM</span></div>
           </div>
         </div>
         <div class="vf-wrap rv d3" style="max-width:500px;justify-self:center">
@@ -136,7 +136,7 @@
         <div class="cold-transform f fade" style="margin-top:16px">
           <span class="bad">⏱ Truyền thống: 90–120′ cài đặt · 45′ thu bài</span>
           <span style="color:var(--a1);font-family:var(--mono)">──────►</span>
-          <span class="good">⚡ DrgX: &lt; 60s viết code · &lt; 2′ thu &amp; chấm 40 máy LAN</span>
+          <span class="good">⚡ DrgX: &lt; 60s mở hồ sơ (khi có sẵn bộ nền) · &lt; 2′ thu &amp; chấm 40 bài LAN</span>
         </div>
       </div>
 
@@ -158,7 +158,7 @@
         <div class="clock-compare">
           <div><b class="bad">6–8</b><span>Công cụ rời rạc phải tự ghép</span></div>
           <div><b class="good">1 Lệnh</b><span>Khởi chạy ngay qua drgx.cmd</span></div>
-          <div><b class="good">0,18s</b><span>Chấm 10 test bằng phím F9 (p50)</span></div>
+          <div><b class="good">&lt; 1s</b><span>F9: dịch g++ 0,62s + chạy 10 test 0,18s</span></div>
           <div><b class="acc">94,3%</b><span>HS lớp 9A2 chạy AC trong 5′ đầu</span></div>
         </div>
       </div>
@@ -187,7 +187,7 @@
         </div>
         <h3 style="font-size:36px">DrgX Dev Studio</h3>
         <ul style="margin-top:14px;gap:10px">
-          <li style="font-size:19.5px"><b>Trợ lý AI Sư phạm tiếng Việt &amp; Tự sửa 25 mẫu lỗi C++17:</b> Giải thích nguyên nhân lỗi biên dịch/runtime tức thì (36/36 test E2E)</li>
+          <li style="font-size:19.5px"><b>Trợ lý AI Sư phạm tiếng Việt &amp; Tự sửa 25 mẫu lỗi C++17:</b> Giải thích nguyên nhân lỗi biên dịch/runtime tức thì (chạy ngoại tuyến)</li>
           <li style="font-size:19.5px"><b>Hướng dẫn từng bước (Local-first &amp; BYOK):</b> Gợi ý thuật toán, sinh testcase biên mà không làm hộ bài</li>
           <li style="font-size:19.5px"><b>Learn Hub 12 tuần &amp; STEM Robotics:</b> 42 bài giảng, 47 bài tập + mô phỏng Robot 8×8, Arduino/ESP32</li>
         </ul>
@@ -206,19 +206,19 @@
         </div>
         <h3 style="font-size:36px">DrgX CP Studio</h3>
         <ul style="margin-top:14px;gap:10px">
-          <li style="font-size:19.5px"><b>Khóa sạch 100% mô-đun AI:</b> Loại bỏ hoàn toàn tác tử AI &amp; gợi ý inline từ tầng gói cài đặt phòng thi</li>
-          <li style="font-size:19.5px"><b>Chấm đa test <kbd>F9</kbd> (0,18s p50):</b> Báo Diff trực quan ngay lúc code, kiểm tra <span class="mono">freopen</span> chống 0 điểm oan</li>
+          <li style="font-size:19.5px"><b>Giảm thiểu rủi ro AI có kiểm chứng:</b> Hồ sơ cách ly chỉ nạp <span class="mono">drgx-cp</span>, ghi đè <span class="mono">settings.json</span> chỉ-đọc tắt AI &amp; hỗ trợ Veyon/SEB</li>
+          <li style="font-size:19.5px"><b>Chấm đa test <kbd>F9</kbd> (&lt; 1s; chạy test 0,18s p50):</b> Báo Diff từng dòng, tiền kiểm tra <span class="mono">freopen</span> chống 0 điểm oan trên Themis</li>
           <li style="font-size:19.5px"><b>Đồng bộ Exam Server LAN <span class="mono">:8765</span>:</b> Nộp bài 1 chạm, lọc đạo văn Winnowing &amp; <b>xuất chuẩn Themis</b></li>
         </ul>
-        <div class="lockbar" style="margin-top:14px;font-size:16.5px">🛡️ EXAM INTEGRITY: AI OFF · VERDICT DO SERVER GIÁO VIÊN QUYẾT ĐỊNH</div>
+        <div class="lockbar" style="margin-top:14px;font-size:16.5px">🛡️ EXAM INTEGRITY: KHÓA CHỈ-ĐỌC SETTINGS.JSON + VEYON / SEB + QUY CHẾ LAN</div>
       </div>
     </div>
 
     <div class="shield-strip rv d4" style="margin-top:14px">
-      <div class="shield-item"><span>①</span><div><b>Lớp 1 · Cách ly Bản dựng</b>Gỡ hoàn toàn AI trong CP Studio</div></div>
-      <div class="shield-item"><span>②</span><div><b>Lớp 2 · Server Verdict</b>Máy giáo viên biên dịch &amp; chấm</div></div>
-      <div class="shield-item"><span>③</span><div><b>Lớp 3 · Bảo vệ Phòng thi</b>Mã 6 ký tự + Chặn gói &gt; 512KB</div></div>
-      <div class="shield-item"><span>④</span><div><b>Lớp 4 · Winnowing token</b>Bắt 100% bài chép đổi tên biến</div></div>
+      <div class="shield-item"><span>①</span><div><b>Lớp 1 · Hồ sơ Chỉ-đọc</b>Ghi đè settings.json + Veyon/SEB</div></div>
+      <div class="shield-item"><span>②</span><div><b>Lớp 2 · Win32 JobObject</b>Giới hạn 256MB RAM &amp; lọc biến MT</div></div>
+      <div class="shield-item"><span>③</span><div><b>Lớp 3 · Xác thực Phiên</b>studentToken + Khóa Admin 403</div></div>
+      <div class="shield-item"><span>④</span><div><b>Lớp 4 · Winnowing token</b>Lọc khung mẫu &amp; chốt chặn bài ngắn</div></div>
     </div>
     <i class="f mark mark-cp"></i>
   </section>
@@ -253,11 +253,11 @@
       </div>
 
       <div class="feat stg">
-        <div class="glass it"><kbd>F9</kbd><div><b>Chạy &amp; chấm đa testcase tức thì (0,18s p50)</b><span>C++17 &amp; Python 3 · 100% Offline · Kiểm tra freopen tự động</span></div></div>
-        <div class="glass it"><kbd>Pilot 9A2</kbd><div><b>Đã kiểm chứng tại Trường THCS Sông Lô</b><span>33/35 học sinh (94,3%) tự biên dịch &amp; chấm F9 thành công trong 5′ đầu</span></div></div>
-        <div class="glass it"><kbd>Stress 3 cột</kbd><div><b>Tự động săn lùng phản ví dụ (1,8s p50)</b><span>Đối chiếu Generator · Brute · Solution tìm testcase nhỏ nhất gây sai</span></div></div>
-        <div class="glass it"><kbd>Ctrl+Alt+L</kbd><div><b>47 bài toán chuẩn HSG &amp; 42 bài giảng</b><span>Lộ trình Learn Hub 12 tuần + tự sửa 25 mẫu lỗi C++17 tiếng Việt</span></div></div>
-        <div class="glass it"><kbd>Web Lab :8123</kbd><div><b>Giải cứu phòng máy khóa quyền Admin</b><span>1 máy giáo viên phát IDE cho 40 máy học sinh làm bài trên trình duyệt</span></div></div>
+        <div class="glass it"><kbd>F9</kbd><div><b>Biên dịch &amp; chấm 10 test &lt; 1s (chạy test 0,18s p50, n=30)</b><span>C++17 (dịch g++ 0,62s) &amp; Python 3 · Tiền kiểm tra freopen chống điểm 0 oan</span></div></div>
+        <div class="glass it"><kbd>Pilot 9A2</kbd><div><b>Kiểm thử khả dụng bước đầu tại THCS Sông Lô</b><span>33/35 HS (94,3%) bấm F9 thành công trong 5′ đầu (mở rộng A/B tại 3–5 trường)</span></div></div>
+        <div class="glass it"><kbd>Stress 3 cột</kbd><div><b>Tự động săn lùng phản ví dụ (1,8s p50, n=30)</b><span>Đối chiếu Generator · Brute · Solution tìm testcase nhỏ nhất gây sai</span></div></div>
+        <div class="glass it"><kbd>Ctrl+Alt+L</kbd><div><b>47 bài toán chuẩn HSG &amp; 42 bài giảng</b><span>Learn Hub 12 tuần + chẩn đoán 25 lỗi C++17 ngoại tuyến (không giới hạn tuổi)</span></div></div>
+        <div class="glass it"><kbd>Web Lab :8123</kbd><div><b>Giải cứu phòng máy khóa quyền &amp; tích hợp SEB</b><span>1 máy giáo viên phát IDE cho 40 máy học sinh (hỗ trợ Safe Exam Browser &amp; Veyon)</span></div></div>
       </div>
     </div>
   </section>
@@ -292,10 +292,10 @@ cout &lt;&lt; s;</div>
 
   <!-- ============ S06 · LIVE DEMO 2: CHỐNG ĐẠO VĂN CẤU TRÚC WINNOWING ============ -->
   <section class="slide" id="s-win" data-code="S06" data-title="LIVE 2 · Chống đạo văn Winnowing" data-v3="1" data-t3="10" data-time="10" data-core="1" data-ch="2" data-rub="1.4 3.3"
-    data-notes="Ở Demo hai, dù chép bài rồi đổi hết tên biến, thuật toán Winnowing vẫn bóc tách cấu trúc token và báo trùng khớp.">
+    data-notes="Ở Demo hai, dù chép bài rồi đổi hết tên biến, thuật toán Winnowing vẫn lọc khung nhập xuất mẫu, bóc tách cấu trúc token và cảnh báo giáo viên đối chiếu.">
     <div class="demo-head">
       <div>
-        <div class="livetag rv d1"><span class="live"></span>TRẠM DEMO 02 · WINNOWING K-GRAM (MÔ PHỎNG K=5, W=4 · QUÉT 780 CẶP / 40 BÀI TRONG 38 MS P50)</div>
+        <div class="livetag rv d1"><span class="live"></span>TRẠM DEMO 02 · WINNOWING K-GRAM (K=5, W=4 · LỌC BOILERPLATE &amp; CHỐT CHẶN &ge;15 VÂN TAY · 38 MS P50)</div>
         <h2 class="rv d2">Đổi hết tên biến. <span class="grad">Vẫn lộ vân tay cấu trúc.</span></h2>
       </div>
       <button class="btn noprint rv d3" id="runWin">🔍 Phân Tích Vân Tay Mã Nguồn</button>
@@ -336,7 +336,7 @@ int main() {
         <div class="t" id="winTok">FNV-1a 32-bit Rolling Hash</div>
       </div>
       <div class="glass seen">
-        <div class="eyebrow">MÁY NHÌN THẤY GÌ — LUỒNG TOKEN SAU KHI XÓA CHÚ THÍCH &amp; CHUẨN HÓA ĐỊNH DANH THÀNH “ID”</div>
+        <div class="eyebrow">MÁY NHÌN THẤY GÌ — XÓA CHÚ THÍCH, LỌC KHUNG NHẬP XUẤT MẪU (#INCLUDE/FREOPEN) &amp; CHUẨN HÓA ĐỊNH DANH THÀNH “ID”</div>
         <div class="toks" id="tokA"><span class="lab">A</span></div>
         <div class="toks" id="tokB"><span class="lab">B</span></div>
       </div>
@@ -346,9 +346,9 @@ int main() {
 
   <!-- ============ S07 · LIVE DEMO 3: PHÒNG THI MẠNG LAN 40 MÁY ============ -->
   <section class="slide" id="s-lan" data-code="S07" data-title="LIVE 3 · Phòng thi LAN 40 máy" data-v3="1" data-t3="10" data-time="10" data-core="1" data-ch="2" data-rub="2.4 4.4"
-    data-notes="Sang Demo ba: bốn mươi máy nộp bài qua mạng LAN không cần Internet trong mười giây và xuất thẳng thư mục chuẩn Themis.">
-    <div class="kicker rv d1">Trạm Demo 03 · Khảo thí Tập trung qua Mạng LAN Nội bộ · Mô phỏng 40 máy (Đo trên Core i5-8350U, 16GB RAM, Windows 11)</div>
-    <h2 class="sm rv d2">40 máy học sinh. 0 Internet. <span class="grad">Thu &amp; chấm 10,4 giây (p50).</span></h2>
+    data-notes="Sang Demo ba: bốn mươi luồng nộp bài qua mạng LAN không cần Internet trong mười ba giây và xuất thẳng thư mục chuẩn Themis.">
+    <div class="kicker rv d1">Trạm Demo 03 · Khảo thí Tập trung qua Mạng LAN Nội bộ · Mô phỏng đa luồng 40–60 bài (Đo trên Core i5-8350U, 16GB RAM, Windows 11)</div>
+    <h2 class="sm rv d2">40 bài đồng thời. 0 Internet. <span class="grad">C++17: 13,3–14,0s · Python: 4,9–5,4s.</span></h2>
     <div class="lan">
       <svg id="lanSvg" class="rv d3" viewBox="0 0 1000 620" aria-label="Sơ đồ phòng thi LAN: 1 máy giáo viên, 40 máy học sinh"></svg>
       <div class="lanstat rv d4">
@@ -359,11 +359,11 @@ int main() {
           <div class="glass"><span>Với DrgX · Thu LAN :8765 &amp; xuất chuẩn Themis</span><b class="good">&lt; 2 phút</b></div>
         </div>
         <div class="row" style="margin-top:20px">
-          <span class="pill g">✓ 100% Offline LAN</span>
-          <span class="pill">✓ Chặn Payload &gt; 512 KB (HTTP 413)</span>
+          <span class="pill g">✓ Win32 JobObject (256MB RAM)</span>
+          <span class="pill">✓ Định danh studentToken + IP</span>
           <span class="pill p">✓ Xuất cây $SBD\$BAI.cpp chuẩn Themis</span>
         </div>
-        <div class="hint" style="margin-top:14px">Đo kiểm thực nghiệm 25/10/2026: 40 tiến trình nộp đồng thời đạt 40/40 AC trong 10,4s (p50) – 16,8s (p95, 60 máy) · Vượt 11/11 smoke test</div>
+        <div class="hint" style="margin-top:14px">Đo tải ngày 31/10/2026 (load-test.py đa luồng trên 1 máy): 40 bài đạt 40/40 AC (Python 4,9–5,4s; C++17 13,3–14,0s; 60 bài C++17: 21,7–26,2s) · Vượt 15/15 smoke test bảo mật &amp; cách ly biến môi trường</div>
       </div>
     </div>
     <i class="f mark" data-run="lan"></i>
@@ -371,7 +371,7 @@ int main() {
 
   <!-- ============ S08 · CÔNG NGHỆ LÕI (39MB RAM, STEM ROBOTICS) & 68/68 CHỐT CHẶN PASS ============ -->
   <section class="slide" id="s-proof" data-code="S08" data-title="Công nghệ lõi 39MB & 68/68 PASS" data-v3="1" data-t3="9" data-time="9" data-core="1" data-ch="3" data-rub="2.1 3.2 3.3 6.2"
-    data-notes="Nhờ viết bằng Rust và C++17, ứng dụng chỉ tốn ba chín mê-ga-bai RAM, tích hợp Robot STEM và vượt sáu tám chốt chặn.">
+    data-notes="Nhờ viết bằng Rust và C++17, ứng dụng chỉ tốn bốn sáu mê-ga-bai RAM, tích hợp Robot STEM và vượt sáu tám chốt chặn kiểm định.">
     <div class="kicker rv d1">Kiến trúc Kỹ thuật &amp; Kiểm định Tự động · Minh bạch Phần Tự Phát Triển &amp; Mã Nguồn Mở (MIT / Apache-2.0)</div>
     <h2 class="sm rv d2">Siêu nhẹ 39 MB RAM · Tích hợp STEM · <span class="grad">68/68 Chốt chặn Xanh.</span></h2>
 
@@ -379,62 +379,62 @@ int main() {
       <div class="stack stg" style="gap:14px">
         <div class="glass layer" style="padding:18px 22px">
           <div class="lv">Tầng 01 · Giao diện<small>Kế thừa hợp pháp MIT</small></div>
-          <div class="chips"><span>Tauri 2 (Rust · vỏ ≈ 39 MB)</span><span>CP Studio (Khóa AI)</span><span>Dev Studio (AI Sư phạm)</span><span>Web Lab :8123</span><span>DrgX Workbench Core (MIT)</span></div>
+          <div class="chips"><span>Tauri 2 (drgx-studio ≈ 39 MB)</span><span>CP Studio (Khóa Chat/AI)</span><span>Dev Studio (AI Sư phạm)</span><span>Web Lab :8123</span><span>VS Code / VSCodium</span></div>
         </div>
         <div class="glass layer core" style="padding:18px 22px">
           <span class="own">TÀI SẢN TRÍ TUỆ (IP) DO NHÓM 9A2 TỰ PHÁT TRIỂN</span>
           <div class="lv">Tầng 02 · Lõi DrgX<small>Tự thiết kế &amp; lập trình</small></div>
-          <div class="chips"><span>Void-bit C++17 OJ (3,98 MB · ~14 MB RAM)</span><span>Differential Stress 3 cột</span><span>Winnowing Anti-Cheat</span><span>Exam Server LAN :8765</span><span>Bộ sửa 25 lỗi C++17</span><span>5 Skins</span></div>
+          <div class="chips"><span>Void-bit C++17 OJ (3,9 MB · ~14 MB RAM)</span><span>Differential Stress 3 cột</span><span>Winnowing Anti-Cheat</span><span>Exam Server LAN :8765</span><span>Bộ sửa 25 lỗi C++17</span><span>5 Skins</span></div>
         </div>
         <div class="glass stem-box" style="padding:18px 22px">
           <div class="ram-bars" style="margin-top:0">
             <div class="ram-row">
-              <div class="rr-top"><span class="good">Tiến trình vỏ DrgX (Rust · Tauri 2) &amp; Nhân chấm C++17 (~14 MB)</span><b class="mono good">39 MB RAM</b></div>
+              <div class="rr-top"><span class="good">DrgX Studio (Tauri 2 · ~39 MB) &amp; Nhân chấm C++17 (~14 MB)</span><b class="mono good">39 MB RAM</b></div>
               <div class="ram-track"><div class="ram-fill" style="width:8%;background:var(--good)"></div></div>
             </div>
           </div>
           <div style="padding-top:10px;border-top:1px solid var(--line);margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:12px">
-            <span style="font-size:16.5px;color:var(--muted)">🤖 <b>Mở rộng STEM Robotics:</b> Mô phỏng Robot tự hành 8×8 (BFS/A*), cảm biến HC-SR04, xung PWM L298N &amp; xuất mã <span class="mono">.ino</span> nạp mạch Arduino/ESP32.</span>
+            <span style="font-size:16px;color:var(--muted)">🤖 <b>STEM Robotics:</b> Mô phỏng 8×8 (BFS/A*), HC-SR04, PWM L298N &amp; xuất mã <span class="mono">.ino</span> Arduino/ESP32 · Kiểm định: <b>36 tĩnh + 32 mô-đun = 68/68</b>, <b>15/15</b> Smoke LAN &amp; <b>13/13</b> API.</span>
             <span class="badge b"><b data-count="68" style="font-size:15px">68</b>/68 PASS</span>
           </div>
         </div>
       </div>
 
       <div class="glass term rv d3" style="height:100%">
-        <div class="bar"><i style="background:#fb7185"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i>&nbsp; DrgX Health Gate · Kiểm định Tự động 5 Trụ cột (drgx.cmd verify)</div>
+        <div class="bar"><i style="background:#fb7185"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i>&nbsp; DrgX Health Gate · 68/68 (36 tĩnh + 32 mô-đun) · Smoke LAN 15/15</div>
         <pre id="proofTerm" aria-live="polite"></pre>
       </div>
     </div>
   </section>
 
-  <!-- ============ S09 · ĐỐI SÁNH HỆ THỐNG CÙNG LOẠI (THEMIS, DOMJUDGE, VNOJ) ============ -->
-  <section class="slide" id="s12" data-code="S09" data-title="Đối sánh Themis, DOMjudge, VNOJ" data-v3="1" data-t3="9" data-time="9" data-core="1" data-ch="3" data-rub="3.2"
-    data-notes="Đối sánh với Themis, DOMjudge và VNOJ, chỉ DrgX kết hợp tự chấm F9, khóa AI phòng thi và thu bài mạng LAN tự động.">
-    <div class="kicker rv d1" style="margin-bottom:10px">Lợi thế Cạnh tranh · Đối sánh Khách quan với các Hệ thống Chấm bài Cùng loại (Ghi nhận tháng 10/2026)</div>
+  <!-- ============ S09 · ĐỐI SÁNH HỆ THỐNG CÙNG LOẠI (THEMIS, CP EDITOR, DOMJUDGE, VNOJ) ============ -->
+  <section class="slide" id="s12" data-code="S09" data-title="Đối sánh Themis, CP Editor, DOMjudge" data-v3="1" data-t3="9" data-time="9" data-core="1" data-ch="3" data-rub="3.2"
+    data-notes="Đối sánh với Themis, CP Editor, DOMjudge và VNOJ, chỉ DrgX kết hợp tự chấm F9, khóa AI phòng thi và thu bài mạng LAN tự động.">
+    <div class="kicker rv d1" style="margin-bottom:10px">Lợi thế Cạnh tranh · Đối sánh Khách quan 7 Nhóm Công cụ Thực tế (Ghi nhận tháng 10/2026)</div>
     <h2 class="sm rv d2" style="font-size:42px">Không thay thế thói quen dùng Themis — <span class="grad">Bổ sung trọn vẹn khâu Học &amp; Thi LAN.</span></h2>
-    <div class="hint rv d2" style="margin-top:6px;margin-bottom:6px">Nguồn đối chiếu: DOMjudge (domjudge.org), VNOJ (oj.vnoi.info), DMOJ (github.com/DMOJ) và tài liệu hướng dẫn phần mềm chấm bài Themis.</div>
+    <div class="hint rv d2" style="margin-top:6px;margin-bottom:6px">Nguồn đối chiếu 7 nhóm (Bảng 15 hồ sơ): Themis, CP Editor / CPH (VS Code), DOMjudge / CMS / Moodle VPL, VNOJ / DMOJ và SEB / Veyon.</div>
     <table class="t rv d3" style="margin-top:10px">
-      <thead><tr><th>Tiêu chí đối sánh</th><th class="us">Hệ sinh thái DrgX</th><th>Themis (chấm trên máy GV)</th><th>DOMjudge (mã nguồn mở ICPC)</th><th>VNOJ / DMOJ (trực tuyến)</th></tr></thead>
+      <thead><tr><th>Tiêu chí đối sánh</th><th class="us">Hệ sinh thái DrgX</th><th>Themis (chấm trên máy GV)</th><th>CP Editor / CPH (VS Code)</th><th>DOMjudge / VNOJ / SEB</th></tr></thead>
       <tbody>
-        <tr><td>1. Hạ tầng &amp; Cài đặt</td><td class="us y">✓ Máy Windows · LAN 0 Internet (&lt;60s)</td><td class="n">Máy Windows giáo viên</td><td class="n">Cần quản trị máy chủ Linux</td><td class="n">Cần kết nối Internet ổn định</td></tr>
-        <tr><td>2. Học sinh tự chấm thử khi làm</td><td class="us y">✓ Phím F9 (0,18s) · Báo Diff &amp; freopen</td><td class="n">✕ Chỉ chấm sau khi GV thu bài</td><td class="n">Nộp qua giao diện web nội bộ</td><td class="n">Nộp qua giao diện web</td></tr>
-        <tr><td>3. Chế độ thi tắt AI trên máy HS</td><td class="us y">✓ CP Studio gỡ bỏ 100% mô-đun AI</td><td class="n">Không thuộc phạm vi phần mềm</td><td class="n">Tùy cấu hình máy trạm</td><td class="n">Không kiểm soát máy khách</td></tr>
-        <tr><td>4. Stress Test 3 cột &amp; Lọc đạo văn</td><td class="us y">✓ Tích hợp sẵn (Winnowing 38ms/40 bài)</td><td class="n">Chưa tích hợp quét token</td><td class="n">Cần tích hợp công cụ ngoài</td><td class="n">Chỉ dành cho quản trị viên</td></tr>
-        <tr><td>5. Học liệu tiếng Việt &amp; Sửa lỗi C++</td><td class="us y">✓ 47 bài tập, 42 bài giảng, 25 mẫu lỗi</td><td class="n">Giao diện Việt, không kèm học liệu</td><td class="n">Giao diện Tiếng Anh</td><td class="n">Kho bài tập cộng đồng lớn</td></tr>
-        <tr><td>6. Tương thích quy trình hiện có</td><td class="us y">✓ Xuất thư mục $SBD\$BAI.cpp nạp Themis</td><td class="n">Chuẩn chấm thi HSG phổ thông</td><td class="n">Chuẩn ICPC quốc tế</td><td class="n">Chuẩn DMOJ</td></tr>
+        <tr><td>1. Hạ tầng &amp; Cài đặt</td><td class="us y">✓ Windows · LAN 0 Internet (&lt;60s)</td><td class="n">Máy Windows giáo viên</td><td class="n">Cần tự cài g++/PATH thủ công</td><td class="n">DOMjudge cần Linux; VNOJ cần mạng</td></tr>
+        <tr><td>2. Tự chấm F9 &amp; tiền kiểm freopen</td><td class="us y">✓ Phím F9 (0,18s) · Báo Diff &amp; freopen</td><td class="n">✕ Chỉ chấm sau khi GV thu bài</td><td class="n">✓ Chấm mẫu nhanh (chưa kiểm freopen)</td><td class="n">Nộp qua web (SEB chỉ khóa trình duyệt)</td></tr>
+        <tr><td>3. Giảm thiểu rủi ro AI &amp; Kiosk</td><td class="us y">✓ CP Studio khóa AI + tích hợp SEB/Veyon</td><td class="n">Không thuộc phạm vi phần mềm</td><td class="n">✕ Không tách hồ sơ thi / không khóa AI</td><td class="n">SEB/Veyon khóa máy (bổ trợ cho DrgX)</td></tr>
+        <tr><td>4. Stress Test 3 cột &amp; Lọc đạo văn</td><td class="us y">✓ Tích hợp sẵn (Winnowing 38ms/40 bài)</td><td class="n">Chưa tích hợp quét token</td><td class="n">CP Editor có Stress (không thu LAN)</td><td class="n">Cần tích hợp công cụ ngoài (MOSS/JPlag)</td></tr>
+        <tr><td>5. Học liệu Việt &amp; Sửa lỗi C++</td><td class="us y">✓ 47 bài tập, 42 bài giảng, 25 mẫu lỗi</td><td class="n">Giao diện Việt, không kèm học liệu</td><td class="n">Giao diện Anh, không kèm học liệu</td><td class="n">VNOJ có kho bài lớn (cần Internet)</td></tr>
+        <tr><td>6. Thu bài LAN &amp; Xuất chuẩn Themis</td><td class="us y">✓ Thu LAN :8765 → xuất $SBD\$BAI.cpp</td><td class="n">Chuẩn chấm thi HSG phổ thông</td><td class="n">✕ Không có tính năng thu bài LAN</td><td class="n">Chuẩn ICPC / DMOJ (không xuất Themis)</td></tr>
       </tbody>
     </table>
 
     <div class="moat-strip rv d4">
-      <div class="glass moat-card"><span style="font-size:28px">🛡️</span><div><b>Rào cản Kỹ thuật (Đo kiểm thật)</b><span>Vỏ 39MB, nhân chấm 3,98MB (~14MB RAM), chịu tải 40–60 máy LAN 100% AC</span></div></div>
+      <div class="glass moat-card"><span style="font-size:28px">🛡️</span><div><b>Rào cản Kỹ thuật (Đo kiểm thật)</b><span>DrgX Studio ~39MB RAM, nhân chấm 3,9MB (~14MB RAM), Win32 JobObject 256MB</span></div></div>
       <div class="glass moat-card"><span style="font-size:28px">📚</span><div><b>Rào cản Sư phạm (GDPT 2018)</b><span>Học có AI (Dev Studio) tách biệt Thi sạch AI (CP Studio) + tương thích Themis</span></div></div>
-      <div class="glass moat-card"><span style="font-size:28px">🔒</span><div><b>Bảo vệ Dữ liệu (NĐ 13/2023)</b><span>Lưu cục bộ tại trường, tuân thủ Luật Bảo vệ dữ liệu cá nhân (2026)</span></div></div>
+      <div class="glass moat-card"><span style="font-size:28px">🔒</span><div><b>Bảo vệ Dữ liệu (Luật BVDLCN 2025)</b><span>Lưu cục bộ tại trường, tuân thủ Luật 91/2025/QH15 &amp; NĐ 356/2025/NĐ-CP</span></div></div>
     </div>
   </section>
 
   <!-- ============ S10 · BÁNH ĐÀ B2B2C & UNIT ECONOMICS (CHI PHÍ MÁY CHỦ ≈ 0Đ) ============ -->
   <section class="slide" id="s13" data-code="S10" data-title="Lan tỏa B2B2C & Unit Economics" data-v3="1" data-t3="9" data-time="9" data-core="1" data-ch="4" data-rub="2.2 2.3 5.1 5.2"
-    data-notes="Một nghìn lượt cài miễn phí phục vụ năm nghìn học sinh; nhờ chấm ngay trên máy trường nên biên lợi nhuận gộp đạt tám lăm phần trăm.">
+    data-notes="Một nghìn học sinh tích cực tại tám trường thí điểm; doanh thu trọng tâm từ khối trường học B2B bảy mươi mốt phẩy bảy phần trăm với tỷ lệ LTV trên CAC đạt chín phẩy mười lăm lần.">
     <div class="split" style="grid-template-columns:560px 1fr;gap:42px;align-items:center">
       <div class="fly rv d2" style="transform:scale(0.92);transform-origin:center">
         <svg viewBox="0 0 620 600" aria-hidden="true">
@@ -444,35 +444,35 @@ int main() {
         </svg>
         <div class="hub"><b class="grad">B2B2C</b><span>Land-and-Expand</span></div>
         <div class="node n-top glass"><span class="n0">BƯỚC 01 · HẠT NHÂN</span><b>1 Giáo viên Tin học</b>dùng Exam Server miễn phí</div>
-        <div class="node n-right glass"><span class="n0">BƯỚC 02 · LAN TỎA</span><b>≥1.000 lượt cài đặt</b>phục vụ ≈ 5.000 HS sử dụng</div>
-        <div class="node n-bottom glass"><span class="n0">BƯỚC 03 · CHỨNG MINH</span><b>Thực nghiệm 9A2</b>94,3% HS AC trong 5′ đầu</div>
-        <div class="node n-left glass"><span class="n0">BƯỚC 04 · CHUYỂN ĐỔI</span><b>Gói School 15–20tr</b>&amp; Gói Pro 499k–699k/năm</div>
+        <div class="node n-right glass"><span class="n0">BƯỚC 02 · THÍ ĐIỂM 2027</span><b>08 trường vùng lõi</b>U_reach 4.000 · U_active 1.000 HS</div>
+        <div class="node n-bottom glass"><span class="n0">BƯỚC 03 · CHỨNG MINH</span><b>Khảo nghiệm 9A2 (35 HS)</b>94,3% F9 &lt; 5′ · Cổng Go/No-Go 30/12</div>
+        <div class="node n-left glass"><span class="n0">BƯỚC 04 · CHUYỂN ĐỔI</span><b>Gói Trường 6–12tr (BQ 8tr)</b>Mini-Contest 7tr · Pro 300k</div>
       </div>
 
       <div>
-        <div class="kicker rv d1">Mô hình Kinh doanh Local-First &amp; Kênh Truyền thông Thật (Ngân sách Năm 1: 55 Triệu Đồng)</div>
-        <h2 class="sm rv d2">Thêm học sinh, <span class="grad">chi phí máy chủ ≈ 0 đồng.</span></h2>
+        <div class="kicker rv d1">Mô hình Kinh doanh Local-First (0 Máy chủ Đám mây) · Doanh thu Trọng tâm từ B2B Trường học &amp; Giải đấu (71,7% Năm 2029)</div>
+        <h2 class="sm rv d2">Thêm học sinh, <span class="grad">chi phí máy chủ = 0 đồng.</span></h2>
         <div class="grid g4 f" style="margin-top:14px;gap:14px">
-          <div class="glass stat" style="padding:16px 18px"><b class="grad" style="font-size:44px">82–85%</b><span style="font-size:15px">Biên lợi nhuận gộp</span></div>
-          <div class="glass stat" style="padding:16px 18px"><b style="font-size:44px">6,2x</b><span style="font-size:15px">LTV/CAC · Gói Pro (B2C)</span></div>
-          <div class="glass stat" style="padding:16px 18px"><b class="good" style="font-size:44px">7,9x</b><span style="font-size:15px">LTV/CAC · Gói Trường (B2B)</span></div>
-          <div class="glass stat" style="padding:16px 18px"><b style="font-size:44px">&lt; 5,3<small style="font-size:22px">th</small></b><span style="font-size:15px">Thu hồi chi phí CAC</span></div>
+          <div class="glass stat" style="padding:16px 18px"><b class="grad" style="font-size:42px">76,3–93%</b><span style="font-size:15px">Biên đóng góp gộp</span></div>
+          <div class="glass stat" style="padding:16px 18px"><b class="good" style="font-size:42px">9,15x</b><span style="font-size:15px">LTV/CAC · Gói Trường (BQ 8tr)</span></div>
+          <div class="glass stat" style="padding:16px 18px"><b style="font-size:42px">71,7%</b><span style="font-size:15px">Tỷ trọng DT B2B (205/286tr)</span></div>
+          <div class="glass stat" style="padding:16px 18px"><b style="font-size:42px">3,9<small style="font-size:22px">th</small></b><span style="font-size:15px">Thu hồi chi phí CAC</span></div>
         </div>
 
         <div class="ue-bottom f" style="margin-top:16px;gap:16px">
           <div class="glass ue-bench" style="padding:18px 22px">
             <div class="eyebrow acc">HIỆU QUẢ VỐN (LTV / CAC) SO VỚI CHUẨN EDTECH (3,0x)</div>
-            <div class="ue-bar-row"><b>DrgX School (15–20 tr/năm)</b><div class="ue-bar-track"><div class="ue-bar-fill" style="width:100%;background:linear-gradient(90deg,var(--good),var(--a1))"></div></div><b class="mono good" style="text-align:right">7,9x</b></div>
-            <div class="ue-bar-row"><b>DrgX Pro (499k–699k/năm)</b><div class="ue-bar-track"><div class="ue-bar-fill" style="width:78%"></div></div><b class="mono acc" style="text-align:right">6,2x</b></div>
-            <div class="ue-bar-row"><span class="muted">Chuẩn ngành EdTech</span><div class="ue-bar-track"><div class="ue-bar-fill" style="width:38%;background:var(--faint)"></div></div><span class="mono muted" style="text-align:right">3,0x</span></div>
+            <div class="ue-bar-row"><b>DrgX School Phú Thọ (6–12 tr/năm · BQ 8,0tr · LTV 18,3tr / CAC 2,0tr)</b><div class="ue-bar-track"><div class="ue-bar-fill" style="width:92%;background:linear-gradient(90deg,var(--good),var(--a1))"></div></div><b class="mono good" style="text-align:right">9,15x</b></div>
+            <div class="ue-bar-row"><b>Gói Mở rộng Liên tỉnh (15–18 tr/năm · LTV 50,8tr / CAC 5,0tr)</b><div class="ue-bar-track"><div class="ue-bar-fill" style="width:100%"></div></div><b class="mono acc" style="text-align:right">10,2x</b></div>
+            <div class="ue-bar-row"><span class="muted">Chuẩn ngành EdTech (SaaS Giáo dục)</span><div class="ue-bar-track"><div class="ue-bar-fill" style="width:30%;background:var(--faint)"></div></div><span class="mono muted" style="text-align:right">3,0x</span></div>
           </div>
           <div class="glass card" style="padding:18px 22px">
-            <div class="eyebrow acc">MINH CHỨNG KÊNH TRUYỀN THÔNG THẬT</div>
+            <div class="eyebrow acc">CƠ CẤU ĐƠN GIÁ CHUẨN HỒ SƠ (BẢNG 9)</div>
             <p style="font-size:15.5px;margin-top:8px;line-height:1.45">
-              • <b>Web &amp; Kiosk sống:</b> <span class="mono">drgx-web.netlify.app</span><br>
-              • <b>GitHub công khai:</b> <span class="mono">LeMinh2k12/Drgx-Startup</span><br>
-              • <b>Giải đấu CLB:</b> Mini-Contest 45′ &amp; Tờ rơi QR<br>
-              • <b>Khớp chỉ tiêu:</b> ≥1.000 lượt cài ≈ 5.000 HS dùng
+              • <b>DrgX Free (MIT):</b> 0đ (F9, Pre-flight, Stress 3 cột, 47 bài)<br>
+              • <b>Gói Trường (B2B):</b> 6,0–12,0 tr/năm (BQ <b>8,0 tr/năm</b>)<br>
+              • <b>Giải Mini-Contest (B2B):</b> <b>7,0 tr/hợp đồng</b> (biên 71,4%)<br>
+              • <b>Gói Pro Offline (B2C):</b> <b>300.000 đ/HS/năm</b> (~25k/tháng)
             </p>
           </div>
         </div>
@@ -480,81 +480,81 @@ int main() {
     </div>
   </section>
 
-  <!-- ============ S11 · KẾ HOẠCH TÀI CHÍNH 3 KỊCH BẢN & LỘ TRÌNH PHÚ THỌ → TOÀN QUỐC ============ -->
-  <section class="slide" id="s15" data-code="S11" data-title="Tài chính 3 kịch bản & Lộ trình" data-v3="1" data-t3="9" data-time="9" data-core="1" data-ch="4" data-rub="4.1 4.2 4.3 4.4"
-    data-notes="Theo ba kịch bản từ Phú Thọ ra toàn quốc, dự án hòa vốn vào năm hai; kể cả doanh thu giảm ba mươi phần trăm vẫn có lãi.">
+  <!-- ============ S11 · KẾ HOẠCH TÀI CHÍNH 4 KỊCH BẢN & LỘ TRÌNH PHÚ THỌ → LIÊN TỈNH ============ -->
+  <section class="slide" id="s15" data-code="S11" data-title="Tài chính 2027–2029 & Lộ trình" data-v3="1" data-t3="9" data-time="9" data-core="1" data-ch="4" data-rub="4.1 4.2 4.3 4.4"
+    data-notes="Theo mô hình tài chính chuẩn hồ sơ Phú Thọ đã tính đủ nhân sự tám mươi nghìn một giờ và thuế thu nhập doanh nghiệp mười lăm phần trăm: năm hai không hai chín đạt hai trăm tám mươi sáu triệu doanh thu, lãi ròng bảy mươi bảy phẩy sáu triệu đồng và hoàn vốn lũy kế dương.">
     <div class="split" style="grid-template-columns:1.02fr .98fr;gap:36px;align-items:stretch">
       <div>
-        <div class="kicker rv d1">Kế hoạch Tài chính 3 Kịch bản (Thận trọng – Cơ sở – Lạc quan) · Hòa vốn Quý 3/2028</div>
-        <h2 class="sm rv d2" style="font-size:40px">Kịch bản Cơ sở: <span class="grad">50.000 HS · 80 Trường Năm 3.</span></h2>
+        <div class="kicker rv d1">Mô hình Tài chính Chuẩn Hồ sơ (Bảng 17–20) · Nhân sự 80k/giờ · Thuế TNDN 15% EBT (Luật 67/2025/QH15)</div>
+        <h2 class="sm rv d2" style="font-size:38px">Kịch bản Cơ sở 2029: <span class="grad">16/40 Trường (40%) · DT 286,0 tr · EAT +77,6 tr.</span></h2>
         <div class="glass fin-card rv d3" style="padding:18px 22px">
           <div class="fin-head">
-            <span class="eyebrow acc">DOANH THU &amp; CHI PHÍ KỊCH BẢN CƠ SỞ (TRIỆU VNĐ)</span>
-            <span class="badge g">⚡ Hòa vốn Quý 3/2028</span>
+            <span class="eyebrow acc">DOANH THU &amp; CHI TRƯỚC THUẾ KỊCH BẢN CƠ SỞ (TRIỆU VNĐ)</span>
+            <span class="badge g">⚡ Lãi lũy kế +4,15tr · Tiền mặt cuối 2029: +124,15tr</span>
           </div>
           <div class="cols" style="padding-top:26px">
             <div class="yr">
               <div class="pair" style="height:175px">
-                <div class="bar cost" style="--h:18%"><em>315,0</em></div>
-                <div class="bar rev" style="--h:14%"><em>244,9</em></div>
+                <div class="bar cost" style="--h:22%"><em>64,0</em></div>
+                <div class="bar rev" style="--h:4%"><em>0,0</em></div>
               </div>
-              <div class="yr-meta"><div class="lbl">Năm 1 (2027)</div><div class="pl bad">EBT: −70,1 tr (8 trường)</div></div>
+              <div class="yr-meta"><div class="lbl">2027 (Thí điểm 8 trường)</div><div class="pl bad">EAT: −64,0 tr (Tiền mặt +44,0tr)</div></div>
             </div>
             <div class="yr">
               <div class="pair" style="height:175px">
-                <div class="bar cost" style="--h:42%"><em>1.070,0</em></div>
-                <div class="bar rev" style="--h:62%"><em>1.588,8</em></div>
+                <div class="bar cost" style="--h:44%"><em>125,0</em></div>
+                <div class="bar rev" style="--h:45%"><em>128,0</em></div>
               </div>
-              <div class="yr-meta"><div class="lbl">Năm 2 (2028)</div><div class="pl good">EBT: +518,8 tr (40 trường)</div></div>
+              <div class="yr-meta"><div class="lbl">2028 (8/25 trường · H2)</div><div class="pl good">EAT năm: +2,55 tr (H2: +26,55tr)</div></div>
             </div>
             <div class="yr">
               <div class="pair" style="height:175px">
-                <div class="bar cost" style="--h:62%"><em>2.250,0</em></div>
-                <div class="bar rev" style="--h:100%"><em>3.647,5</em></div>
+                <div class="bar cost" style="--h:68%"><em>194,7</em></div>
+                <div class="bar rev" style="--h:100%"><em>286,0</em></div>
               </div>
-              <div class="yr-meta"><div class="lbl">Năm 3 (2029 · Cơ sở)</div><div class="pl good">EBT: +1.397,5 tr (80 trường)</div></div>
+              <div class="yr-meta"><div class="lbl">2029 (16/40 trường)</div><div class="pl good">EBT: +91,3 · EAT: +77,6 tr (27,1%)</div></div>
             </div>
           </div>
-          <div class="legend" style="margin-top:8px;font-size:14.5px">
-            <span><b>Cơ sở Năm 3:</b> 50.000 HS · DT 3.647,5 tr · Lãi +1.397,5 tr</span>
-            <span><b>Lạc quan Năm 3:</b> 120.000 HS · DT 7.594,0 tr · Lãi +4.094,0 tr</span>
+          <div class="legend" style="margin-top:8px;font-size:13.5px">
+            <span><b>Cơ sở Phú Thọ 2029 (16/40 trường · 11 HĐ · 270 Pro):</b> DT 286,0 tr · EAT +77,6 tr (Tinh gọn 1 CTV: +99,0 tr)</span>
+            <span><b>Lạc quan Phú Thọ (25/60 trường):</b> DT 446,0 tr · EAT +147,5 tr · <b>Mở rộng Liên tỉnh:</b> DT 609,6 tr · EAT +121,6 tr</span>
           </div>
         </div>
       </div>
 
       <div style="display:flex;flex-direction:column;justify-content:space-between">
         <div>
-          <div class="eyebrow acc rv d3">ĐỐI CHIẾU ĐỘ NHẠY 3 KỊCH BẢN (NĂM 2 — 2028) &amp; CHỈ SỐ TÁC ĐỘNG GIÁO DỤC</div>
+          <div class="eyebrow acc rv d3">ĐỐI CHIẾU CÁC KỊCH BẢN NĂM 2029 (THUẾ TNDN 15% EBT — BẢNG 19 HỒ SƠ)</div>
           <table class="t rv d4" style="margin-top:10px">
-            <thead><tr><th>Kịch bản</th><th>Doanh thu Năm 2</th><th>Lợi nhuận EBT</th><th>Quy mô Năm 3 (2029)</th></tr></thead>
+            <thead><tr><th>Kịch bản Năm 2029</th><th>Doanh thu</th><th>EBT / Lãi ròng (EAT)</th><th>Quy mô &amp; Số dư Tiền mặt</th></tr></thead>
             <tbody>
               <tr>
-                <td>Thận trọng (−30%)</td>
-                <td class="mono">1.112,2 tr</td>
-                <td class="good mono"><b>+90,2 tr</b><div class="mini-bar"><i style="--w:15%;background:var(--good)"></i></div></td>
-                <td>20.000 HS · 40 trường</td>
+                <td>Sàn &amp; Thận trọng</td>
+                <td class="mono">24,0 / 148,0 tr</td>
+                <td class="mono"><span class="good"><b>Sàn: +2,1 tr EAT</b></span><br><span class="good" style="font-size:13px">Thận trọng (Tinh gọn 1 CTV): <b>+17,6 tr EAT</b></span></td>
+                <td>03/15 trường (Sàn) · 08/30 trường (Thận trọng · TM +46,6tr)</td>
               </tr>
               <tr>
-                <td class="us">Cơ sở (Chính)</td>
-                <td class="us mono"><b>1.588,8 tr</b></td>
-                <td class="us good mono"><b>+518,8 tr</b><div class="mini-bar"><i style="--w:65%;background:var(--a1)"></i></div></td>
-                <td class="us"><b>50.000 HS · 80 trường</b></td>
+                <td class="us">Cơ sở (Kế hoạch chính)</td>
+                <td class="us mono"><b>286,0 tr</b></td>
+                <td class="us good mono"><b>+91,3 tr EBT</b><br><span style="font-size:13.5px">EAT: <b>+77,6 tr</b> (Tinh gọn: <b>+99,0 tr</b>)</span></td>
+                <td class="us"><b>16/40 trường · 11 HĐ · 270 Pro</b><br><span style="font-size:13px">Lũy kế <b>+4,15 tr</b> · Tiền mặt <b>+124,15 tr</b></span></td>
               </tr>
               <tr>
-                <td>Lạc quan (+25%)</td>
-                <td class="mono">1.986,0 tr</td>
-                <td class="good mono"><b>+876,0 tr</b><div class="mini-bar"><i style="--w:100%;background:var(--a2)"></i></div></td>
-                <td>120.000 HS · 150 trường</td>
+                <td>Lạc quan / Liên tỉnh</td>
+                <td class="mono">446,0 / 609,6 tr</td>
+                <td class="good mono"><b>+147,5 tr EAT</b> (Phú Thọ)<br><span style="font-size:13px">Liên tỉnh: <b>+121,6 tr EAT</b></span></td>
+                <td>25/60 trường Phú Thọ (TM +220,65tr) · 32–50 trường Liên tỉnh</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="glass card rv d4" style="padding:18px 22px;border-color:color-mix(in srgb,var(--good) 55%,var(--line2))">
-          <div style="font-size:19px;font-weight:900" class="good">🗺️ Lộ trình Phú Thọ → Miền Bắc → Toàn quốc &amp; 4 Chỉ số Tác động Đo được:</div>
-          <p style="font-size:15.5px;margin-top:6px;line-height:1.45">
-            • <b>GĐ1 (11–12/2026):</b> Pilot 3–5 trường tại Phú Thọ · <b>GĐ2 (2027):</b> 08 trường, 5.000 HS · <b>GĐ3–4 (2028–2029):</b> 40 → 80 trường.<br>
-            • <b>4 KPI Giáo dục:</b> (1) &lt; 5 phút đến bài AC đầu tiên (Pilot 9A2 đạt 94,3%); (2) ≥ 3 bài AC/HS/tuần; (3) &lt; 2 phút GV thu &amp; chấm 40 máy; (4) D7 Retention ≥ 30%.
+          <div style="font-size:18.5px;font-weight:900" class="good">🗺️ Lộ trình Thực thi, Cổng Go/No-Go &amp; Khớp Lịch Thi Lớp 10:</div>
+          <p style="font-size:15px;margin-top:6px;line-height:1.45">
+            • <b>Cổng Go/No-Go (30/12/2026):</b> ≥ 03 LOI thí điểm &amp; ≥ 32% trường khảo sát chọn mức ≥ 6,0 tr/năm · <b>T3–T6/2027:</b> <b>Đóng băng tính năng mới</b> để 4 em thi lớp 10 · <b>Q1/2028:</b> Phụ huynh lập Công ty TNHH &amp; mua chứng thư OV Code Signing.<br>
+            • <b>Chịu đựng rủi ro:</b> Kể cả khi doanh thu Gói Pro = 0 đồng, năm 2029 vẫn lãi ròng <b>+18,9 tr</b> (chuẩn) / <b>+40,4 tr</b> (tinh gọn).
           </p>
         </div>
       </div>
@@ -562,7 +562,7 @@ int main() {
   </section>
 
   <!-- ============ S12 · ĐỀ XUẤT ĐỒNG HÀNH, MÃ QR TRẢI NGHIỆM & KẾT THÚC ============ -->
-  <section class="slide closing chapter" id="s18" data-code="S12" data-title="Đề xuất 300tr, Mã QR & Kết thúc" data-v3="1" data-t3="9" data-time="9" data-core="1" data-norail="1" data-rub="6.1 6.3 6.4 4.2"
+  <section class="slide closing chapter" id="s18" data-code="S12" data-title="Vốn ươm tạo 120tr/60tr, Mã QR & Kết thúc" data-v3="1" data-t3="9" data-time="9" data-core="1" data-norail="1" data-rub="6.1 6.3 6.4 4.2"
     data-notes="Từ hai giờ cài đặt nay chỉ còn sáu mươi giây — kính mời thầy cô quét mã QR trải nghiệm. Chúng em cảm ơn Ban Giám khảo ạ!">
     <div class="split" style="grid-template-columns:1.05fr 0.95fr;gap:42px;width:100%;text-align:left;align-items:center">
       <div>
@@ -570,7 +570,7 @@ int main() {
         <div class="from rv d2" style="margin-top:4px;justify-content:flex-start"><s>2 giờ</s><span style="color:var(--a1);font-size:64px">──►</span><span class="f pop grad" style="font-size:78px">60 giây.</span></div>
         <h2 class="f" style="font-size:42px;margin-top:8px">Mỗi học sinh Việt Nam xứng đáng có<br><span class="grad">một môi trường lập trình đẳng cấp.</span></h2>
         <p class="lead f" style="font-size:19px;margin-top:10px">
-          <b>Phương án tự chủ:</b> Ngay cả khi chưa huy động vốn ngoài, kiến trúc Local-First giúp nhóm duy trì vận hành thực tế tại Phú Thọ với chi phí tinh gọn <b>&lt; 20 triệu đồng/năm</b>.
+          <b>Phương án tự chủ vốn gia đình (Bảng 18):</b> Chỉ với <b>60,0 triệu đồng</b> vốn đối ứng của 4 gia đình (chi 52,0 tr, giữ đệm +8,0 tr), dự án vẫn vận hành trọn vẹn và đạt số dư tiền mặt <b>+112,15 triệu đồng</b> cuối năm 2029.
         </p>
 
         <div class="grid g2 rv d4" style="margin-top:18px;gap:16px">
@@ -587,33 +587,36 @@ int main() {
             <div>
               <span class="badge b" style="font-size:11px;padding:3px 8px">MÃ QR 02 · MÃ NGUỒN</span>
               <div style="font-size:16px;font-weight:800;margin-top:4px">LeMinh2k12/Drgx-Startup</div>
-              <div style="font-size:13.5px;color:var(--muted)">Kho mã nguồn, bộ cài &amp; báo cáo 68/68 PASS</div>
+              <div style="font-size:13.5px;color:var(--muted)">Kho mã nguồn, bộ cài &amp; kiểm định 68/68 + 15/15 PASS</div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="glass card rv d3" style="padding:30px 34px;border-color:var(--a1)">
-        <span class="badge b">ĐỀ XUẤT VỐN ƯƠM TẠO 300 TRIỆU ĐỒNG (18 THÁNG) &amp; KẾT NỐI PILOT</span>
+        <span class="badge b">VỐN ƯƠM TẠO 18 THÁNG: 120 TRIỆU (CHUẨN PHÚ THỌ) · 60 TRIỆU (TỰ CHỦ GIA ĐÌNH)</span>
         <div style="display:grid;grid-template-columns:230px 1fr;gap:24px;align-items:center;margin-top:16px">
-          <svg class="donut" viewBox="0 0 330 330" aria-label="Phân bổ 300 triệu">
+          <svg class="donut" viewBox="0 0 330 330" aria-label="Phân bổ 120 triệu vốn ươm tạo">
             <circle cx="165" cy="165" r="120" stroke="var(--line2)"/>
-            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--a1)" style="--d:40"/>
-            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--a2)" style="--d:26.7;stroke-dashoffset:-40"/>
-            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--a3)" style="--d:20;stroke-dashoffset:-66.7"/>
-            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--warn)" style="--d:13.3;stroke-dashoffset:-86.7"/>
-            <text x="165" y="166" text-anchor="middle" font-size="56">300tr</text>
-            <text x="165" y="204" text-anchor="middle" font-size="20" style="fill:var(--muted);font-weight:700">Hoàn vốn 18–20th</text>
+            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--a1)" style="--d:38"/>
+            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--a2)" style="--d:25;stroke-dashoffset:-38"/>
+            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--a3)" style="--d:25;stroke-dashoffset:-63"/>
+            <circle class="seg" cx="165" cy="165" r="120" pathLength="100" stroke="var(--warn)" style="--d:12;stroke-dashoffset:-88"/>
+            <text x="165" y="160" text-anchor="middle" font-size="52">120tr</text>
+            <text x="165" y="200" text-anchor="middle" font-size="18" style="fill:var(--muted);font-weight:700">Chi 100tr · Đệm 20tr</text>
           </svg>
           <div class="ask-list">
-            <div><i style="background:var(--a1)"></i><span>R&amp;D Sản phẩm &amp; Học liệu số</span><b>120 tr (40%)</b></div>
-            <div><i style="background:var(--a2)"></i><span>Pilot trường học &amp; Mini-Contest</span><b>80 tr (27%)</b></div>
-            <div><i style="background:var(--a3)"></i><span>Hạ tầng &amp; Hỗ trợ kỹ thuật</span><b>60 tr (20%)</b></div>
-            <div><i style="background:var(--warn)"></i><span>Pháp lý &amp; Bản quyền SHTT</span><b>40 tr (13%)</b></div>
+            <div><i style="background:var(--a1)"></i><span>R&amp;D 60 bài HSG (gen/brute) + 15 đề</span><b>38,0 tr (38%)</b></div>
+            <div><i style="background:var(--a2)"></i><span>Thí điểm 08 trường &amp; Mini-Contest</span><b>25,0 tr (25%)</b></div>
+            <div><i style="background:var(--a3)"></i><span>Thiết bị mạng &amp; OV Code Signing</span><b>25,0 tr (25%)</b></div>
+            <div><i style="background:var(--warn)"></i><span>Pháp lý Công ty TNHH &amp; SHTT (+Đệm 20tr)</span><b>12,0 tr (12%)</b></div>
           </div>
         </div>
-        <div class="row" style="margin-top:20px">
-          <span class="pill g">🏫 Xin kết nối 3–5 trường THCS/THPT Pilot tại Phú Thọ</span>
+        <div style="font-size:13px;color:var(--muted);margin-top:10px">
+          * <b>Cơ cấu nguồn vốn 120tr:</b> 60,0tr vốn 4 gia đình + 60,0tr giải thưởng/tài trợ (Gói mở rộng liên tỉnh 18 tháng: 300,0tr).
+        </div>
+        <div class="row" style="margin-top:14px">
+          <span class="pill g">🏫 Xin kết nối 08 trường THCS/THPT Thí điểm miễn phí năm 2027 tại Phú Thọ</span>
           <span class="pill p">🙏 Chúng em trân trọng cảm ơn Ban Giám khảo!</span>
         </div>
       </div>
@@ -623,60 +626,60 @@ int main() {
   <!-- ============ PHỤ LỤC · Hỏi đáp (phím A) ============ -->
 
   <section class="slide appendix" id="pl1" data-code="PL1" data-apx="1" data-title="PL1 · Bản quyền & dữ liệu" data-time="0" data-rub="6.2"
-    data-notes="Nhóm tự phát triển 100% lớp lõi gồm nhân chấm C++17, Stress Engine 3 cột, Winnowing token, Exam Server LAN, 42 bài giảng và 5 Skins. Toàn bộ bài thi của học sinh lưu cục bộ tại trường theo đúng Nghị định 13/2023/NĐ-CP.">
+    data-notes="Nhóm tự phát triển 100% lớp lõi gồm nhân chấm C++17, Stress Engine 3 cột, Winnowing token, Exam Server LAN, 42 bài giảng và 5 Skins. Toàn bộ bài thi của học sinh lưu cục bộ tại trường theo đúng Luật Bảo vệ dữ liệu cá nhân năm 2025 và Nghị định 356/2025/NĐ-CP.">
     <span class="badge b apx-tag">PHỤ LỤC HỎI ĐÁP · PL1 / 05</span>
-    <div class="kicker rv d1">Câu hỏi Phản biện 01 · Sở hữu Trí tuệ &amp; Quyền Riêng tư</div>
+    <div class="kicker rv d1">Câu hỏi Phản biện 01 · Sở hữu Trí tuệ, Sandbox Win32 &amp; Quyền Riêng tư</div>
     <h2 class="rv d2">Làm chủ công nghệ lõi. <span class="grad">Dữ liệu ở lại trường.</span></h2>
     <div class="qa stg">
-      <div class="glass card"><h3>🧩 100% Tài sản Trí tuệ (IP) gốc do nhóm tự phát triển</h3><p>Nhân chấm C++17 (<span class="mono">oj_server.cpp</span>), Stress Engine 3 cột, thuật toán Winnowing token, <span class="mono">exam_server.py</span>, bộ công cụ CP/Dev Studio, 5 Giao diện (Skins) và 42 bài giảng VNOI Wiki là tài sản nguyên bản của nhóm.</p></div>
-      <div class="glass card"><h3>⚖️ Kiến trúc Tauri 2 (Rust) chuẩn Công nghiệp</h3><p>Vỏ ứng dụng xây dựng trên nền tảng hệ thống <b>Rust / Tauri 2</b> kết hợp <b>Win32 JobObject API</b>, bảo đảm hiệu năng nhẹ (tiến trình vỏ ≈ 39 MB RAM) và giải phóng 100% tiến trình con sau mỗi lần chấm.</p></div>
-      <div class="glass card"><h3>🔒 Không thu thập mã nguồn mặc định (Zero Telemetry)</h3><p>Toàn bộ quá trình biên dịch và chấm bài diễn ra cục bộ trên máy trạm học sinh. Trợ lý AI chỉ hoạt động khi người dùng chủ động bật trong Dev Studio; bản CP Studio khóa AI hoàn toàn.</p></div>
-      <div class="glass card"><h3>🏫 Tuân thủ Nghị định 13/2023/NĐ-CP</h3><p>Điểm thi và bài làm của học sinh lưu trực tiếp trên máy chủ giáo viên trong mạng LAN của trường, không đẩy lên đám mây nước ngoài; công bố rõ tại <span class="mono">PRIVACY.md</span>.</p></div>
+      <div class="glass card"><h3>🧩 100% Tài sản Trí tuệ (IP) gốc do nhóm tự phát triển</h3><p>Nhân chấm C++17 (<span class="mono">oj_server.cpp</span>), Stress Engine 3 cột, thuật toán Winnowing token (<span class="mono">k=5, w=4</span>, lọc khung nhập xuất mẫu + chốt chặn &ge;15 vân tay), <span class="mono">exam-server.py</span>, bộ tiền kiểm Pre-flight Check 5 luật Themis, 25 mẫu lỗi C++17 tiếng Việt và 5 Skins thuộc đồng quyền tác giả 4 thành viên (25% &times; 4 em); gói dịch vụ thương mại chỉ phân phối nhị phân <b>VSCodium (MIT)</b> và biên soạn mới 60 bài HSG + 15 đề thi thử.</p></div>
+      <div class="glass card"><h3>🛡️ Đã tích hợp Low Integrity + Win32 JobObject (14/14 SEC PASS)</h3><p>Máy chủ thi LAN đã tích hợp <b>Low Integrity Level (MIC NO_READ_UP/NO_WRITE_UP)</b> + <b>Win32 JobObject API</b> (khóa cứng 256 MB RAM/tiến trình, chặn fork-bomb), lọc sạch biến môi trường (<span class="mono">python -I</span> + <span class="mono">sys.addaudithook</span>), cấp <span class="mono">studentToken</span> đối chiếu hằng thời gian (<span class="mono">hmac.compare_digest</span>) — đạt <b>15/15 Smoke PASS</b> &amp; <b>14/14 SEC PASS</b>.</p></div>
+      <div class="glass card"><h3>🔒 Không thu thập mã nguồn mặc định (Zero Telemetry)</h3><p>Toàn bộ quá trình biên dịch và chấm bài diễn ra cục bộ. Trợ lý AI chỉ hoạt động khi người dùng chủ động bật trong Dev Studio (lọc chặn 46/50 = 92% câu xin code giải sẵn); bản CP Studio ghi đè &amp; khóa chỉ-đọc <span class="mono">settings.json</span> ngay khi khởi chạy (<span class="mono">p50 = 53,1 ms</span>).</p></div>
+      <div class="glass card"><h3>🏫 Tuân thủ Luật BVDLCN 91/2025/QH15 &amp; NĐ 356/2025/NĐ-CP</h3><p>Điểm thi và bài làm của học sinh lưu trực tiếp trên máy chủ giáo viên trong mạng LAN của trường, không đẩy lên đám mây nước ngoài; tuân thủ Luật Bảo vệ dữ liệu cá nhân có hiệu lực từ 01/01/2026.</p></div>
     </div>
   </section>
 
-  <section class="slide appendix" id="pl2" data-code="PL2" data-apx="1" data-title="PL2 · Vì sao cần DrgX khi đã có Themis?" data-time="0" data-rub="3.2"
+  <section class="slide appendix" id="pl2" data-code="PL2" data-apx="1" data-title="PL2 · Vì sao cần DrgX khi đã có Themis & CP Editor?" data-time="0" data-rub="3.2"
     data-notes="DrgX không thay thế thói quen dùng Themis của thầy cô mà lấp đầy điểm mù trước và trong giờ thi: chấm F9 ngay lúc code, kiểm tra freopen tránh 0 điểm oan, khóa AI trên máy học sinh, quét đạo văn Winnowing và xuất cây thư mục chuẩn 100% để nạp thẳng vào Themis.">
     <span class="badge b apx-tag">PHỤ LỤC HỎI ĐÁP · PL2 / 05</span>
-    <div class="kicker rv d1">Câu hỏi Phản biện 02 · Lợi thế Cạnh tranh &amp; Tương thích Themis</div>
+    <div class="kicker rv d1">Câu hỏi Phản biện 02 · Lợi thế Cạnh tranh &amp; Tương thích Themis / SEB</div>
     <h2 class="rv d2">Không thay thế thói quen cũ — <span class="grad">Lấp đầy điểm mù khảo thí.</span></h2>
     <div class="qa stg">
-      <div class="glass card"><h3>🧪 Vì sao đã có IDE truyền thống + Themis vẫn cần DrgX?</h3><p><b>Themis</b> rất mạnh khi chấm trên máy giáo viên sau giờ thi, nhưng chưa khóa được AI trên máy học sinh, chưa quét đạo văn theo cấu trúc token, và học sinh hay bị <b>0 điểm oan</b> vì quên <span class="mono">freopen</span> / đặt sai tên file. DrgX giải quyết trọn vẹn các điểm mù này và <b>xuất thư mục bài nộp chuẩn 100% cho Themis</b>.</p></div>
-      <div class="glass card"><h3>🌐 Vì sao Web OJ (VNOJ, Codeforces) chưa đủ cho phòng máy?</h3><p>Web OJ rất tốt để luyện đề khi có mạng, nhưng không có IDE kèm theo, mất mạng là phòng máy tê liệt, và không kiểm soát được việc học sinh bật AI ở tab bên cạnh trong giờ kiểm tra.</p></div>
-      <div class="glass card"><h3>🤖 Vì sao Cloud AI IDE quốc tế không phù hợp?</h3><p>AI luôn bật nên không thể dùng làm môi trường khảo thí trung thực; chi phí 10–20 USD/tháng/học sinh vượt quá ngân sách trường công lập.</p></div>
-      <div class="glass card"><h3>🛡️ Hào bảo vệ ngách của DrgX</h3><p>Kiến trúc Kép (Học có AI / Thi sạch AI) + Chấm <kbd>F9</kbd> &amp; Stress Test 3 cột ngay lúc code + Phòng thi LAN tương thích <b>Themis</b> + Web Lab cho máy khóa Admin.</p></div>
+      <div class="glass card"><h3>🧪 Vì sao đã có Themis vẫn cần DrgX?</h3><p><b>Themis</b> rất mạnh khi chấm trên máy giáo viên sau giờ thi, nhưng chưa kiểm tra quy cách <span class="mono">freopen</span> trên máy học sinh (đã đo bắt đúng <b>100/100</b> bài đơn vị &amp; <b>10/10</b> tệp lịch sử quên sửa <span class="mono">TASK.INP</span>), chưa khóa AI và chưa lọc gợi ý Winnowing. DrgX giải quyết các điểm mù này và <b>xuất cây thư mục <span class="mono">$SBD\$BAI.cpp</span> chuẩn 100% cho Themis</b>.</p></div>
+      <div class="glass card"><h3>⚡ Vì sao CP Editor / CPH (VS Code) chưa đủ cho trường học?</h3><p><b>CP Editor</b> và <b>CPH</b> hỗ trợ chấm mẫu cá nhân tốt (cùng tải 10 test <span class="mono">p50 = 1,46 s</span> tương đương DrgX F9) nhưng không có bộ tiền kiểm <span class="mono">freopen</span>, không tách cấu hình khóa AI giờ thi, không có giao diện Stress Test 3 cột tích hợp sẵn và không thu bài mạng LAN 40 máy.</p></div>
+      <div class="glass card"><h3>🖥️ Phối hợp với Safe Exam Browser (SEB) &amp; Veyon ra sao?</h3><p>Kiểm tra thường xuyên 15–45 phút dùng <b>CP Studio + Veyon</b>; kỳ thi học kỳ / chọn đội tuyển mở <b>DrgX Web Lab (:8123)</b> bên trong trình duyệt khóa máy <b>Safe Exam Browser (SEB)</b> — chặn cứng <span class="mono">Alt+Tab</span>, Task Manager ở cấp hệ điều hành.</p></div>
+      <div class="glass card"><h3>🛡️ Hào bảo vệ ngách của DrgX</h3><p>Kiến trúc Kép (Học có AI / Thi sạch AI) + Chấm <kbd>F9</kbd> tiền kiểm <span class="mono">freopen</span> + Stress Test 3 cột miễn phí + Phòng thi LAN tương thích <b>Themis</b> + Mức phí dịch vụ <b>6,0–12,0 triệu đ/trường/năm</b> vừa khít kinh phí chuyên môn thường xuyên của trường.</p></div>
     </div>
   </section>
 
   <section class="slide appendix" id="pl3" data-code="PL3" data-apx="1" data-title="PL3 · Rủi ro & giảm thiểu" data-time="0" data-rub="2.1 4.2"
-    data-notes="Với phòng máy khóa quyền Admin, giáo viên bật Web Lab (:8123) cho cả lớp mở bằng trình duyệt LAN. Với khảo thí, 4 lớp khiên bảo vệ chống gian lận AI và đạo văn. Với tài chính, kịch bản hụt 30% doanh thu Năm 2 vẫn lãi +90,2 triệu đồng.">
+    data-notes="Với phòng máy khóa quyền Admin, giáo viên bật Web Lab (:8123) cho cả lớp mở bằng trình duyệt LAN hoặc SEB. Với cao điểm thi học kỳ, nhóm phân tầng trực từ xa cho gói 6 triệu và trực tại chỗ kèm 2 CTV thời vụ cho gói 12 triệu. Với tài chính, kịch bản Thận trọng chế độ tinh gọn 1 CTV vẫn lãi ròng +17,6 triệu đồng.">
     <span class="badge b apx-tag">PHỤ LỤC HỎI ĐÁP · PL3 / 05</span>
-    <div class="kicker rv d1">Câu hỏi Phản biện 03 · Quản trị Rủi ro Thực tiễn</div>
+    <div class="kicker rv d1">Câu hỏi Phản biện 03 · Quản trị Rủi ro Thực tiễn (Bảng 12–14 Hồ sơ)</div>
     <h2 class="rv d2">Chủ động nhận diện — <span class="grad">Phương án kiểm soát toàn diện.</span></h2>
     <table class="t rv d3">
-      <thead><tr><th>Tình huống vận hành thực tế</th><th>Cơ chế bảo vệ</th><th style="text-align:left">Giải pháp kỹ thuật &amp; vận hành của DrgX</th></tr></thead>
+      <thead><tr><th>Tình huống vận hành thực tế</th><th>Cơ chế bảo vệ</th><th style="text-align:left">Giải pháp kỹ thuật &amp; vận hành cụ thể của DrgX</th></tr></thead>
       <tbody>
-        <tr><td>1. Phòng máy đóng băng ổ cứng / khóa Admin</td><td class="us"><span class="badge g">Đã có Web Lab</span></td><td style="text-align:left">Triển khai gói Portable chạy ngay không cần quyền Admin, hoặc bật <b>Web Lab (:8123)</b> trên máy giáo viên để 40 máy học sinh mở trực tiếp qua trình duyệt LAN.</td></tr>
-        <tr><td>2. Đảm bảo tính nghiêm túc trong phòng thi</td><td class="us"><span class="badge b">4 Lớp Khiên</span></td><td style="text-align:left">Thiết lập <b>4 lớp bảo vệ khảo thí</b>: Khóa cứng AI ở CP Studio, Verdict do Server giáo viên quyết định, Mã phòng 6 ký tự + chặn gói &gt;512KB, và quét vân tay Winnowing token.</td></tr>
-        <tr><td>3. Biến động chu kỳ ngân sách trường học</td><td class="us"><span class="badge g">Biên gộp 85%</span></td><td style="text-align:left">Kiến trúc Local-first giúp <b>chi phí biến đổi ≈ 0đ</b>; kịch bản thận trọng (−30% khách hàng) ở Năm 2 vẫn lãi ròng <b>+90,2 triệu đồng</b>.</td></tr>
-        <tr><td>4. Vận hành &amp; bảo trì khi mở rộng quy mô</td><td class="us"><span class="badge a">68/68 Tự động</span></td><td style="text-align:left">Hệ thống kiểm định tự động <b>68/68 chốt chặn</b> kiểm tra toàn bộ 5 trụ cột trong chưa đầy 30 giây, đi kèm bộ tài liệu hướng dẫn chuẩn hóa và đội ngũ cố vấn đồng hành.</td></tr>
+        <tr><td>1. Bài nộp độc hại &amp; Nghe lén HTTP trong mạng LAN</td><td class="us"><span class="badge b">15/15 &amp; 14/14 PASS</span></td><td style="text-align:left">Hạ quyền <b>Low Integrity + Win32 JobObject (256MB/tiến trình)</b>, gắn nhãn MIC <span class="mono">NO_READ_UP</span>, khóa <span class="mono">sys.addaudithook</span>; đối chiếu <span class="mono">studentToken</span> hằng thời gian (<span class="mono">hmac.compare_digest</span>) + hỗ trợ bọc <b>HTTPS/TLS 1.2+</b> (<span class="mono">DRGX_TLS_CERT</span>).</td></tr>
+        <tr><td>2. Quá tải nhân sự 2 tuần cao điểm thi Học kỳ I &amp; II</td><td class="us"><span class="badge g">Phân tầng 4 lớp</span></td><td style="text-align:left">(i) <b>Gói Cơ bản (6tr, 10 trường):</b> kiểm tra máy trước 48h &amp; trực từ xa; (ii) <b>Gói HSG (12tr, 06 trường):</b> đăng ký ca lệch buổi (&le;1 trường/buổi); (iii) Thuê thêm <b>02 CTV sinh viên CNTT thời vụ</b> (400k/buổi = 5h &times; 80k/h); (iv) Trần tối đa 08 trường trực tại chỗ/đợt.</td></tr>
+        <tr><td>3. Rủi ro chuyển đổi thấp &amp; Chia sẻ tệp Gói Pro</td><td class="us"><span class="badge g">Go/No-Go 2 tầng</span></td><td style="text-align:left">Xét Go/No-Go ngày <b>30/12/2026</b> (&ge;03 LOI &amp; &ge;32% trường chọn &ge;6tr/năm; nếu thấp hơn chuyển sang <b>Kịch bản Sàn</b> lãi +2,1tr). Ở kịch bản Thận trọng, bật chế độ <b>Tinh gọn 01 CTV (48tr/năm)</b> lãi <b>+17,6tr</b>. Khi Gói Pro = 0đ vẫn lãi <b>+18,9tr</b> (chuẩn) / <b>+40,4tr</b> (tinh gọn).</td></tr>
+        <tr><td>4. Lịch thi vào lớp 10 (T3–T6/2027) &amp; Vốn gia đình 60tr</td><td class="us"><span class="badge a">An toàn thanh khoản</span></td><td style="text-align:left">Đóng băng tính năng mới từ <b>01/03–15/06/2027</b> để 4 em thi lớp 10; Q1/2028 phụ huynh lập Công ty TNHH. Nếu chỉ có <b>60,0tr vốn 4 gia đình</b>, thu gọn chi ươm tạo xuống 52,0tr (giữ đệm +8,0tr), cuối 2029 tiền mặt đạt <b>+112,15tr</b>.</td></tr>
       </tbody>
     </table>
   </section>
 
-  <section class="slide appendix" id="pl4" data-code="PL4" data-apx="1" data-title="PL4 · Giả định tài chính" data-time="0" data-rub="4.1 4.2"
-    data-notes="Gói Pro cá nhân 599.000 đ/năm có biên lợi nhuận gộp 85%, LTV/CAC = 6,2x. Gói Trường học 18 triệu đ/năm có biên lợi nhuận gộp 82%, LTV/CAC = 7,9x, thu hồi CAC dưới 5,3 tháng.">
+  <section class="slide appendix" id="pl4" data-code="PL4" data-apx="1" data-title="PL4 · Giả định tài chính & Unit Economics" data-time="0" data-rub="4.1 4.2"
+    data-notes="Gói Trường học bình quân 8 triệu đồng một năm có biên đóng góp 76,3% tương đương 6,1 triệu đồng một năm, LTV đạt 18,3 triệu đồng, CAC 2 triệu đồng, tỷ lệ LTV trên CAC đạt 9,15 lần và thu hồi CAC trong 3,9 tháng.">
     <span class="badge b apx-tag">PHỤ LỤC HỎI ĐÁP · PL4 / 05</span>
-    <div class="kicker rv d1">Câu hỏi Phản biện 04 · Cơ sở Tính toán Unit Economics &amp; Dòng tiền</div>
+    <div class="kicker rv d1">Câu hỏi Phản biện 04 · Cơ sở Tính toán Unit Economics &amp; Độ Nhạy 4 Kịch bản (Bảng 9 &amp; 19)</div>
     <h2 class="rv d2">Số liệu nhất quán 100% — <span class="grad">Giả định minh bạch, kiểm chứng được.</span></h2>
     <table class="t rv d3">
-      <thead><tr><th>Chỉ số kinh tế đơn vị (Unit Economics)</th><th class="us">Mảng Cá nhân — DrgX Pro (B2C)</th><th>Mảng Tổ chức — DrgX School (B2B)</th></tr></thead>
+      <thead><tr><th>Chỉ số kinh tế đơn vị (Unit Economics)</th><th class="us">Mảng Tổ chức — DrgX School &amp; Mini-Contest (B2B · 71,7% DT 2029)</th><th>Mảng Cá nhân — DrgX Pro Offline (B2C · 28,3% DT 2029)</th></tr></thead>
       <tbody>
-        <tr><td>Doanh thu trung bình / khách / năm (ARPU / ACV)</td><td class="us"><b>599.000 đ / năm</b> (~50.000 đ/tháng)</td><td><b>18.000.000 đ / trường / năm</b></td></tr>
-        <tr><td>Biên lợi nhuận gộp (Gross Margin)</td><td class="us"><b class="good">85%</b> (Xử lý biên dịch cục bộ)<div class="mini-bar"><i style="--w:85%;background:var(--good)"></i></div></td><td><b class="good">82%</b> (Đã trừ chi phí tập huấn &amp; hỗ trợ)<div class="mini-bar"><i style="--w:82%;background:var(--a1)"></i></div></td></tr>
-        <tr><td>Thời gian gắn bó trung bình (Lifespan)</td><td class="us"><b>2,2 năm</b> (Theo chu kỳ lớp 10 → 12)</td><td><b>3,5 năm</b> (Tỷ lệ duy trì ≥ 85%/năm)</td></tr>
-        <tr><td>Giá trị vòng đời (LTV) vs Chi phí thu hút (CAC)</td><td class="us"><b>LTV 1,12 tr</b> · <b>CAC 180k</b> → <b class="good">LTV/CAC = 6,2x</b></td><td><b>LTV 51,66 tr</b> · <b>CAC 6,5 tr</b> → <b class="good">LTV/CAC = 7,9x</b></td></tr>
-        <tr><td>Lộ trình quy mô 3 năm (2027 → 2028 → 2029)</td><td colspan="2"><b>Kịch bản Cơ sở:</b> 5.000 → 30.000 → 50.000 HS (8 → 40 → 80 trường) · <b>Kịch bản Lạc quan:</b> 120.000 HS (150 trường) · Tỷ lệ chuyển đổi Pro: <b>3% → 5%</b></td></tr>
+        <tr><td>Đơn giá dự kiến (Từ H2/2028, sau thí điểm 2027)</td><td class="us"><b>Gói Trường: 6,0–12,0 tr/năm (BQ 8,0 tr/năm)</b> · <b>Mini-Contest: 7,0 tr/HĐ</b></td><td><b>300.000 đ / HS / năm</b> (~25.000 đ/tháng · 60 bài HSG gen/brute + 15 đề)</td></tr>
+        <tr><td>Chi phí phục vụ &amp; Biên đóng góp gộp</td><td class="us"><b class="good">76,3% (6,1 tr/trường/năm)</b> (COGS 1,5tr + Hỗ trợ 0,4tr = 1,9tr/năm; Mini-Contest biên 71,4% = 5,0tr/HĐ)<div class="mini-bar"><i style="--w:76%;background:var(--good)"></i></div></td><td><b class="good">93,3% (280.000 đ/năm)</b> (COGS cập nhật gói đề 20.000 đ/năm; 0 đ máy chủ đám mây)<div class="mini-bar"><i style="--w:93%;background:var(--a1)"></i></div></td></tr>
+        <tr><td>Chu kỳ lưu giữ &amp; Thời gian thu hồi CAC</td><td class="us"><b>3,0 năm</b> · Thu hồi CAC: <b>3,9 – 4,3 tháng</b></td><td><b>2,0 năm</b> · Thu hồi CAC: <b>~1,7 tháng</b></td></tr>
+        <tr><td>Giá trị vòng đời (LTV) vs Chi phí thu hút (CAC)</td><td class="us"><b>LTV 18,30 tr</b> · <b>CAC 2,00 tr</b> → <b class="good">LTV/CAC = 9,15 lần</b> (Liên tỉnh 18tr: <b>10,2x</b>)</td><td><b>LTV 560.000 đ</b> · <b>CAC 40.000 đ</b> → <b class="good">LTV/CAC = 14,0 lần</b></td></tr>
+        <tr><td>Độ nhạy 4 kịch bản năm 2029 (Thuế TNDN 15% EBT)</td><td colspan="2"><b>Sàn (03/15 trường):</b> DT 24,0tr, EAT <b>+2,1tr</b> · <b>Thận trọng (08/30 trường):</b> DT 148,0tr, Tinh gọn 1 CTV lãi <b>+17,6tr</b> · <b>Cơ sở (16/40 trường):</b> DT 286,0tr, EAT <b>+77,6tr</b> (Tinh gọn <b>+99,0tr</b>, lũy kế <b>+4,15tr</b>, tiền mặt <b>+124,15tr</b>) · <b>Lạc quan (25/60 trường):</b> DT 446,0tr, EAT <b>+147,5tr</b>.</td></tr>
       </tbody>
     </table>
   </section>
@@ -689,12 +692,12 @@ int main() {
     <table class="t rv d3">
       <thead><tr><th>Trụ cột giá trị cốt lõi</th><th>Trọng số tác động</th><th style="text-align:left">Minh chứng thực nghiệm trực tiếp trên Hệ sinh thái DrgX</th></tr></thead>
       <tbody>
-        <tr><td>I. Giải quyết triệt để nỗi đau phòng máy</td><td class="us"><b>Cấp thiết</b><div class="mini-bar"><i style="--w:100%;background:var(--good)"></i></div></td><td style="text-align:left">Slide S01–S03 &amp; Demo S05–S07: Giảm cài đặt 120′ → 60s; chấm &lt; 0,5s; giải quyết nghịch lý AI; đúng định hướng <b>QĐ 1131/QĐ-TTg</b>.</td></tr>
-        <tr><td>II. Tính khả thi &amp; sẵn sàng vận hành</td><td class="us"><b>Chạy thật 100%</b><div class="mini-bar"><i style="--w:95%;background:var(--a1)"></i></div></td><td style="text-align:left">Slide S04, S07, S08, S10: Vượt qua 68/68 chốt chặn kiểm định; 11/11 tải đa luồng LAN; tương thích 100% quy trình chấm <b>Themis</b>.</td></tr>
-        <tr><td>III. Đột phá công nghệ lõi &amp; tích hợp STEM</td><td class="us"><b>Độc quyền</b><div class="mini-bar"><i style="--w:100%;background:var(--a2)"></i></div></td><td style="text-align:left">Slide S03, S05, S06, S08, S09: Kiến trúc Kép (Học có AI / Thi sạch AI); Stress 3 cột; Winnowing token; tích hợp STEM Arduino/ESP32.</td></tr>
-        <tr><td>IV. Hiệu quả tài chính &amp; bình đẳng số</td><td class="us"><b>Bền vững</b><div class="mini-bar"><i style="--w:90%;background:var(--good)"></i></div></td><td style="text-align:left">Slide S10–S11: Doanh thu 244,9tr → 1.588,8tr → 7.594,0tr; LTV/CAC 6,2x–7,9x; kịch bản −30% vẫn lãi +90,2tr Năm 2.</td></tr>
-        <tr><td>V. Chiến lược lan tỏa B2B2C tự nhiên</td><td class="us"><b>CAC tối ưu</b><div class="mini-bar"><i style="--w:85%;background:var(--warn)"></i></div></td><td style="text-align:left">Slide S10: Mô hình Land-and-Expand từ Giáo viên; TikTok 60s bắt test WA; giải đấu DrgX Mini-Contest 45 phút tại các CLB.</td></tr>
-        <tr><td>VI. Đội ngũ thực chiến &amp; Chủ quyền dữ liệu</td><td class="us"><b>An toàn 100%</b><div class="mini-bar"><i style="--w:100%;background:var(--a1)"></i></div></td><td style="text-align:left">Slide S01, S12, PL1: Đội ngũ 4 thành viên Lớp 9A2 THCS Sông Lô; tuân thủ Nghị định 13/2023/NĐ-CP; Gian hàng 3 Trạm Demo.</td></tr>
+        <tr><td>I. Giải quyết triệt để nỗi đau phòng máy</td><td class="us"><b>Cấp thiết</b><div class="mini-bar"><i style="--w:100%;background:var(--good)"></i></div></td><td style="text-align:left">Slide S01–S03 &amp; Demo S05–S07: Tiền kiểm 5 luật Themis (bắt đúng 100/100 bài đơn vị &amp; 10/10 tệp quên sửa <span class="mono">TASK.INP</span>); phím F9 (<span class="mono">p50 = 1,46 s</span> / 10 test); đúng định hướng <b>QĐ 1131/QĐ-TTg</b>.</td></tr>
+        <tr><td>II. Tính khả thi &amp; bảo mật thực chiến</td><td class="us"><b>Chạy thật 100%</b><div class="mini-bar"><i style="--w:95%;background:var(--a1)"></i></div></td><td style="text-align:left">Slide S04, S07, S08: Vượt 68/68 kiểm định (36 tĩnh + 32 mô-đun); 15/15 smoke test &amp; 14/14 kịch bản bảo mật <span class="mono">SEC-01..SEC-14</span> (Low Integrity + JobObject 256MB); xuất chuẩn <b>Themis</b>.</td></tr>
+        <tr><td>III. Đột phá công nghệ lõi &amp; tích hợp STEM</td><td class="us"><b>Độc quyền</b><div class="mini-bar"><i style="--w:100%;background:var(--a2)"></i></div></td><td style="text-align:left">Slide S03, S05, S06, S08, S09: Kiến trúc Kép (Học có AI / Thi sạch AI); Stress 3 cột miễn phí (<span class="mono">p50 = 1,8 s</span>); Winnowing <span class="mono">k=5, w=4</span> (<span class="mono">37,82 ms</span> / 780 cặp); 25 lỗi C++17 tiếng Việt.</td></tr>
+        <tr><td>IV. Hiệu quả tài chính &amp; bình đẳng số</td><td class="us"><b>Bền vững</b><div class="mini-bar"><i style="--w:90%;background:var(--good)"></i></div></td><td style="text-align:left">Slide S10–S12: Vốn ươm tạo 120tr (tự chủ gia đình 60tr); DT Cơ sở 0 → 128,0tr → 286,0tr (EBT +91,3tr, Thuế 15% 13,7tr, EAT +77,6tr, lũy kế +4,15tr, tiền mặt +124,15tr); LTV/CAC = 9,15x.</td></tr>
+        <tr><td>V. Chiến lược lan tỏa B2B2C tự nhiên</td><td class="us"><b>CAC tối ưu</b><div class="mini-bar"><i style="--w:85%;background:var(--warn)"></i></div></td><td style="text-align:left">Slide S10: Thí điểm miễn phí 08 trường năm 2027 (Cổng Go/No-Go 30/12/2026); Gói Trường 6–12tr/năm (BQ 8,0tr) + Giải đấu Mini-Contest 7,0tr/HĐ (B2B chiếm 71,7% DT).</td></tr>
+        <tr><td>VI. Đội ngũ thực chiến &amp; Chủ quyền dữ liệu</td><td class="us"><b>An toàn 100%</b><div class="mini-bar"><i style="--w:100%;background:var(--a1)"></i></div></td><td style="text-align:left">Slide S01, S12, PL1: Đội ngũ 4 thành viên Lớp 9A2 THCS Sông Lô (đóng băng tính năng T3–T6/2027 ôn thi lớp 10); tuân thủ <b>Luật BVDLCN 91/2025/QH15</b>.</td></tr>
       </tbody>
     </table>
   </section>

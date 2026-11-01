@@ -1,31 +1,33 @@
-﻿Khoản mục,Năm 1 (2027),Năm 2 (2028),Năm 3 (2029),Ghi chú
+Khoản mục,Năm 1 (2027 - Thí điểm 08 trường),Năm 2 (2028 - Thương mại hóa H2),Năm 3 (2029 - Mở rộng liên tỉnh),Ghi chú chuẩn Hồ sơ 9A2 (Luật Thuế TNDN 67/2025/QH15 - 15%)
 DOANH THU,,,,
-Gói Pro cá nhân (B2C),74.9,718.8,4194.0,150 / 1.200 / 6.000 người; 499k / 599k / 699k đ/năm
-Giấy phép trường (B2B),120.0,720.0,3000.0,8 / 40 / 150 trường; 15 / 18 / 20 triệu đ/năm
-Dịch vụ & đào tạo,50.0,150.0,400.0,"Đào tạo giáo viên, tổ chức contest, tùy biến"
-Tổng doanh thu,244.9,1588.8,7594.0,Đơn vị: triệu đồng
+Gói Trường học & CLB (B2B),0.0,64.0,128.0,"0 / 08 / 16 trường trả phí; dải giá 6,0 - 12,0 triệu đ/năm (bình quân 8,0 triệu/trường/năm; biên gộp 76,3% = 6,1 tr)"
+Giải đấu Cụm trường Mini-Contest (B2B),0.0,28.0,77.0,"0 / 04 / 11 hợp đồng dịch vụ trọn gói; đơn giá 7,0 triệu đ/kỳ thi (biên gộp 71,4% = 5,0 tr)"
+Gói Cá nhân Pro Offline (B2C),0.0,36.0,81.0,"0 / 120 / 270 học sinh trả phí; đơn giá 300.000 đ/HS/năm (biên gộp 93,3% = 280k; Stress Test 3 cột mở miễn phí)"
+Tổng doanh thu,0.0,128.0,286.0,"Đơn vị: triệu đồng (Tỷ trọng B2B chiếm 71,7% = 205,0 triệu năm 2029)"
 CHI PHÍ,,,,
-Nhân sự / đội ngũ,120.0,480.0,1500.0,"R&D, phát triển học liệu"
-"Hạ tầng, AI, vận hành",45.0,160.0,600.0,"VPS, CDN, AI Gateway, backup"
-Marketing & cộng đồng,55.0,220.0,800.0,"Pilot trường học, Mini-Contest, nội dung"
-"Pháp lý, kế toán, SHTT",25.0,40.0,100.0,"Đăng ký bản quyền, kế toán"
-"Công cụ, sự kiện, đi lại",40.0,90.0,300.0,"Hội thảo cụm trường, đi lại pilot"
-Dự phòng,30.0,80.0,200.0,Quỹ dự phòng rủi ro
-Tổng chi phí,315.0,1070.0,3500.0,Đơn vị: triệu đồng
-Lợi nhuận sau chi phí,-70.1,518.8,4094.0,Biên lợi nhuận ròng Năm 3: 53.9%
-Lũy kế,-70.1,448.7,4542.7,Hòa vốn Quý 3/2028
+Giá vốn hàng bán & Triển khai trực tiếp (COGS),0.0,25.6,57.0,"Tập huấn giáo viên tại chỗ, trực kỹ thuật kỳ thi, băng thông & token AI"
+R&D Học liệu & Kiểm định chất lượng,32.0,34.0,42.0,"Biên soạn 60 bài toán chuẩn Themis, 15 đề thi thử, kiểm định testcase"
+"Pháp lý, OV Code Signing & Kế toán thuế",12.0,14.0,15.7,"Thành lập Công ty TNHH (T4/2028), chứng chỉ chữ ký số OV, phần mềm kế toán"
+"Marketing, Hội thảo Cụm trường & Đi lại Pilot",20.0,21.4,28.0,"Tài trợ giải thưởng Mini-Contest, đi lại cài đặt phòng máy"
+Quỹ lương CTV Sinh viên CNTT (80.000 đ/giờ),0.0,30.0,72.0,"Giai đoạn ươm tạo: 0đ lương sáng lập; Năm 2029: 2 CTV chuẩn (72tr) hoặc 1 CTV tinh gọn (46,8tr)"
+Tổng chi phí trước thuế,64.0,125.0,194.7,"Năm 2028: H1 chi 24,0tr (ươm tạo) + H2 chi 101,0tr (vận hành thương mại)"
+Lợi nhuận trước thuế (EBT),-64.0,3.0,91.3,"Năm 2028 tính riêng H2 thương mại đạt EBT +27,0 triệu; Năm 2029 biên EBT đạt 31,9%"
+Thuế TNDN (15% EBT theo Luật 67/2025/QH15),0.0,0.45,13.7,"Áp dụng mức thuế suất ưu đãi doanh nghiệp siêu nhỏ (DT < 3 tỷ đồng/năm)"
+Lợi nhuận ròng sau thuế (EAT),-64.0,2.55,77.6,"Biên EAT Năm 2029 đạt 27,1% (Chế độ tinh gọn 1 CTV: EAT đạt +99,0 triệu = 34,6%)"
+Lợi nhuận ròng lũy kế (từ T11/2026),-76.0,-73.45,4.15,"Bù đắp toàn bộ 76,0 triệu đầu tư ươm tạo (12tr cuối 2026 + 64tr năm 2027) và có lãi ròng lũy kế +4,15 triệu"
+Số dư tiền mặt cuối kỳ (Vốn ươm tạo 120tr),44.0,46.55,124.15,"Không có tháng nào âm quỹ tiền mặt (Phương án tự chủ 60tr vốn gia đình: cuối 2029 dư +112,15 triệu)"
 ,,,,
-UNIT ECONOMICS (KINH TẾ ĐƠN VỊ),Gói Pro (B2C),Gói School (B2B),Chuẩn ngành EdTech,Ghi chú
-ARPU / ACV (đồng/năm),599000,18000000,,Doanh thu trung bình mỗi khách hàng/năm
-Biên lợi nhuận gộp (%),85%,82%,>= 70%,Nhờ kiến trúc xử lý cục bộ Local-First
-Vòng đời trung bình (năm),2.2,3.5,>= 2.0,Theo chu kỳ học cấp THPT / hợp đồng trường
-LTV (đồng),1120000,51660000,,LTV = ARPU * Biên LN gộp * Vòng đời
-CAC (đồng),180000,6500000,,Chi phí thu hút 1 khách hàng trả phí
-Tỷ lệ LTV / CAC,6.2x,7.9x,>= 3.0x,Hiệu quả sử dụng vốn rất cao
-Thời gian thu hồi CAC (tháng),≈ 4.2,< 5.3,<= 12,Thu hồi chi phí bán hàng ngay năm đầu
+UNIT ECONOMICS (KINH TẾ ĐƠN VỊ B2B),Gói Trường (B2B),Giải đấu (B2B),Gói Pro (B2C),Ghi chú kiểm toán
+Đơn giá bình quân (ACV / ARPU),8000000,7000000,300000,Đồng/năm (Gói Trường 6-12tr) hoặc Đồng/HĐ (Giải đấu)
+Chi phí biến đổi trực tiếp,1900000,2000000,20000,Chi phí tập huấn tại trường / vận hành kỳ thi / băng thông
+Lãi gộp đơn vị (Biên lợi nhuận gộp),6100000 (76.3%),5000000 (71.4%),280000 (93.3%),Nhờ kiến trúc Local-First chạy trên máy sẵn có của trường
+Vòng đời duy trì trung bình,3.0 năm,Lặp lại hằng năm,2.0 năm,Gắn với chu kỳ bồi dưỡng đội tuyển HSG của nhà trường
+Giá trị vòng đời khách hàng (LTV),18300000,15000000,560000,LTV B2B Trường học = 6.100.000 đ/năm * 3 năm = 18.300.000 đồng
+Chi phí thu hút khách hàng (CAC),2000000,1000000,35000,Qua kênh Mini-Contest cụm trường và hội thảo Tổ trưởng chuyên môn
+Tỷ lệ LTV / CAC,9.15 lần,15.0 lần,16.0 lần,Vượt xa ngưỡng chuẩn bền vững >= 3.0 lần của ngành EdTech
+Thời gian thu hồi CAC (Payback),3.9 - 4.3 tháng,< 2.5 tháng,< 1.5 tháng,Thu hồi toàn bộ CAC ngay trong học kỳ đầu tiên
 ,,,,
-PHÂN TÍCH ĐỘ NHẠY (NĂM 2 - 2028),Doanh thu (tr),Lợi nhuận (tr),Điểm hòa vốn,Thời gian hoàn vốn (300tr)
-Kịch bản Thận trọng (-30% khách hàng),1112.2,90.2,Quý 4/2028,> 24 tháng
-Kịch bản Cơ sở (Base Case),1588.8,518.8,Quý 3/2028,18 - 20 tháng
-Kịch bản Tích cực (+25% khách hàng),1986.0,876.0,Quý 1/2028,16 - 18 tháng
-Giả định độ nhạy,Định phí giữ nguyên (910 tr),Chi phí hạ tầng-AI-vận hành (160 tr) co giãn theo doanh thu,,Lợi nhuận = Doanh thu - Chi phí
+PHÂN TÍCH ĐỘ NHẠY & CHỊU ĐỰNG (NĂM 2029),Doanh thu (tr),Lợi nhuận ròng EAT (tr),Số dư tiền mặt (tr),Ghi chú kịch bản
+Kịch bản Thận trọng (Trễ tiến độ 50% hoặc Gói Pro = 0đ),205.0,+18.9 (Chuẩn) / +40.4 (Tinh gọn),+65.45,Chỉ sống bằng doanh thu B2B trường học vẫn tự chủ tài chính
+Kịch bản Cơ sở (Chuẩn Hồ sơ 9A2 - 16 trường trả phí),286.0,+77.6 (Chuẩn) / +99.0 (Tinh gọn),+124.15,Hoàn trả toàn bộ vốn ươm tạo và tích lũy +124,15 triệu tiền mặt
+Kịch bản Mở rộng Liên tỉnh Tốc độ cao (30 trường / 800 HS),609.6,+213.6,+260.15,Khi nhận gói ươm tạo mở rộng 300 triệu đồng liên tỉnh (Phú Thọ - Vĩnh Phúc - Yên Bái - Tuyên Quang)

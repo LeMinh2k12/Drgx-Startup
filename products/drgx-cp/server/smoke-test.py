@@ -144,7 +144,45 @@ for idx in range(4):
         fail('missing concurrent submission in exams.json', sub_students)
 ok('4 concurrent submissions -> all AC & persisted atomically')
 
+# 12. child process env isolation: student Python code cannot read DRGX_ADMIN_TOKEN
+py_env_probe = (
+    'import os, sys\n'
+    'tok = os.environ.get("DRGX_ADMIN_TOKEN", "")\n'
+    'if tok:\n'
+    '    print("LEAKED:" + tok)\n'
+    'else:\n'
+    '    data = sys.stdin.read().split()\n'
+    '    if len(data) >= 2:\n'
+    '        print(int(data[0]) + int(data[1]))\n'
+)
+r_env = req('/submit', {'examCode': code, 'language': 'python', 'code': py_env_probe, 'student': 'hs-env-check'}, 'POST')
+if r_env.get('verdict') != 'AC':
+    fail('child process env isolation failed (DRGX_ADMIN_TOKEN leaked or execution error)', r_env)
+ok('child process env isolation -> DRGX_ADMIN_TOKEN stripped from student submission')
+
+# 13. /exam/join returns studentToken and hides submissions from student response
+j_sec = req('/exam/join', {'code': code, 'name': 'hs-bao-mat'}, 'POST')
+st_tok = j_sec.get('studentToken', '')
+if not st_tok or 'submissions' in j_sec.get('exam', {}):
+    fail('/exam/join must return studentToken and hide submissions', j_sec)
+ok('POST /exam/join -> returns studentToken & hides submissions list')
+
+# 14. /submit with forged studentToken for registered student -> HTTP 403
+try:
+    req('/submit', {
+        'examCode': code,
+        'language': 'python',
+        'code': py_good,
+        'student': 'hs-bao-mat',
+        'studentToken': 'FORGED_WRONG_TOKEN'
+    }, 'POST')
+    fail('forged studentToken must be rejected with HTTP 403')
+except urllib.error.HTTPError as he:
+    if he.code != 403:
+        fail('expected HTTP 403 for forged studentToken', he.code)
+    ok('forged studentToken -> rejected HTTP 403 (anti-impersonation)')
+
 # Cleanup temporary test dir created by smoke test
 shutil.rmtree(tdir, ignore_errors=True)
 
-print('\nALL SMOKE TESTS PASSED')
+print('\nALL SMOKE TESTS PASSED (15/15)')

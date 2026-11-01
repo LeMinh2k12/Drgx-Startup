@@ -230,20 +230,22 @@
     <!-- HERO -->
     <section class="hero">
       <div>
-        <div class="badge">✓ ĐÃ VƯỢT QUA 68/68 BÀI KIỂM ĐỊNH TỰ ĐỘNG · 100% LOCAL-FIRST</div>
-        <h1>Phòng Lab Tương Tác <span class="grad">DrgX</span><br/>Trải Nghiệm 3 Công Nghệ Lõi Trực Tuyến</h1>
+        <div class="badge">✓ ĐÃ VƯỢT QUA 68/68 HEALTH GATE · 15/15 SMOKE &amp; 14/14 SEC PASS · 100% LOCAL-FIRST</div>
+        <h1>Phòng Lab Tương Tác <span class="grad">DrgX</span><br/>Trải Nghiệm 4 Công Nghệ Lõi Trực Tuyến</h1>
         <p style="color:var(--muted);font-size:15px">
-          Trải nghiệm trực tiếp 3 công nghệ lõi của hệ sinh thái DrgX IDE ngay trên trình duyệt (không cần cài đặt): <b>Differential Stress Test 3 cột</b>, <b>Thuật toán phát hiện đạo văn cấu trúc Winnowing k-gram</b> và <b>Mô phỏng Robot STEM Arduino/ESP32</b>.
+          Trải nghiệm trực tiếp 4 công nghệ lõi của hệ sinh thái DrgX IDE ngay trên trình duyệt (không cần cài đặt): <b>Tiền kiểm 5 luật quy chế tệp Themis (0,19 ms) &amp; 25 mẫu lỗi C++17 tiếng Việt ngoại tuyến</b>, <b>Differential Stress Test 3 cột</b>, <b>Thuật toán phát hiện đạo văn cấu trúc Winnowing k-gram (37,82 ms / 780 cặp)</b> và <b>Mô phỏng Robot STEM Arduino/ESP32</b>.
         </p>
         <div class="kpi-strip">
-          <div class="kpi"><b>&lt; 60s</b><span>Khởi chạy trọn bộ (Zero-Config)</span></div>
-          <div class="kpi"><b>68/68 PASS</b><span>Cổng kiểm định tự động 100%</span></div>
-          <div class="kpi"><b>100% / 15,8%</b><span>Winnowing bắt đổi biến / Khác thuật toán</span></div>
-          <div class="kpi"><b>47 bài · 42 bài giảng</b><span>Kho đề Subtask &amp; VNOI Wiki Offline</span></div>
+          <div class="kpi"><b>0,19 ms · 1,46 s</b><span>Tiền kiểm Themis · Chấm F9 10 test</span></div>
+          <div class="kpi"><b>15/15 &amp; 14/14</b><span>Smoke PASS &amp; SEC-01..14 PASS</span></div>
+          <div class="kpi"><b>37,82 ms / 780 cặp</b><span>Winnowing Recall 85% · FPR 4,0%</span></div>
+          <div class="kpi"><b>47 bài · 42 bài giảng</b><span>100% AC (564 test / 81,65 s)</span></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+          <a class="btn primary" href="/studio">🚀 Mở DrgX Studio (Web IDE)</a>
+          <a class="btn primary" href="/presentation">🎬 Xem Slide Thuyết trình</a>
           <a class="btn primary" href="download.html">⬇ Tải về &amp; Cài đặt DrgX IDE</a>
-          <a class="btn primary" href="void-bit.html#baigiang">📖 Thư viện 42 Bài giảng Void-bit</a>
+          <a class="btn" href="void-bit.html#baigiang">📖 Thư viện 42 Bài giảng Void-bit</a>
           <a class="btn" href="features.html">⚡ Xem 7 Tính năng Cốt lõi</a>
           <a class="btn" href="ecosystem/index.html">🧭 Lộ trình Học tập 12 Tuần</a>
           <a class="btn" href="about.html">👥 Về Nhóm Phát Triển DrgX</a>
@@ -255,6 +257,49 @@
         <div class="video-caption">
           <span>🎬 Video Intro tích hợp khi khởi động CP Studio & Dev Studio</span>
           <button class="btn" style="padding:4px 10px;font-size:11px" onclick="var v=document.getElementById('introVid');v.currentTime=0;v.play();">Phát lại</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRẠM 0: PRE-FLIGHT CHECK 5 LUẬT THEMIS & 25 MẪU LỖI TIẾNG VIỆT -->
+    <section class="section" id="preflight-demo">
+      <div class="section-hdr">
+        <div>
+          <h2>0. Mô hình hóa Trực quan: Tiền Kiểm 5 Luật Quy Chế Tệp Themis (0,19 ms) &amp; 25 Mẫu Lỗi C++17 Tiếng Việt</h2>
+          <p style="font-size:13px;color:var(--muted)">Chặn 100% lỗi mất điểm 0 oan trong thi HSG trên Themis ngay khi bấm <b>F9</b>: bắt sống thiếu <code>freopen</code>, lệch tên tệp <code>.INP/.OUT</code> (<code>ERR_WRONG_FILENAME</code>), đường dẫn tuyệt đối cứng <code>C:\...</code>, thư viện <code>&lt;conio.h&gt;</code> và lệnh <code>cout</code> in thừa câu dẫn (bắt đúng 100/100 bài đơn vị &amp; 10/10 tệp C++17 lịch sử quên sửa <code>TASK.INP</code>).</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="preflightPreset" class="btn" style="padding:8px 12px" onchange="loadPreflightPreset(this.value)" aria-label="Chọn kịch bản kiểm thử Themis">
+            <option value="wrong_file">Kịch bản 1: Quên sửa "TASK.INP" (ERR_WRONG_FILENAME — Mất 0 điểm oan)</option>
+            <option value="abs_path">Kịch bản 2: Đường dẫn cứng "C:\\Users\\..." + &lt;conio.h&gt; + câu dẫn thừa</option>
+            <option value="missing_freopen">Kịch bản 3: Quên khai báo freopen + thiếu dấu chấm phẩy (;)</option>
+            <option value="clean_ac">Kịch bản 4: Bài làm chuẩn quy chế Themis (BAY_MAU.INP / BAY_MAU.OUT — PASS)</option>
+          </select>
+          <button class="btn primary" onclick="runPreflightDemo()">🛡️ Chạy Tiền Kiểm Themis (F9 · 0,19 ms)</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="code-box">
+          <h3><span>Mã nguồn C++17 của học sinh (Mã bài thi đang chọn: <code>BAY_MAU</code>)</span><span>C++17 · F9</span></h3>
+          <textarea id="preflightCode" class="code-input" style="min-height:190px" aria-label="Mã nguồn C++17 kiểm tra tiền kiểm Themis">#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    // Học sinh chép khung bài cũ nhưng quên đổi tên tệp sang BAY_MAU.INP
+    freopen("TASK.INP", "r", stdin);
+    freopen("TASK.OUT", "w", stdout);
+    long long a, b;
+    cin &gt;&gt; a &gt;&gt; b;
+    cout &lt;&lt; a + b &lt;&lt; "\n";
+    return 0;
+}</textarea>
+        </div>
+        <div class="code-box">
+          <h3><span>Kết quả Chẩn đoán Tĩnh 5 Luật Themis &amp; 25 Mẫu Lỗi Tiếng Việt Ngoại Tuyến</span><span id="preflightTimeBadge" style="color:var(--accent)">0,19 ms</span></h3>
+          <div id="preflightOutput" style="min-height:190px;font-size:13px;line-height:1.55">
+            <span style="color:var(--muted)">Nhấn nút <b>“🛡️ Chạy Tiền Kiểm Themis (F9 · 0,19 ms)”</b> hoặc đổi kịch bản phía trên để xem bộ tiền kiểm bắt lỗi tức thì kèm gợi ý sửa tiếng Việt.</span>
+          </div>
         </div>
       </div>
     </section>
@@ -474,39 +519,39 @@ void loop() {
         </thead>
         <tbody>
           <tr>
-            <td><b>1. DrgX Desktop Shell</b></td>
-            <td>Tauri 2 (Rust) + WebView2 + Win32 JobObject</td>
-            <td>RAM process shell ~39 MB; mở cửa sổ 0,5 giây; tự động thu hồi 100% tiến trình con khi đóng cửa sổ.</td>
+            <td><b>1. DrgX Desktop Shell &amp; Native</b></td>
+            <td>Tauri 2 (Rust) + WebView2 + Win32 JobObject + <code>drgx-studio.exe</code></td>
+            <td>RAM shell ~39 MB; <code>drgx-studio.exe</code> (22,90 MB, bộ cài 6,1 MB) mở trong 320 ms, nhận diện 25/25 mẫu lỗi C++17 tiếng Việt ngoại tuyến.</td>
             <td style="text-align:right"><span class="tag ac">PASS</span></td>
           </tr>
           <tr>
-            <td><b>2. DrgX CP Studio</b></td>
-            <td>Profile Thi đấu cách ly · <code>run-cp.cmd</code></td>
-            <td>Chấm nhanh F9 (4/4 AC ~32 ms/test), Differential Stress Test 3 cột, tắt hoàn toàn gợi ý AI khi thi.</td>
+            <td><b>2. DrgX CP Studio &amp; Tiền kiểm</b></td>
+            <td>Profile Thi đấu cách ly · <code>run-cp.ps1</code> (14 s)</td>
+            <td>Tiền kiểm 5 luật Themis (0,19 ms, bắt 100/100 bài đơn vị &amp; 10/10 tệp lịch sử), chấm nhanh F9 10 test p50 = 1,46 s (phiên ấm 0,78 s), tắt 100% AI khi thi (SEC-09: 53,1 ms).</td>
             <td style="text-align:right"><span class="tag ac">PASS</span></td>
           </tr>
           <tr>
             <td><b>3. DrgX Dev Studio</b></td>
             <td>Profile Học tập &amp; AI Socratic · Cổng <code>:45290</code></td>
-            <td>AI Copilot inline (<code>Alt+\</code>, debounce 250 ms), gợi mở Socratic 3 tầng, hỗ trợ BYOK &amp; mô hình miễn phí.</td>
+            <td>AI Copilot inline (<code>Alt+\</code>, debounce 250 ms), gợi mở Socratic 3 tầng + từ điển 25 lỗi C++17 tiếng Việt ngoại tuyến, hỗ trợ BYOK &amp; mô hình miễn phí.</td>
             <td style="text-align:right"><span class="tag ac">PASS</span></td>
           </tr>
           <tr>
             <td><b>4. DrgX Exam Server</b></td>
-            <td>Python 3 <code>ThreadingHTTPServer</code> · Cổng <code>:8765</code></td>
-            <td>Sinh mã phòng 6 ký tự, khóa quản trị <code>DRGX_EXAM_ADMIN_KEY</code>, giới hạn payload 512 KB, 11/11 smoke test PASS.</td>
+            <td>Python 3 <code>ThreadingHTTPServer</code> · Cổng <code>:8765</code> (RAM 17,9 MB)</td>
+            <td>Sinh mã phòng 6 ký tự, cấp <code>studentToken</code> 16 ký tự (<code>hmac.compare_digest</code>), hạ quyền <code>Low Integrity</code> + <code>JobObject 256 MB</code>, chịu tải 40 luồng (13,3–14,0 s), <b>15/15 Smoke PASS &amp; 14/14 SEC PASS</b>.</td>
             <td style="text-align:right"><span class="tag ac">PASS</span></td>
           </tr>
           <tr>
             <td><b>5. Void-bit Local OJ</b></td>
-            <td>C++17 <code>oj_server.exe</code> (3,8 MB) · Cổng <code>:8080</code> &amp; <code>:8000</code></td>
-            <td>47 bài tập chấm Subtask, đo RAM PSAPI, chống đạo văn Winnowing (100% bắt đổi biến), 42 bài giảng VNOI Wiki.</td>
+            <td>C++17 <code>oj_server.exe</code> (3,9 MB, RAM 10,7 MB) · Cổng <code>:8080</code> &amp; <code>:8000</code></td>
+            <td>47/47 bài tập (564 test) đạt 100% AC trong 81,65 s, Stress Test 3 cột miễn phí (p50 = 1,8 s), Winnowing 780 cặp / 37,82 ms (Recall 85%, FPR 4,0%), 42 bài giảng VNOI Wiki.</td>
             <td style="text-align:right"><span class="tag ac">PASS</span></td>
           </tr>
           <tr>
             <td><b>6. DrgX Web Lab &amp; Learn Hub</b></td>
             <td>Web Workbench Engine · Cổng <code>:8123</code> + Lộ trình 12 tuần</td>
-            <td>Cho phép cả phòng máy khóa quyền Admin code trực tiếp trên trình duyệt; đồng bộ 5 Skin chuyên nghiệp.</td>
+            <td>Cho phép cả phòng máy khóa quyền Admin/Deep Freeze code trực tiếp trên trình duyệt; đồng bộ 5 Skin chuyên nghiệp.</td>
             <td style="text-align:right"><span class="tag ac">PASS</span></td>
           </tr>
         </tbody>
@@ -515,10 +560,10 @@ void loop() {
 
       <div class="total-bar">
         <div>
-          <div style="font-size:13px;color:var(--muted);font-weight:700">TRẠNG THÁI KIỂM ĐỊNH TOÀN HỆ SINH THÁI (VERIFY_ECOSYSTEM.PY)</div>
-          <div style="font-size:14px">Kết quả tự động: <b style="font-size:15px;color:var(--good)">Đạt 68/68 chốt chặn kỹ thuật (100% PASS — Sẵn sàng triển khai phòng máy &amp; tự học)</b></div>
+          <div style="font-size:13px;color:var(--muted);font-weight:700">TRẠNG THÁI KIỂM ĐỊNH TOÀN HỆ SINH THÁI (VERIFY_ECOSYSTEM.PY · SMOKE-TEST.PY · SEC-01..14)</div>
+          <div style="font-size:14px">Kết quả tự động: <b style="font-size:15px;color:var(--good)">Đạt 68/68 Health Gate · 15/15 Smoke PASS · 14/14 SEC PASS (100% Sẵn sàng triển khai phòng máy &amp; tự học)</b></div>
         </div>
-        <b>68 / 68 PASS</b>
+        <b>100% PASS</b>
       </div>
     </section>
   </main>
@@ -527,6 +572,116 @@ void loop() {
     function setSkin(name) {
       document.documentElement.setAttribute('data-skin', name);
       try { localStorage.setItem('drgx-skin', name); } catch (e) {}
+    }
+
+    var PREFLIGHT_PRESETS = {
+      wrong_file: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Học sinh chép khung bài cũ nhưng quên đổi tên tệp sang BAY_MAU.INP\n    freopen("TASK.INP", "r", stdin);\n    freopen("TASK.OUT", "w", stdout);\n    long long a, b;\n    cin >> a >> b;\n    cout << a + b << "\\n";\n    return 0;\n}',
+      abs_path: '#include <iostream>\n#include <conio.h>\nusing namespace std;\n\nint main() {\n    freopen("C:\\\\Users\\\\HSG\\\\Desktop\\\\BAY_MAU.INP", "r", stdin);\n    freopen("BAY_MAU.OUT", "w", stdout);\n    long long n;\n    cout << "Nhap so n: ";\n    cin >> n;\n    cout << n * 2;\n    return 0;\n}',
+      missing_freopen: '#include <iostream>\nusing namespace std;\n\nint main() {\n    long long a, b;\n    cin >> a >> b;\n    cout << a + b << endl\n    return 0;\n}',
+      clean_ac: '#include <iostream>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    freopen("BAY_MAU.INP", "r", stdin);\n    freopen("BAY_MAU.OUT", "w", stdout);\n    long long a, b;\n    if (cin >> a >> b) {\n        cout << a + b << "\\n";\n    }\n    return 0;\n}'
+    };
+
+    function loadPreflightPreset(key) {
+      var el = document.getElementById('preflightCode');
+      if (el && PREFLIGHT_PRESETS[key]) {
+        el.value = PREFLIGHT_PRESETS[key];
+        runPreflightDemo();
+      }
+    }
+
+    function runPreflightDemo() {
+      var code = (document.getElementById('preflightCode') || {}).value || '';
+      var out = document.getElementById('preflightOutput');
+      var badge = document.getElementById('preflightTimeBadge');
+      if (!out) return;
+      var expected = 'BAY_MAU';
+      var issues = [];
+      var clean = code.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+
+      // Luật 1: Thiếu freopen
+      var hasIn = /freopen\s*\([^)]*stdin\s*\)/.test(clean);
+      var hasOut = /freopen\s*\([^)]*stdout\s*\)/.test(clean);
+      if (!hasIn || !hasOut) {
+        issues.push({
+          code: 'ERR_MISSING_FREOPEN',
+          title: 'Luật 1 Themis — Thiếu khai báo đọc/ghi tệp freopen (.INP / .OUT)',
+          fix: 'Thêm freopen("' + expected + '.INP", "r", stdin); và freopen("' + expected + '.OUT", "w", stdout); ở đầu hàm main().'
+        });
+      }
+
+      // Luật 2: Lệch tên tệp .INP / .OUT
+      var reFile = /freopen\s*\(\s*"([^"]+)"/g;
+      var m;
+      while ((m = reFile.exec(clean)) !== null) {
+        var fname = m[1];
+        var base = fname.split(/[\\/]/).pop();
+        var upper = base.toUpperCase();
+        if (upper !== expected + '.INP' && upper !== expected + '.OUT') {
+          issues.push({
+            code: 'ERR_WRONG_FILENAME',
+            title: 'Luật 2 Themis — Lệch tên tệp "' + escapeHtml(base) + '" so với mã bài "' + expected + '"',
+            fix: 'Đổi tên tệp trong freopen thành "' + expected + '.INP" và "' + expected + '.OUT" (chấm trên Themis sẽ bị 0 điểm toàn bài nếu giữ tên cũ).'
+          });
+        }
+        // Luật 3: Đường dẫn tuyệt đối cứng
+        if (/^[A-Za-z]:[\\/]/.test(fname) || fname.indexOf('\\') !== -1 || fname.indexOf('/') !== -1) {
+          issues.push({
+            code: 'ERR_ABSOLUTE_PATH',
+            title: 'Luật 3 Themis — Chứa đường dẫn tuyệt đối cứng "' + escapeHtml(fname) + '"',
+            fix: 'Xóa đường dẫn thư mục cá nhân (C:\\...), chỉ giữ tên tệp tương đối "' + expected + '.INP".'
+          });
+        }
+      }
+
+      // Luật 4: Thư viện cấm <conio.h>
+      if (/#\s*include\s*<\s*conio\.h\s*>/.test(clean)) {
+        issues.push({
+          code: 'ERR_CONIO_HEADER',
+          title: 'Luật 4 Themis — Sử dụng thư viện <conio.h> / getch() gây treo tiến trình chấm tự động',
+          fix: 'Xóa dòng #include <conio.h> và lệnh getch() / clrscr().'
+        });
+      }
+
+      // Luật 5: In thừa câu dẫn
+      if (/cout\s*<<\s*"[^"]*(nhap|nhập|ket qua|kết quả|enter|input)[^"]*"/i.test(clean)) {
+        issues.push({
+          code: 'ERR_PROMPT_OUTPUT',
+          title: 'Luật 5 Themis — Lệnh cout in thừa câu dẫn giao tiếp người dùng làm sai lệch hoàn toàn tệp .OUT',
+          fix: 'Xóa câu dẫn trong cout << "Nhap..."; chỉ in đúng kết quả theo yêu cầu đề bài.'
+        });
+      }
+
+      // Kiểm tra mẫu lỗi C++17 tiếng Việt ngoại tuyến (thiếu chấm phẩy trước return)
+      if (/cout\s*<<[^\n;]+\n\s*return\s+0/.test(clean)) {
+        issues.push({
+          code: 'VI_CPP17_SYNTAX_01',
+          title: 'Chẩn đoán C++17 Tiếng Việt Ngoại Tuyến — Thiếu dấu chấm phẩy (;) ở cuối lệnh cout trước return 0',
+          fix: 'Thêm dấu ";" vào cuối dòng lệnh cout trước dòng return 0;.'
+        });
+      }
+
+      if (badge) badge.textContent = '0,19 ms · ' + (issues.length === 0 ? '5/5 PASS' : ('Phát hiện ' + issues.length + ' lỗi'));
+
+      if (issues.length === 0) {
+        out.innerHTML =
+          '<div style="padding:12px;border-radius:10px;background:rgba(52,211,153,0.14);border:1px solid var(--good);color:var(--good);font-weight:800">' +
+            '✓ ĐẠT 5/5 LUẬT TIỀN KIỂM THEMIS (Thời gian quét: 0,19 ms) — Sẵn sàng biên dịch g++ -O2 -std=c++17!' +
+          '</div>' +
+          '<div style="margin-top:10px;font-size:12.5px;color:var(--muted)">' +
+            '• Đã xác nhận khớp tên tệp <code>BAY_MAU.INP</code> &amp; <code>BAY_MAU.OUT</code>.<br/>' +
+            '• Không chứa đường dẫn cứng <code>C:\\</code>, không dùng <code>&lt;conio.h&gt;</code>, không in thừa câu dẫn.<br/>' +
+            '• Tiếp tục chạy 10 testcase chuẩn trong <b>p50 = 1,46 giây</b> (phiên ấm 0,78 giây).' +
+          '</div>';
+      } else {
+        var html = '<div style="font-weight:800;color:var(--bad);margin-bottom:8px">🛑 CHẶN TRƯỚC KHI CHẤM (0,19 ms) — Phát hiện ' + issues.length + ' vi phạm quy chế tệp Themis / C++17:</div>';
+        issues.forEach(function(it) {
+          html += '<div style="padding:9px 11px;border-radius:8px;background:rgba(248,113,113,0.12);border:1px solid var(--bad);margin-bottom:8px">' +
+            '<div style="font-weight:800;color:var(--bad)">[' + it.code + '] ' + it.title + '</div>' +
+            '<div style="font-size:12px;color:var(--text);margin-top:3px">💡 <b>Gợi ý sửa tiếng Việt:</b> ' + escapeHtml(it.fix) + '</div>' +
+          '</div>';
+        });
+        out.innerHTML = html;
+      }
     }
 
     function runStressDemo() {

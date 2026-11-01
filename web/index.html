@@ -171,7 +171,8 @@
       <div class="hero-cta">
         <a class="btn btn-grad" href="download.html">Tải cho Windows (x64) ↓</a>
         <a class="btn btn-ghost" href="judge-demo.html">🧪 Trải nghiệm Phòng Lab Ảo</a>
-        <a class="btn btn-ghost" href="void-bit.html#baigiang">📖 Đọc 42 Bài giảng</a>
+        <a class="btn btn-ghost" href="/studio">💻 Mở DrgX Studio Web</a>
+        <a class="btn btn-ghost" href="/presentation">🎬 Slide Thuyết Trình (12 Slide)</a>
         <button class="btn btn-ghost btn-sm" id="replaySplashBtn" type="button" title="Phát lại video intro gốc của nhóm">▶ Xem lại intro</button>
       </div>
       <p class="hero-note">Số liệu đo trực tiếp trên tiến trình thật (19–24/10/2026) · 100% miễn phí · Không quảng cáo · Chạy mượt cả khi mất mạng.</p>
@@ -267,8 +268,8 @@ int main() {
           <h3><span class="ico" aria-hidden="true">⚖️</span> Chấm đa testcase ngay trong máy</h3>
           <p class="desc">Bấm <kbd>F9</kbd> hoặc <kbd>Ctrl+Alt+J</kbd> — DrgX tự động khớp toàn bộ <code>tests/*.in</code> với <code>*.out / *.ans</code>, trả về verdict <b>AC / WA / RE / TLE</b> kèm thời gian chạy từng test và dòng bị lệch (diff).</p>
           <div class="feat-list">
-            <div class="feat-item"><span class="fx">✓</span><span><b>Hoàn toàn offline</b> <span class="m">— không phụ thuộc mạng trường hay hàng đợi judge online.</span></span></div>
-            <div class="feat-item"><span class="fx">✓</span><span><b>Bắt lỗi tràn số rõ ràng</b> <span class="m">— hiển thị ngay kỳ vọng <code>3000000000</code> so với kết quả <code>-1294967296</code> khi quên dùng <code>long long</code>.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Tiền kiểm Pre-flight Check 5 luật Themis (0,19 ms)</b> <span class="m">— tự động cảnh báo thiếu <code>freopen</code>, lệch tên tệp <code>.INP/.OUT</code>, đường dẫn cứng <code>C:\</code>, <code>&lt;conio.h&gt;</code> và câu dẫn thừa trước khi nộp bài.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>Bắt lỗi tràn số rõ ràng</b> <span class="m">— hiển thị ngay kỳ vọng <code>3000000000</code> so với kết quả <code>-1294967296</code> khi quên dùng <code>long long</code> (chấm 10 test trong <code>p50 = 1,46 s</code>).</span></span></div>
           </div>
           <div class="hero-cta" style="margin-top:20px">
             <a class="btn btn-ghost btn-sm" href="features.html#judge">Chi tiết DrgX Judge →</a>
@@ -320,18 +321,18 @@ int main() {
           <p class="desc">Trong giờ kiểm tra, <b>DrgX CP Studio</b> chạy trong profile cách ly (tắt hoàn toàn AI) và gửi mã nguồn lên <b>Exam Server (cổng 8765)</b> để chấm tập trung đa luồng (<code>ThreadingHTTPServer</code>).</p>
           <div class="feat-list">
             <div class="feat-item"><span class="fx">✓</span><span><b>Verdict server-authoritative</b> <span class="m">— server tự biên dịch và chấm; client không thể giả mạo kết quả.</span></span></div>
-            <div class="feat-item"><span class="fx">✓</span><span><b>4 lớp bảo vệ + Admin Guard</b> <span class="m">— mã phòng 6 ký tự do server sinh, chặn payload &gt; 512KB (HTTP 413), bảo vệ route quản trị bằng <code>DRGX_ADMIN_TOKEN</code>.</span></span></div>
+            <div class="feat-item"><span class="fx">✓</span><span><b>6 lớp bảo vệ + Low Integrity &amp; JobObject 256MB</b> <span class="m">— cấp <code>studentToken</code> đối chiếu hằng thời gian, hạ quyền tiến trình chấm, chặn payload &gt; 512KB (HTTP 413), lọc gợi ý Winnowing (<code>37,82 ms</code> / 780 cặp) và xuất cây thư mục chuẩn <b>Themis</b>.</span></span></div>
           </div>
           <div class="hero-cta" style="margin-top:20px">
-            <a class="btn btn-ghost btn-sm" href="features.html#exam-integrity">Xem 4 lớp Exam Integrity →</a>
+            <a class="btn btn-ghost btn-sm" href="features.html#exam-integrity">Xem 6 lớp Exam Integrity →</a>
           </div>
         </div>
         <div class="term">
-          <div class="term-head"><i class="tdot r"></i><i class="tdot y"></i><i class="tdot g"></i><span class="tname">Exam Server (8765) — smoke test 11/11 PASS (4 luồng song song)</span></div>
+          <div class="term-head"><i class="tdot r"></i><i class="tdot y"></i><i class="tdot g"></i><span class="tname">Exam Server (8765) — smoke test 15/15 PASS &amp; 14/14 SEC PASS</span></div>
           <div class="term-body"><span class="dim">POST /exam/create</span>            → <span class="acc">{"code":"C8YGPD"}</span>
-<span class="dim">POST /exam/join {code,name}</span>  → <span class="ok">{"status":"joined"}</span>
-<span class="dim">POST /submit (C++17 &amp; Py3)</span>   → <span class="ok">verdict: AC (2/2 test)</span>
-<span class="dim">POST /submit (tràn int)</span>      → <span class="warn">verdict: FAIL (WA kèm diff)</span>
+<span class="dim">POST /exam/join {code,name}</span>  → <span class="ok">{"status":"joined","studentToken":"..."}</span>
+<span class="dim">POST /submit (C++17 &amp; Py3)</span>   → <span class="ok">verdict: AC (Low-IL + JobObject 256MB)</span>
+<span class="dim">POST /submit (sai token/SBD)</span> → <span class="bad">HTTP 403 Forbidden (Chống nộp đè)</span>
 <span class="dim">POST /submit (phòng ảo)</span>      → <span class="bad">HTTP 404 Not Found</span>
 <span class="dim">POST /exam/join (&gt;512 KB)</span>    → <span class="bad">HTTP 413 Payload Too Large</span></div>
         </div>

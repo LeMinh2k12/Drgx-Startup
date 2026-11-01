@@ -162,7 +162,7 @@ python -X utf8 scripts\verify_ecosystem.py
 powershell -ExecutionPolicy Bypass -File scripts\demo-doctor.ps1
 
 # Khởi động từng sản phẩm:
-products\drgx-cp\run-cp.cmd          # 1. DrgX CP Studio + Exam Server :8765 (ThreadingHTTPServer, 11/11 smoke test PASS)
+products\drgx-cp\run-cp.cmd          # 1. DrgX CP Studio + Exam Server :8765 (ThreadingHTTPServer, 15/15 Smoke PASS & 14/14 SEC PASS)
 products\drgx-dev\run-dev.cmd        # 2. DrgX Dev Studio với bridge AI (:45290)
 products\void-bit\run-void-bit.cmd   # 3. Void-bit OJ Judge Server :8080 + Web Học Tập :8000 (47 bài, C++/Python/Anti-cheat)
 ```
@@ -224,11 +224,10 @@ IDE tự cài extension vào `~/.vscode-server/extensions` khi khởi động. K
 
 ## Trạng thái & lộ trình
 
-- **Đã có:** ba trụ cột sản phẩm chạy thật (DrgX CP Studio, DrgX Dev Studio, Void-bit OJ 47 bài), exam server smoke test 11/11 PASS (AC/WA/CE/TLE cho C++ & Python), Void-bit Judge C++ 12/12 AC + Winnowing (chép đổi tên biến: 100%), web lab, extension v1.0.0, Learn Hub, 5 skin gốc chống mỏi mắt, auto-branding, single-instance.
-- **Đang làm:** pilot trường học, tài liệu giáo viên, dashboard lớp (alpha), đo retention.
-- **2027:** bản 1.0, gói Pro, web lab cho trường, 5.000 người dùng.
-- **2028:** 30.000 người dùng, 40 trường, API trường, hòa vốn.
-- **2029:** 120.000 người dùng, 150 trường, mở rộng khu vực.
+- **Đã có:** ba trụ cột sản phẩm chạy thật (DrgX CP Studio, DrgX Dev Studio, Void-bit OJ 47 bài), Tiền kiểm 5 luật quy chế tệp Themis (`0,19 ms/tệp`, bắt đúng `100/100` bài đơn vị & `10/10` tệp C++17 lịch sử quên sửa `TASK.INP`), phím F9 chấm 10 test trong `p50 = 1,46 s` (phiên ấm `0,78 s`), Exam Server `15/15 Smoke PASS` & `14/14 SEC PASS` (`Low Integrity` + `Win32 JobObject 256 MB` + `studentToken`), Void-bit Judge C++ `47/47 AC (564 test / 81,65 s)` + Winnowing `780 cặp / 37,82 ms` (Recall `85,0%`, FPR `4,0%`), `drgx-studio.exe` mở trong `320 ms` (25/25 mẫu lỗi C++17 tiếng Việt ngoại tuyến), web lab, extension v1.0.0, Learn Hub, 5 skin gốc chống mỏi mắt.
+- **2026–2027 (Giai đoạn 1 — Kiểm chứng tại Phú Thọ):** Thí điểm miễn phí 100% tại **08 trường THCS/THPT** (~1.200 học sinh, ≥320 WAU); hoàn thiện 60 bài toán & 15 đề thi thử.
+- **2028 (Giai đoạn 2 — Thương mại hóa tỉnh Phú Thọ):** Mở rộng 25 trường, chuyển đổi **08 trường trả phí** (Gói Trường 6–12 tr/năm, BQ 8,0 tr) + **04 HĐ Giải đấu Mini-Contest** (7,0 tr/HĐ) + **120 HS Gói Pro Offline** (300.000 đ/HS/năm); Doanh thu `128,0 triệu`, **EAT năm 2028 đạt `+2,55 triệu`** (H2 đạt `+26,55 triệu`).
+- **2029 (Giai đoạn 3 — Mở rộng liên tỉnh Vĩnh Phúc, Yên Bái, Tuyên Quang):** Phục vụ **40 trường** (**16 trường trả phí**, **11 HĐ Giải đấu**, **270 HS Gói Pro**); Doanh thu `286,0 triệu` (71,7% B2B), EBT `+91,3 triệu (31,9%)`, Thuế TNDN 15% `13,7 triệu`, **Lợi nhuận ròng EAT `+77,6 triệu (27,1%)`** (chế độ tinh gọn 1 CTV: **`+99,0 triệu`**); Lãi ròng lũy kế 2026–2029 đạt **`+4,15 triệu`**, Số dư tiền mặt cuối 2029 đạt **`+124,15 triệu`** (`LTV/CAC = 9,15 lần`). *(Kịch bản mở rộng liên tỉnh tốc độ cao 30 trường/800 HS: DT 609,6 triệu, EAT +213,6 triệu).*
 
 Chi tiết tài chính: [`docs/startup/financial-model.csv`](docs/startup/financial-model.csv).
 
