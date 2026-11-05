@@ -74,6 +74,13 @@ const GXX_BIN = findBinary([
   'g++'
 ]);
 
+const OBJCOPY_BIN = findBinary([
+  'C:\\msys64\\ucrt64\\bin\\objcopy.exe',
+  'C:\\msys64\\mingw64\\bin\\objcopy.exe',
+  'objcopy.exe',
+  'objcopy'
+]);
+
 const PYTHON_BIN = findBinary([
   path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Python', 'Python312', 'python.exe'),
   path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Python', 'Python311', 'python.exe'),
@@ -774,96 +781,634 @@ async function compileCppSource(code, tmpPrefix = 'drgx_run') {
   };
 }
 
-// Local AI Code Analyzer & Auto-Fixer (works 100% offline & augments OJ AI server)
-function analyzeAndFixCode(code, lang = 'cpp', mode = 'bugcheck') {
-  const lines = String(code || '').split(/\r?\n/);
-  const findings = [];
-  let fixedCode = String(code || '');
+// Fast syntax-only GCC 15 pass used by /api/studio/diagnose
+async function syntaxCheckCppSource(code) {
+  const tmpDir = path.join(os.tmpdir(), 'drgx_studio_syntax');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const src = path.join(tmpDir, `syntax_${process.pid}_${Date.now()}_${Math.random().toString(36).slice(2)}.cpp`);
+  fs.writeFileSync(src, String(code || ''), 'utf8');
+  const res = await runProcessWithInput(
+    GXX_BIN,
+    ['-std=c++17', '-fsyntax-only', '-Wall', '-Wextra', '-Warray-bounds=2', src],
+    '',
+    10000,
+    tmpDir
+  );
+  try { fs.unlinkSync(src); } catch (_) {}
+  return {
+    checked: true,
+    ok: res.ok,
+    output: (res.stderr || res.stdout || '').trim(),
+    timeMs: res.timeMs
+  };
+}
 
-  // Detect common C++ / CP bugs & optimization opportunities
-  const hasBits = /#include\s*<bits\/stdc\+\+\.h>/.test(code);
-  const hasFastIo = /ios::sync_with_stdio\s*\(\s*false\s*\)/.test(code) || /ios_base::sync_with_stdio/.test(code);
-  const usesEndl = /\bendl\b/.test(code);
-  const usesIntAccumulate = /accumulate\s*\([^,]+,[^,]+,\s*0\s*\)/.test(code);
-  const uses32BitShift = /\b1\s*<<\s*(3[1-9]|[4-6]\d)\b/.test(code);
-  const hasIfAssign = /if\s*\(\s*[a-zA-Z_]\w*\s*=\s*[^=]/.test(code);
-  const hasIntSumLoop = /int\s+(sum|ans|total|res)\s*=\s*0/.test(code);
+// Fast Python AST parse pass used by /api/studio/diagnose
+async function syntaxCheckPythonSource(code) {
+  const tmpDir = path.join(os.tmpdir(), 'drgx_studio_syntax');
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+  const src = path.join(tmpDir, `syntax_${process.pid}_${Date.now()}_${Math.random().toString(36).slice(2)}.py`);
+  fs.writeFileSync(src, String(code || ''), 'utf8');
+  const res = await runProcessWithInput(
+    PYTHON_BIN,
+    ['-c', 'import ast,sys; ast.parse(open(sys.argv[1], encoding="utf-8").read())', src],
+    '',
+    6000,
+    tmpDir
+  );
+  try { fs.unlinkSync(src); } catch (_) {}
+  return {
+    checked: true,
+    ok: res.ok,
+    output: (res.stderr || res.stdout || '').trim(),
+    timeMs: res.timeMs
+  };
+}
 
-  if (lang === 'cpp') {
-    if (!hasFastIo && /cin\s*>>/.test(code)) {
-      findings.push({
-        severity: 'warning',
-        title: 'Thiếu Fast I/O (`ios::sync_with_stdio(false); cin.tie(nullptr);`)',
-        detail: 'Với dữ liệu vào N >= 10^5, `cin/cout` mặc định có thể gây TLE. Nên tắt đồng bộ stdio ngay đầu `main()`.',
-      });
-      fixedCode = fixedCode.replace(/(int\s+main\s*\([^)]*\)\s*\{)/, `$1\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);`);
-    }
-    if (usesEndl) {
-      findings.push({
-        severity: 'warning',
-        title: 'Sử dụng `endl` gây flush buffer liên tục (nguy cơ TLE)',
-        detail: 'Thay `endl` bằng `"\\n"` để tăng tốc độ in kết quả gấp 5–20 lần.',
-      });
-      fixedCode = fixedCode.replace(/\bendl\b/g, '"\\n"');
-    }
-    if (usesIntAccumulate) {
-      findings.push({
-        severity: 'error',
-        title: 'Tràn số 32-bit trong `accumulate(..., 0)`',
-        detail: 'Tham số khởi tạo `0` có kiểu `int` (tối đa ~2.14×10^9). Phải dùng `0LL` để tính tổng `long long`.',
-      });
-      fixedCode = fixedCode.replace(/accumulate\s*\(([^,]+),([^,]+),\s*0\s*\)/g, 'accumulate($1,$2, 0LL)');
-    }
-    if (uses32BitShift) {
-      findings.push({
-        severity: 'error',
-        title: 'Undefined Behavior: Dịch bit 32-bit `1 << k` với k >= 31',
-        detail: 'Cần dùng `1LL << k` để tránh tràn bit dấu trên kiểu `int`.',
-      });
-      fixedCode = fixedCode.replace(/\b1\s*<<\s*/g, '1LL << ');
-    }
-    if (hasIfAssign) {
-      findings.push({
-        severity: 'error',
-        title: 'Nghi vấn phép gán `=` thay vì so sánh `==` trong điều kiện `if (...)`',
-        detail: 'Kiểm tra lại biểu thức trong `if`: dùng `==` để so sánh bằng.',
-      });
-    }
-    if (hasIntSumLoop) {
-      findings.push({
-        severity: 'warning',
-        title: 'Biến tích lũy (`sum` / `ans` / `total` / `res`) khai báo kiểu `int`',
-        detail: 'Trong các bài tổng/tích mảng, kết quả thường vượt `2^31 - 1`. Khuyến nghị đổi sang `long long`.',
-      });
-      fixedCode = fixedCode.replace(/\bint\s+(sum|ans|total|res)\s*=/g, 'long long $1 =');
-    }
-  }
+// ============================================================================
+// 70+ rules · Vietnamese explanations · 1-click autofix_patch
+// ============================================================================
+// DrgX Offline AST / Diagnostic Engine v3 (MIT 6.035 inspired)
+// 70+ rules · Vietnamese explanations · 1-click autofix_patch
+// ============================================================================
+// DrgX Offline AST / Diagnostic Engine v3 (MIT 6.035 inspired)
+// 70+ rules · Vietnamese explanations · 1-click autofix_patch
+// ============================================================================
+const DRGX_RULE_COUNT = 71;
+const DRGX_PROFILE_SIZES = [250, 500, 1000, 2000, 4000];
 
-  // Estimate complexity
-  let nestedLoops = 0;
-  let curDepth = 0;
+function drgxLineAt(text, index) {
+  if (!Number.isFinite(index) || index < 0) return 1;
+  let line = 1;
+  const limit = Math.min(index, String(text).length);
+  for (let i = 0; i < limit; i++) if (String(text).charCodeAt(i) === 10) line++;
+  return line;
+}
+
+function drgxEstimateComplexity(code) {
+  const text = String(code || '');
+  const lines = text.split(/\r?\n/);
+  let depth = 0;
+  let maxDepth = 0;
   for (const ln of lines) {
-    if (/\b(for|while)\s*\(/.test(ln)) {
-      curDepth++;
-      nestedLoops = Math.max(nestedLoops, curDepth);
+    const opens = (ln.match(/\b(for|while)\s*\(/g) || []).length;
+    const hasBrace = ln.includes('{');
+    if (opens) {
+      depth += opens;
+      if (depth > maxDepth) maxDepth = depth;
     }
-    if (ln.includes('}') && curDepth > 0) curDepth--;
+    const closes = (ln.match(/\}/g) || []).length;
+    if (closes) depth = Math.max(0, depth - closes);
+    if (opens && !hasBrace) depth = Math.max(0, depth - opens);
   }
-  const hasSort = /\bsort\s*\(/.test(code);
-  const hasPriorityQueue = /\bpriority_queue\b/.test(code);
-  const hasMapSet = /\b(map|set|multiset)\s*</.test(code);
-  let complexity = 'O(N)';
-  if (nestedLoops >= 3) complexity = 'O(N^3)';
-  else if (nestedLoops === 2) complexity = 'O(N^2)';
-  else if (hasSort || hasPriorityQueue || hasMapSet) complexity = 'O(N log N)';
-  else if (nestedLoops === 1) complexity = 'O(N)';
-  else complexity = 'O(1)';
+  const hasSort = /\bsort\s*\(/.test(text);
+  const hasPq = /\bpriority_queue\b/.test(text);
+  const hasMapSet = /\b(map|set|multiset)\s*</.test(text);
+  if (maxDepth >= 3) return 'O(N^3)';
+  if (maxDepth === 2) return 'O(N^2)';
+  if (hasSort || hasPq || hasMapSet) return 'O(N log N)';
+  if (maxDepth === 1) return 'O(N)';
+  return 'O(1)';
+}
+
+function drgxBuildDiagnostics(code, lang = 'cpp') {
+  const original = String(code ?? '');
+  let fixed = original;
+  const findings = [];
+  const patches = [];
+  const seen = new Set();
+  const langLower = String(lang || 'cpp').toLowerCase();
+  const isCpp = ['cpp', 'c++', 'c'].includes(langLower);
+  const isPy = ['python', 'py'].includes(langLower);
+
+  function push(severity, line, rule, title, detail, patch) {
+    const ln = line || 1;
+    const key = `${rule}:${ln}:${title}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    findings.push({ line: ln, severity, rule, title, detail, autofix_patch: patch || null });
+  }
+
+  function patchExact(before, after, description) {
+    if (before == null || before === '') return null;
+    const from = String(before);
+    const to = String(after ?? '');
+    const idx = fixed.indexOf(from);
+    if (idx < 0) return null;
+    const line = drgxLineAt(fixed, idx);
+    fixed = fixed.slice(0, idx) + to + fixed.slice(idx + from.length);
+    const p = { before: from, after: to, line, applied: true, description: description || 'Bản vá tự động' };
+    patches.push(p);
+    return p;
+  }
+
+  function patchLine(line, before, after, description) {
+    const arr = fixed.split('\n');
+    if (line < 1 || line > arr.length) return null;
+    const prev = arr[line - 1];
+    if (!prev.includes(before)) return null;
+    arr[line - 1] = prev.split(before).join(after);
+    fixed = arr.join('\n');
+    const p = { before: prev.trim(), after: arr[line - 1].trim(), line, applied: true, description: description || 'Bản vá tự động' };
+    patches.push(p);
+    return p;
+  }
+
+  function add(severity, line, rule, title, detail, patch) {
+    push(severity, line, rule, title, detail, patch || null);
+  }
+
+  // -------------------------------------------------------------------------
+  // C++ : empty file / GCC 15 syntax / typo / linker / NTSTATUS / CP logic
+  // -------------------------------------------------------------------------
+  if (isCpp && !original.trim()) {
+    const tpl = '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    long long a, b;\n    if (cin >> a >> b) cout << (a + b) << "\\n";\n    return 0;\n}\n';
+    fixed = tpl;
+    const p = { before: '', after: tpl, line: 1, applied: true, description: 'Tạo khung C++17 chuẩn thi đấu' };
+    patches.push(p);
+    push('error', 1, 'cpp-empty-file', 'Dòng 1: Tệp mã nguồn đang trống (thiếu hàm `int main()`)', 'Trình liên kết sẽ báo `undefined reference to WinMain` nếu không có `main`. Đã tạo khung C++17 chuẩn.', p);
+    return { findings, fixedCode: fixed, patches, complexity: 'O(1)' };
+  }
+
+  if (isCpp) {
+    // 1. Token / keyword typos (GCC 15 syntax errors)
+    const typoRules = [
+      { bad: 'using namepsace std', good: 'using namespace std', rule: 'cpp-typo-namespace', title: 'Sai chính tả `namespace`', detail: 'GCC 15 báo `expected nested-name-specifier` hoặc `unknown type name`. Đã sửa thành `using namespace std;`.' },
+      { bad: 'using namespac std', good: 'using namespace std', rule: 'cpp-typo-namespace', title: 'Sai chính tả `namespace`', detail: 'Đã tự động sửa thành `using namespace std;`.' },
+      { bad: 'using namespace sdt', good: 'using namespace std', rule: 'cpp-typo-namespace', title: 'Sai tên miền `std`', detail: '`std` là tên miền chuẩn của C++; `sdt` không tồn tại. Đã tự động sửa.' },
+      { bad: 'int mian(', good: 'int main(', rule: 'cpp-typo-main', title: 'Sai tên hàm `main` (`mian`)', detail: 'Hàm khởi động bắt buộc tên `main`. Nếu sai, linker báo `undefined reference to WinMain`. Đã sửa.' },
+      { bad: 'int man(', good: 'int main(', rule: 'cpp-typo-main', title: 'Sai tên hàm `main` (`man`)', detail: 'Đã tự động sửa thành `int main(`.' },
+      { bad: 'signed mian(', good: 'signed main(', rule: 'cpp-typo-main', title: 'Sai tên hàm `signed main`', detail: 'Đã tự động sửa thành `signed main(`.' },
+      { bad: 'retrun ', good: 'return ', rule: 'cpp-typo-return', title: 'Sai chính tả `return`', detail: 'Từ khóa đúng là `return`. Đã tự động sửa.' },
+      { bad: 'reutrn ', good: 'return ', rule: 'cpp-typo-return', title: 'Sai chính tả `return`', detail: 'Từ khóa đúng là `return`. Đã tự động sửa.' },
+      { bad: 'cni >>', good: 'cin >>', rule: 'cpp-typo-cin', title: 'Sai chính tả `cin`', detail: 'Luồng nhập chuẩn là `cin`. Đã tự động sửa.' },
+      { bad: 'cni <<', good: 'cin >>', rule: 'cpp-typo-cin', title: 'Sai chiều toán tử nhập', detail: '`cin` phải dùng `>>`. Đã tự động sửa.' },
+      { bad: 'cotu <<', good: 'cout <<', rule: 'cpp-typo-cout', title: 'Sai chính tả `cout`', detail: 'Luồng xuất chuẩn là `cout`. Đã tự động sửa.' },
+      { bad: 'cuot <<', good: 'cout <<', rule: 'cpp-typo-cout', title: 'Sai chính tả `cout`', detail: 'Đã tự động sửa thành `cout <<`.' },
+      { bad: 'cotu >>', good: 'cout <<', rule: 'cpp-typo-cout', title: 'Sai chiều toán tử xuất', detail: '`cout` phải dùng `<<`. Đã tự động sửa.' },
+      { bad: 'cuot >>', good: 'cout <<', rule: 'cpp-typo-cout', title: 'Sai chiều toán tử xuất', detail: 'Đã tự động sửa thành `cout <<`.' },
+      { bad: 'vectro<', good: 'vector<', rule: 'cpp-typo-vector', title: 'Sai chính tả `vector`', detail: 'GCC 15 báo `no match for operator<<` hoặc `unknown type name`. Đã sửa thành `vector<`.' },
+      { bad: 'vecotr<', good: 'vector<', rule: 'cpp-typo-vector', title: 'Sai chính tả `vector`', detail: 'Đã tự động sửa thành `vector<`.' },
+      { bad: 'stirng ', good: 'string ', rule: 'cpp-typo-string', title: 'Sai chính tả `string`', detail: 'Đã tự động sửa thành `string`.' },
+      { bad: 'long lon ', good: 'long long ', rule: 'cpp-typo-longlong', title: 'Sai chính tả `long long`', detail: 'Đã tự động sửa thành `long long`.' },
+      { bad: 'push_bakc(', good: 'push_back(', rule: 'cpp-typo-pushback', title: 'Sai chính tả `push_back`', detail: 'Đã tự động sửa thành `push_back(`.' },
+      { bad: 'pirntf(', good: 'printf(', rule: 'cpp-typo-scanf', title: 'Sai chính tả `printf`', detail: 'Đã tự động sửa thành `printf(`.' },
+      { bad: 'scnaf(', good: 'scanf(', rule: 'cpp-typo-scanf', title: 'Sai chính tả `scanf`', detail: 'Đã tự động sửa thành `scanf(`.' },
+    ];
+
+    let cppLines = fixed.split('\n');
+    for (let i = 0; i < cppLines.length; i++) {
+      const lineNo = i + 1;
+      // Missing # before include
+      const cur = (fixed.split('\n')[i] || '');
+      if (/^\s*include\s*[<"]/.test(cur)) {
+        const p = patchLine(lineNo, 'include', '#include', 'Thêm dấu # cho chỉ thị tiền xử lý');
+        if (p) add('error', lineNo, 'cpp-include-hash', `Dòng ${lineNo}: Thiếu dấu \`#\` ở chỉ thị \`#include\``, 'Mọi chỉ thị tiền xử lý C++ phải bắt đầu bằng `#`. Đã tự động thêm.', p);
+      }
+      // Common <bits/stdc++.h> typo
+      const cur2 = (fixed.split('\n')[i] || '');
+      if (/<bit\/stdc\+\+\.h>/.test(cur2)) {
+        const p = patchLine(lineNo, '<bit/stdc++.h>', '<bits/stdc++.h>', 'Sửa tên thư viện chuẩn');
+        if (p) add('error', lineNo, 'cpp-header-typo', `Dòng ${lineNo}: Sai tên thư viện \`<bit/stdc++.h>\``, 'Tên đúng là `#include <bits/stdc++.h>`. Đã tự động sửa.', p);
+      }
+      // Apply typo table
+      for (const t of typoRules) {
+        const lineNow = fixed.split('\n')[i] || '';
+        if (!lineNow.includes(t.bad)) continue;
+        const p = patchLine(lineNo, t.bad, t.good, t.title);
+        if (p) add('error', lineNo, t.rule, `Dòng ${lineNo}: ${t.title} (\`${t.bad.trim()}\`)`, t.detail, p);
+      }
+      // =< and => comparison operators
+      let lineNow = fixed.split('\n')[i] || '';
+      if (lineNow.includes('=<') && !lineNow.includes('<=<')) {
+        const p = patchLine(lineNo, '=<', '<=', 'Sửa toán tử so sánh');
+        if (p) add('error', lineNo, 'cpp-comparison-operator', `Dòng ${lineNo}: Toán tử so sánh sai \`=<` + `\``, 'Trong C++ phải viết `<=`. Đã tự động sửa.', p);
+      }
+      lineNow = fixed.split('\n')[i] || '';
+      if ((/\bif\s*\(/.test(lineNow) || /\bwhile\s*\(/.test(lineNow)) && lineNow.includes('=>')) {
+        const p = patchLine(lineNo, '=>', '>=', 'Sửa toán tử so sánh');
+        if (p) add('error', lineNo, 'cpp-comparison-operator', `Dòng ${lineNo}: Toán tử so sánh sai \`=>\``, 'Trong C++ phải viết `>=`. Đã tự động sửa.', p);
+      }
+      // Assignment inside if/while
+      lineNow = fixed.split('\n')[i] || '';
+      const cond = lineNow.match(/\b(if|while)\s*\(([^)]*)\)/);
+      if (cond && /(^|[^=!<>])=([^=]|$)/.test(cond[2]) && !/==/.test(cond[2])) {
+        const fixedCond = cond[2].replace(/(^|[^=!<>])=([^=]|$)/, '$1==$2');
+        const p = patchLine(lineNo, cond[2], fixedCond, 'Đổi phép gán thành so sánh');
+        if (p) add('error', lineNo, 'cpp-if-assign', `Dòng ${lineNo}: Dùng phép gán \`=\` trong điều kiện \`${cond[1]}\``, '`if (a = b)` sẽ gán giá trị thay vì so sánh. Đã tự động đổi thành `==` (hãy kiểm tra lại logic).', p);
+      }
+      // void main
+      lineNow = fixed.split('\n')[i] || '';
+      if (/\bvoid\s+main\s*\(/.test(lineNow)) {
+        const p = patchLine(lineNo, 'void main', 'int main', 'Chuẩn hóa chữ ký main');
+        if (p) add('error', lineNo, 'cpp-void-main', `Dòng ${lineNo}: Hàm \`main\` khai báo \`void\``, 'Chuẩn C++ yêu cầu `int main()`. Đã tự động sửa; hãy thêm `return 0;` nếu cần.', p);
+      }
+    }
+
+    // endl flush -> "\n" (TLE optimization)
+    if (/\bendl\b/.test(fixed)) {
+      const endlCount = (fixed.match(/\bendl\b/g) || []).length;
+      fixed = fixed.replace(/\bstd::endl\b/g, '"\\n"').replace(/\bendl\b/g, '"\\n"');
+      const p = { before: 'endl', after: '"\\n"', line: 1, applied: true, description: `Thay ${endlCount} lần endl bằng "\\n"` };
+      patches.push(p);
+      add('warning', 1, 'cpp-endl', `Phát hiện ${endlCount} lần dùng \`endl\``, '`endl` flush buffer sau mỗi lần in, làm chương trình chậm 5–20 lần và dễ TLE. Đã tự động đổi thành `"\\n"`.', p);
+    }
+
+    // Missing semicolon heuristic
+    cppLines = fixed.split('\n');
+    for (let i = 0; i < cppLines.length; i++) {
+      const raw = cppLines[i];
+      const t = raw.trim();
+      if (!t || t.startsWith('//') || t.startsWith('/*') || t.startsWith('*') || t.startsWith('#')) continue;
+      if (/^(if|for|while|switch|else|do|case|default|public|private|protected)\b/.test(t)) continue;
+      if (/[;{}:,]$/.test(t) || t.endsWith('\\')) continue;
+      const looksDecl = /^(int|long long|double|float|char|bool|string|auto|unsigned|long|short|vector<[^;]+>)\s+[A-Za-z_]\w*(\s*=\s*[^;{}]+)?$/.test(t);
+      const looksReturn = /^return\s+[^;{}]+$/.test(t);
+      const looksIo = /^(cin\s*>>|cout\s*<<|cerr\s*<<|printf\s*\(|scanf\s*\()/.test(t) && !t.endsWith(';');
+      const looksUsing = /^using\s+namespace\s+[A-Za-z_]\w*\s*$/.test(t);
+      const looksExpr = /^[A-Za-z_]\w*(\s*(\+\+|--|\+=|-=|\*=|\/=|=|<<|>>)\s*[^;{}]+)?$/.test(t);
+      if (!looksDecl && !looksReturn && !looksIo && !looksUsing && !looksExpr) continue;
+      const p = patchLine(i + 1, raw, raw + ';', 'Thêm dấu chấm phẩy bị thiếu');
+      if (p) add('error', i + 1, 'cpp-missing-semicolon', `Dòng ${i + 1}: Thiếu dấu \`;\` (GCC 15: expected ';' before ...)`, 'Đây là lỗi cú pháp phổ biến nhất của người mới. Đã tự động thêm `;` vào cuối dòng.', p);
+    }
+
+    // Unbalanced braces / parentheses / quotes
+    const noComments = fixed.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    const openBraces = (noComments.match(/\{/g) || []).length;
+    const closeBraces = (noComments.match(/\}/g) || []).length;
+    if (openBraces !== closeBraces) {
+      add('error', 1, 'cpp-unbalanced-braces', 'Số dấu `{` và `}` không cân bằng', `Phát hiện ${openBraces} dấu \`{\` nhưng chỉ có ${closeBraces} dấu \`}\`. GCC 15 sẽ báo \`expected '}'\` ở cuối tệp. Hãy kiểm tra lại các khối lệnh.`, null);
+    }
+    const openParens = (noComments.match(/\(/g) || []).length;
+    const closeParens = (noComments.match(/\)/g) || []).length;
+    if (openParens !== closeParens) {
+      add('error', 1, 'cpp-unbalanced-parens', 'Số dấu `(` và `)` không cân bằng', `Phát hiện ${openParens} dấu \`(\` nhưng chỉ có ${closeParens} dấu \`)\`. Hãy kiểm tra các lời gọi hàm và điều kiện.`, null);
+    }
+    const rawLines = fixed.split('\n');
+    for (let i = 0; i < rawLines.length; i++) {
+      const s = rawLines[i].replace(/\\"/g, '').replace(/\/\/.*$/, '');
+      const q = (s.match(/"/g) || []).length;
+      if (q % 2 === 1) add('error', i + 1, 'cpp-odd-quotes', `Dòng ${i + 1}: Số dấu nháy kép \`"\` không chẵn`, 'Chuỗi ký tự chưa được đóng. GCC 15 sẽ báo lỗi `missing terminating " character`.', null);
+    }
+
+    // 2. Format / type / unsafe functions
+    const llNames = new Set();
+    for (const m of fixed.matchAll(/\blong\s+long\s+([^;]+);/g)) {
+      m[1].split(',').forEach(v => {
+        const n = v.trim().replace(/=.*$/, '').trim();
+        if (/^[A-Za-z_]\w*$/.test(n)) llNames.add(n);
+      });
+    }
+    const lines2 = fixed.split('\n');
+    for (let i = 0; i < lines2.length; i++) {
+      const lineNo = i + 1;
+      const line = fixed.split('\n')[i] || '';
+      const hasLl = [...llNames].some(n => new RegExp(`\\b${n}\\b`).test(line));
+
+      if (/\bprintf\s*\(/.test(line) && /%d/.test(line) && hasLl) {
+        const p = patchLine(lineNo, '%d', '%lld', 'Sửa định dạng printf cho long long');
+        if (p) add('error', lineNo, 'cpp-format-longlong', `Dòng ${lineNo}: Dùng \`%d\` để in \`long long\``, 'Trên Windows, `%d` chỉ in 32-bit và có thể in sai/tràn. Đã tự động đổi thành `%lld`.', p);
+      }
+      if (/\bscanf\s*\(/.test(line) && /%d/.test(line) && hasLl) {
+        const p = patchLine(lineNo, '%d', '%lld', 'Sửa định dạng scanf cho long long');
+        if (p) add('error', lineNo, 'cpp-format-longlong', `Dòng ${lineNo}: Dùng \`%d\` để nhập \`long long\``, 'Đã tự động đổi thành `%lld` để đọc đúng 64-bit.', p);
+      }
+      const sc = line.match(/\bscanf\s*\(\s*"([^"]*)"\s*,\s*([A-Za-z_]\w*)\s*\)/);
+      if (sc && !/^[su]/.test(sc[1].trim())) {
+        const before = sc[0];
+        const after = before.replace(sc[2], '&' + sc[2]);
+        const p = patchLine(lineNo, before, after, 'Thêm & vào tham số scanf');
+        if (p) add('error', lineNo, 'cpp-scanf-address', `Dòng ${lineNo}: \`scanf\` thiếu dấu \`&\``, '`scanf` cần địa chỉ biến (`&x`) để ghi dữ liệu. Đã tự động thêm.', p);
+      }
+      if (/\bscanf\s*\(\s*"[^"]*%s/.test(line) && !/%\d+s/.test(line)) {
+        add('warning', lineNo, 'cpp-scanf-width', `Dòng ${lineNo}: \`scanf("%s")\` không giới hạn độ dài`, 'Người dùng nhập chuỗi dài hơn mảng sẽ gây tràn bộ nhớ (0xC0000005). Dùng `%100s` hoặc `fgets`.', null);
+      }
+      if (/\bgets\s*\(/.test(line)) {
+        add('warning', lineNo, 'cpp-gets', `Dòng ${lineNo}: Hàm \`gets()\` không an toàn`, '`gets()` đã bị loại khỏi C++17 và gây tràn buffer. Hãy dùng `fgets(buf, sizeof(buf), stdin)`.', null);
+      }
+      if (/\bfflush\s*\(\s*stdin\s*\)/.test(line)) {
+        add('warning', lineNo, 'cpp-fflush-stdin', `Dòng ${lineNo}: \`fflush(stdin)\` là hành vi không xác định`, 'C++ không định nghĩa `fflush(stdin)`. Hãy dùng `cin.ignore(...)` khi cần xóa bộ đệm.', null);
+      }
+      if (/\bsystem\s*\(\s*"pause"\s*\)/.test(line)) {
+        const p = patchLine(lineNo, 'system("pause");', '', 'Xóa system("pause")');
+        if (p) add('warning', lineNo, 'cpp-system-pause', `Dòng ${lineNo}: \`system("pause")\` không phù hợp khi chấm tự động`, 'Lệnh này treo chương trình trên Themis/OJ. Đã tự động xóa.', p);
+      }
+      if (/#include\s*<conio\.h>/.test(line) || /\bgetch\s*\(/.test(line)) {
+        add('warning', lineNo, 'cpp-conio', `Dòng ${lineNo}: Dùng \`<conio.h>\` / \`getch()\` (bị cấm trên Themis)`, 'Thư viện `conio.h` không có trên GCC Linux/Themis. Hãy dùng `getchar()` hoặc bỏ hoàn toàn.', null);
+      }
+      const mm = line.match(/memset\s*\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/);
+      if (mm) {
+        const val = mm[2].trim();
+        const okVals = new Set(['0', '-1', '0x3f', '0x3F', '0xff', '0xFF', '0x00', "'\\0'"]);
+        if (!okVals.has(val)) {
+          const before = mm[0];
+          const after = before.replace(mm[2], ' 0');
+          const p = patchLine(lineNo, before, after, 'Đổi giá trị memset về 0');
+          if (p) add('error', lineNo, 'cpp-memset-value', `Dòng ${lineNo}: \`memset\` với giá trị \`${val}\` không đúng`, '`memset` ghi từng byte. Chỉ `0`, `-1`, `0x3f` mới cho kết quả có nghĩa; các giá trị khác tạo số rác. Đã tự động đổi về `0`.', p);
+        }
+      }
+      const pInf = line.match(/\bconst\s+int\s+([A-Za-z_]\w*)\s*=\s*1e9\b/);
+      if (pInf) {
+        const before = pInf[0];
+        const after = before.replace(/\bconst\s+int\b/, 'const long long').replace(/1e9\b/, '1000000000LL');
+        const p = patchLine(lineNo, before, after, 'Đổi INF sang long long');
+        if (p) add('warning', lineNo, 'cpp-inf-double', `Dòng ${lineNo}: \`const int ${pInf[1]} = 1e9\``, '`1e9` là kiểu `double`, dễ gây lỗi so sánh/tràn. Đã đổi thành `const long long ... = 1000000000LL`.', p);
+      }
+      if (/#define\s+int\s+long\s+long/.test(line)) {
+        add('warning', lineNo, 'cpp-define-int', `Dòng ${lineNo}: \`#define int long long\``, 'Kỹ thuật này làm `main` thành `long long main` (sai chuẩn) và tăng bộ nhớ. Nên khai báo `long long` ở từng biến.', null);
+      }
+      if (/\babs\s*\(\s*INT_MIN\s*\)/.test(line)) {
+        add('warning', lineNo, 'cpp-abs-intmin', `Dòng ${lineNo}: \`abs(INT_MIN)\` là hành vi không xác định`, '`abs(INT_MIN)` không biểu diễn được trong `int`. Dùng `llabs((long long)INT_MIN)` hoặc `long long`.', null);
+      }
+      if (/\brand\s*\(\s*\)\s*%/.test(line)) {
+        add('info', lineNo, 'cpp-rand-bias', `Dòng ${lineNo}: \`rand() % N\` bị lệch phân phối`, 'Với N không chia hết RAND_MAX, kết quả bị thiên lệch. Dùng `mt19937` + `uniform_int_distribution`.', null);
+      }
+      if (/\bvector\s*<\s*bool\s*>/.test(line)) {
+        add('warning', lineNo, 'cpp-vector-bool', `Dòng ${lineNo}: \`vector<bool>\` là specialization đặc biệt`, '`vector<bool>` không trả về `bool&` thật, gây lỗi khi dùng con trỏ/tham chiếu. Dùng `vector<char>` hoặc `bitset`.', null);
+      }
+      if (/\bnew\b/.test(line) && !/\bdelete\b/.test(line) && !/\/\//.test(line)) {
+        add('info', lineNo, 'cpp-new-delete', `Dòng ${lineNo}: Cấp phát \`new\` nhưng chưa thấy \`delete\``, 'Rò rỉ bộ nhớ có thể làm chương trình bị giới hạn bộ nhớ. Ưu tiên `vector` / `unique_ptr`.', null);
+      }
+      if (/\bmalloc\s*\(/.test(line) && !/\bfree\s*\(/.test(line) && !/\/\//.test(line)) {
+        add('info', lineNo, 'cpp-malloc-free', `Dòng ${lineNo}: \`malloc\` nhưng chưa thấy \`free\``, 'Hãy đảm bảo giải phóng bộ nhớ hoặc dùng `vector`.', null);
+      }
+
+      // Accumulate int and 32-bit shift
+      const acc = line.match(/accumulate\s*\(([^;]*),\s*0\s*\)/);
+      if (acc) {
+        const before = acc[0];
+        const after = before.replace(/,\s*0\s*\)$/, ', 0LL)');
+        const p = patchLine(lineNo, before, after, 'Đổi 0 thành 0LL');
+        if (p) add('error', lineNo, 'cpp-accumulate-int', `Dòng ${lineNo}: \`accumulate(..., 0)\` dùng kiểu \`int\``, 'Giá trị khởi tạo `0` là `int`, tổng sẽ tràn ở 2.14×10^9. Đã tự động đổi thành `0LL`.', p);
+      }
+      if (/\b1\s*<<\s*(3[1-9]|[4-9]\d|\d{3,}|[A-Za-z_]\w*)/.test(line)) {
+        const before = line.match(/\b1\s*<<\s*(3[1-9]|[4-9]\d|\d{3,}|[A-Za-z_]\w*)/)[0];
+        const after = before.replace(/^1\s*<</, '1LL <<');
+        const p = patchLine(lineNo, before, after, 'Đổi 1 << thành 1LL <<');
+        if (p) add('error', lineNo, 'cpp-shift-overflow', `Dòng ${lineNo}: Dịch bit 32-bit \`1 << k\` với k >= 31`, '`1` là `int` 32-bit; dịch từ bit 31 là Undefined Behavior. Đã tự động đổi thành `1LL <<`.', p);
+      }
+    }
+
+    // memset/sizeof on pointer parameters (classic 0xC0000005)
+    const ptrParams = new Set();
+    for (const m of fixed.matchAll(/\(([^)]*)\)\s*\{/g)) {
+      for (const p of m[1].split(',')) {
+        const pm = p.match(/\*\s*([A-Za-z_]\w*)/) || p.match(/([A-Za-z_]\w*)\s*\[\s*\]/);
+        if (pm) ptrParams.add(pm[1]);
+      }
+    }
+    if (ptrParams.size) {
+      const plines = fixed.split('\n');
+      for (let i = 0; i < plines.length; i++) {
+        const lineNo = i + 1;
+        const line = fixed.split('\n')[i] || '';
+        for (const name of ptrParams) {
+          if (new RegExp(`memset\\s*\\(\\s*${name}\\s*,\\s*[^,]+,\\s*sizeof\\s*\\(\\s*${name}\\s*\\)`).test(line)) {
+            add('error', lineNo, 'cpp-memset-sizeof', `Dòng ${lineNo}: \`memset(${name}, ..., sizeof(${name}))\` trên tham số con trỏ`, `\`sizeof(${name})\` chỉ là 8 byte của con trỏ, không phải kích thước mảng. Hãy truyền thêm kích thước hoặc dùng \`vector\`.`, null);
+          }
+          if (new RegExp(`sizeof\\s*\\(\\s*${name}\\s*\\)`).test(line) && new RegExp(`\\b${name}\\s*\\[`).test(fixed)) {
+            add('warning', lineNo, 'cpp-sizeof-array-param', `Dòng ${lineNo}: \`sizeof(${name})\` trên tham số mảng`, 'Trong hàm, mảng được truyền dưới dạng con trỏ nên `sizeof` trả về 8 byte. Hãy truyền kích thước `n` riêng.', null);
+          }
+        }
+      }
+    }
+
+    // int accumulator
+    const intAcc = /\bint\s+(sum|ans|total|res)\s*=/;
+    if (intAcc.test(fixed)) {
+      const p = patchExact('int ' + (fixed.match(intAcc) || [])[1] + ' =', 'long long ' + (fixed.match(intAcc) || [])[1] + ' =', 'Đổi biến tích lũy sang long long');
+      if (p) add('warning', 1, 'cpp-int-accumulator', 'Biến tích lũy khai báo `int` (nguy cơ tràn 32-bit)', 'Tổng/tích thường vượt `2^31 - 1`. Đã tự động đổi biến tích lũy đầu tiên sang `long long`.', p);
+    }
+
+    // 3. Bounds / unsigned / loop / CP logic
+    const arrSizes = new Map();
+    for (const m of fixed.matchAll(/^\s*(?:int|long long|double|char|bool)\s+([A-Za-z_]\w*)\s*\[\s*([^\]]+)\s*\]/gm)) {
+      arrSizes.set(m[1], m[2].trim());
+    }
+    const lines3 = fixed.split('\n');
+    for (let i = 0; i < lines3.length; i++) {
+      const lineNo = i + 1;
+      const line = fixed.split('\n')[i] || '';
+
+      const uc = line.match(/\bfor\s*\(\s*int\s+(\w+)\s*=\s*0\s*;\s*\1\s*<\s*([A-Za-z_]\w*)\.size\s*\(\s*\)/);
+      if (uc) {
+        const before = `int ${uc[1]}`;
+        const after = `size_t ${uc[1]}`;
+        const p = patchLine(lineNo, before, after, 'Đổi biến vòng lặp sang size_t');
+        if (p) add('warning', lineNo, 'cpp-unsigned-compare', `Dòng ${lineNo}: So sánh \`int\` với \`${uc[2]}.size()\` (size_t)`, 'So sánh signed/unsigned có thể gây cảnh báo và lỗi khi size > 2^31. Đã tự động đổi biến lặp thành `size_t`.', p);
+      }
+      const sc = line.match(/\bint\s+(\w+)\s*=\s*([A-Za-z_]\w*)\.size\s*\(\s*\)/);
+      if (sc) {
+        const before = sc[0];
+        const after = `int ${sc[1]} = (int)${sc[2]}.size()`;
+        const p = patchLine(lineNo, before, after, 'Ép kiểu size() về int');
+        if (p) add('warning', lineNo, 'cpp-size-cast', `Dòng ${lineNo}: Gán \`.size()\` vào \`int\``, '`size_t` có thể vượt `INT_MAX`; nên ép `(int)` để tránh cảnh báo và hành vi lạ.', p);
+      }
+      const rev = line.match(/\bfor\s*\(\s*int\s+(\w+)\s*=\s*([A-Za-z_]\w*)\.size\s*\(\s*\)\s*-\s*1\s*;/);
+      if (rev) {
+        const before = `int ${rev[1]} = ${rev[2]}.size() - 1`;
+        const after = `int ${rev[1]} = (int)${rev[2]}.size() - 1`;
+        const p = patchLine(lineNo, before, after, 'Ép kiểu trước khi trừ 1');
+        if (p) add('warning', lineNo, 'cpp-reverse-size', `Dòng ${lineNo}: \`int i = ${rev[2]}.size() - 1\` có thể underflow`, 'Khi container rỗng, `size() - 1` tràn thành `SIZE_MAX`. Đã tự động ép `(int)` trước khi trừ.', p);
+      }
+      if (/\[[^\]]*\.size\s*\(\s*\)\s*-\s*1\s*\]/.test(line)) {
+        add('warning', lineNo, 'cpp-empty-last', `Dòng ${lineNo}: Truy cập phần tử cuối bằng \`.size() - 1\``, 'Nếu container rỗng, biểu thức này tràn chỉ số và gây `0xC0000005`. Hãy kiểm tra `!v.empty()` trước.', null);
+      }
+      const ob = line.match(/\bfor\s*\(\s*(?:int|long long)\s+(\w+)\s*=\s*0\s*;\s*\1\s*<=\s*([A-Za-z_]\w*)\s*;/);
+      if (ob && arrSizes.has(ob[2]) && /^\s*\d+\s*$/.test(arrSizes.get(ob[2]) || '')) {
+        add('warning', lineNo, 'cpp-loop-offbyone', `Dòng ${lineNo}: Vòng lặp \`<= ${ob[2]}\` với mảng \`${ob[2]}[${arrSizes.get(ob[2])}]\``, 'Chỉ số hợp lệ là `0..N-1`; `i <= N` sẽ đọc phần tử ngoài mảng và gây Access Violation. Đổi thành `i < N`.', null);
+      }
+      if (/\[[^\]]*\+\s*1\s*\]/.test(line)) {
+        add('warning', lineNo, 'cpp-index-plus-one', `Dòng ${lineNo}: Truy cập \`a[i + 1]\``, 'Nếu `i` là phần tử cuối, `i + 1` vượt biên (0xC0000005). Hãy kiểm tra `i + 1 < n`.', null);
+      }
+      const vla = line.match(/^(\s*)(int|long long)\s+(\w+)\s*\[\s*([a-z_]\w*(?:\s*[+\-*/]\s*\w+)*)\s*\]\s*(=\s*\{[^}]*\})?\s*;/);
+      if (vla) {
+        const init = vla[5] ? ', 0' : '';
+        const before = line;
+        const after = `${vla[1]}vector<${vla[2]}> ${vla[3]}(${vla[4].trim()}${init});`;
+        const p = patchLine(lineNo, before, after, 'VLA -> vector chuẩn C++');
+        if (vla[5]) {
+          if (p) add('error', lineNo, 'cpp-vla-init', `Dòng ${lineNo}: Mảng động \`${vla[3]}[${vla[4]}]\` khởi tạo bằng \`= {...}\``, 'GCC 15 báo `variable-sized object may not be initialized`. VLA không được khởi tạo tập trung. Đã đổi thành `vector` có giá trị khởi tạo.', p);
+        } else if (p) {
+          add('info', lineNo, 'cpp-vla', `Dòng ${lineNo}: Mảng động \`${vla[3]}[${vla[4]}]\` (VLA)`, 'VLA là extension không chuẩn của GCC, dễ tràn stack và không dùng được trong `struct`. Đã đổi thành `vector`.', p);
+        }
+      }
+      const big = line.match(/^(\s*)(int|long long|double|char|bool)\s+(\w+)\s*\[\s*(\d{6,})\s*\]\s*;/);
+      if (big) {
+        const before = line;
+        const after = `${big[1]}static ${big[2]} ${big[3]}[${big[4]}];`;
+        const p = patchLine(lineNo, before, after, 'Chuyển mảng lớn sang static');
+        if (p) add('error', lineNo, 'cpp-large-local-array', `Dòng ${lineNo}: Mảng lớn \`${big[3]}[${big[4]}]\` khai báo trong hàm`, 'Mảng này nằm trên stack (mặc định 1 MB) và gây `0xC00000FD` Stack Overflow. Đã tự động thêm `static` để chuyển sang vùng nhớ tĩnh.', p);
+      }
+      if (/\b(?:int|long long)\s+[A-Za-z_]\w*\s*=\s*[^;]*\/\s*([A-Za-z_]\w*)\s*;/.test(line) && !/\/\s*0\b/.test(line) && !/!=\s*0|==\s*0|>\s*0/.test(line)) {
+        add('warning', lineNo, 'cpp-divide-zero', `Dòng ${lineNo}: Phép chia cho biến có thể bằng 0`, 'Nếu mẫu số bằng 0, Windows ném `0xC0000094` (Integer Divide by Zero). Hãy kiểm tra `if (mau != 0)` trước khi chia.', null);
+      }
+      if (/\b(?:double|float)\b[^;]*==\s*\d+\.\d+/.test(line)) {
+        add('warning', lineNo, 'cpp-float-equal', `Dòng ${lineNo}: So sánh số thực bằng \`==\``, 'Số thực có sai số biểu diễn. Dùng `fabs(a - b) < 1e-9`.', null);
+      }
+      if (/\(\s*[A-Za-z_]\w*\s*\+\s*[A-Za-z_]\w*\s*\)\s*\/\s*2/.test(line)) {
+        add('info', lineNo, 'cpp-int-average', `Dòng ${lineNo}: Trung bình cộng hai số nguyên bằng \`/ 2\``, 'Phép chia nguyên làm mất phần thập phân. Nếu cần chính xác, dùng `(a + b) / 2.0` hoặc kiểm tra tính chẵn lẻ.', null);
+      }
+      if (/\bgoto\b/.test(line)) {
+        add('info', lineNo, 'cpp-goto', `Dòng ${lineNo}: Sử dụng \`goto\``, '`goto` làm code khó đọc và dễ bỏ qua khởi tạo biến. Hãy dùng vòng lặp/cờ trạng thái.', null);
+      }
+    }
+
+    // Recursion without base case / memoization
+    const funcDefs = [];
+    for (const m of fixed.matchAll(/\b([A-Za-z_]\w*)\s*\([^;{}]*\)\s*\{/g)) {
+      if (!['if', 'for', 'while', 'switch', 'main'].includes(m[1])) funcDefs.push({ name: m[1], index: m.index });
+    }
+    for (const f of funcDefs.slice(0, 12)) {
+      const after = fixed.slice(f.index, f.index + 700);
+      const recursive = new RegExp(`\\b${f.name}\\s*\\(`).test(after.slice(after.indexOf('{') + 1));
+      if (!recursive) continue;
+      const bodyStart = after.indexOf('{') + 1;
+      const head = after.slice(bodyStart, bodyStart + 320);
+      if (!/\bif\s*\(|\breturn\b/.test(head)) {
+        add('warning', 1, 'cpp-recursion-base', `Hàm đệ quy \`${f.name}\` có thể thiếu điểm dừng`, 'Đệ quy không có `if` dừng sẽ làm tràn stack và Windows báo `0xC00000FD`. Hãy thêm điều kiện cơ sở.', null);
+      }
+      if (!/\bmemo\b|\bdp\b|\bcache\b/.test(after)) {
+        add('info', 1, 'cpp-recursion-memo', `Hàm đệ quy \`${f.name}\` chưa thấy memoization`, 'Nếu hàm được gọi lặp lại, hãy dùng `memo`/`dp` để tránh O(2^N).', null);
+      }
+    }
+
+    // Themis / abs / cout vector / string conversion
+    const usesInput = /\b(cin\s*>>|scanf\s*\()/.test(fixed);
+    if (usesInput && !/\bfreopen\s*\(/.test(fixed)) {
+      add('info', 1, 'cpp-freopen', 'Chưa thấy `freopen` cho tệp `.INP` / `.OUT`', 'Themis thường yêu cầu đọc/ghi tệp. Nếu bài nộp dùng stdin/stdout thì bỏ qua cảnh báo này.', null);
+    }
+    if (/[A-Za-z]:\\\\/.test(fixed)) {
+      add('warning', 1, 'cpp-absolute-path', 'Phát hiện đường dẫn tuyệt đối kiểu Windows', 'Đường dẫn `C:\\...` sẽ sai trên máy chấm. Dùng đường dẫn tương đối hoặc `freopen("TEN.INP", ...)`.', null);
+    }
+    const vectorNames = new Set();
+    for (const m of fixed.matchAll(/\bvector\s*<[^>]+>\s+([A-Za-z_]\w*)/g)) vectorNames.add(m[1]);
+    for (const [name] of vectorNames) {
+      if (new RegExp(`\\bcout\\s*<<\\s*${name}\\b`).test(fixed)) {
+        add('error', 1, 'cpp-cout-vector', `Không thể \`cout << ${name}\` trực tiếp với \`vector\``, 'GCC 15 báo `no match for operator<<`. Hãy duyệt từng phần tử hoặc dùng hàm in riêng.', null);
+      }
+    }
+    const stringVars = new Set();
+    for (const m of fixed.matchAll(/\bstring\s+([A-Za-z_]\w*)/g)) stringVars.add(m[1]);
+    for (const s of stringVars) {
+      const m = fixed.match(new RegExp(`\\bint\\s+([A-Za-z_]\\w*)\\s*=\\s*${s}\\s*;`));
+      if (m) {
+        const before = m[0];
+        const after = m[0].replace(new RegExp(`${s}\\s*;`), `stoi(${s});`);
+        const p = patchExact(before, after, 'Chuyển string sang int bằng stoi');
+        if (p) add('error', 1, 'cpp-string-to-int', 'Gán `std::string` trực tiếp vào `int`', 'GCC 15 báo `cannot convert std::string to int`. Đã tự động bọc `stoi(...)`.', p);
+        break;
+      }
+    }
+    if (/\bunsigned\b/.test(fixed) && /\babs\s*\(/.test(fixed)) {
+      add('warning', 1, 'cpp-abs-unsigned', 'Gọi `abs()` trên biểu thức `unsigned`', '`abs(unsigned)` có thể gây `ambiguous overload` hoặc trả về giá trị sai. Hãy ép `(long long)` trước khi gọi.', null);
+    }
+
+    // 4. Includes / namespace / main / fast IO (insertions last: line numbers stable)
+    const usesStd = /\b(cin|cout|cerr|string|vector|map|set|multiset|queue|stack|priority_queue|pair|sort|accumulate|memset|printf|scanf|freopen|ios)\b/.test(fixed);
+    const hasInclude = /#include\s*</.test(fixed);
+    if (usesStd && !hasInclude) {
+      fixed = '#include <bits/stdc++.h>\n' + fixed;
+      const p = { before: '<đầu tệp>', after: '#include <bits/stdc++.h>', line: 1, applied: true, description: 'Chèn thư viện chuẩn' };
+      patches.push(p);
+      add('error', 1, 'cpp-missing-include', 'Thiếu `#include <bits/stdc++.h>`', 'Code dùng `cin/cout` hoặc STL nhưng chưa khai báo thư viện. GCC 15 sẽ báo `cin was not declared` / `no match for operator<<`. Đã tự động chèn.', p);
+    }
+    if (usesStd && !/using\s+namespace\s+std\s*;/.test(fixed) && !/\bstd::/.test(fixed)) {
+      if (/#include[^\n]*\n/.test(fixed)) fixed = fixed.replace(/(#include[^\n]*\n)/, '$1using namespace std;\n');
+      else fixed = 'using namespace std;\n' + fixed;
+      const p = { before: '<sau #include>', after: 'using namespace std;', line: 1, applied: true, description: 'Thêm using namespace std' };
+      patches.push(p);
+      add('error', 1, 'cpp-missing-using', 'Thiếu `using namespace std;`', 'Nếu không có `std::`, GCC 15 không tìm thấy `cin`, `cout`, `vector`... Đã tự động chèn sau `#include`.', p);
+    }
+    if (!/\b(?:int|signed)\s+main\s*\(/.test(fixed)) {
+      const tpl = '\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    return 0;\n}\n';
+      fixed = fixed.replace(/\s*$/, '') + tpl;
+      const p = { before: '<cuối tệp>', after: 'int main() { ... }', line: 1, applied: true, description: 'Thêm hàm main' };
+      patches.push(p);
+      add('error', 1, 'cpp-missing-main', 'Không tìm thấy hàm `int main()`', 'Linker sẽ báo `undefined reference to WinMain` hoặc `ld returned 1 exit status`. Đã tự động thêm khung `main`.', p);
+    }
+    if (/\b(cin|cout)\b/.test(fixed) && !/ios::sync_with_stdio\s*\(\s*false\s*\)/.test(fixed)) {
+      const m = fixed.match(/(int\s+main\s*\([^)]*\)\s*\{)/);
+      if (m) {
+        const before = m[1];
+        const after = `${before}\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);`;
+        const p = patchExact(before, after, 'Bật Fast I/O');
+        if (p) add('warning', 1, 'cpp-missing-fastio', 'Thiếu Fast I/O (`ios::sync_with_stdio(false); cin.tie(nullptr);`)', 'Với N >= 10^5, `cin/cout` mặc định có thể gây TLE. Đã tự động chèn vào đầu `main`.', p);
+      }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Python 3 runtime / CP rules
+  // -------------------------------------------------------------------------
+  if (isPy) {
+    const pyLines = fixed.split('\n');
+    const hasRecursion = /\bdef\s+([A-Za-z_]\w*)\s*\([^)]*\)\s*:/.test(fixed) && (fixed.match(/\bdef\s+([A-Za-z_]\w*)\s*\(/g) || []).length > 1;
+    for (let i = 0; i < pyLines.length; i++) {
+      const lineNo = i + 1;
+      const line = fixed.split('\n')[i] || '';
+      if (/\binput\s*\(\s*\)/.test(line) && /\bfor\b|\bwhile\b/.test(pyLines.slice(Math.max(0, i - 3), i + 1).join('\n'))) {
+        add('warning', lineNo, 'py-input-loop', `Dòng ${lineNo}: Gọi \`input()\` trong vòng lặp`, '`input()` chậm với N lớn. Dùng `sys.stdin.buffer.read().split()` hoặc `sys.stdin.readline()`.', null);
+      }
+      if (/\bdef\s+[A-Za-z_]\w*\s*\([^)]*=\s*(\[\]|\{\})\s*[,)]/.test(line)) {
+        add('error', lineNo, 'py-mutable-default', `Dòng ${lineNo}: Tham số mặc định là list/dict (mutable)`, 'Giá trị mặc định chỉ tạo một lần và bị chia sẻ giữa các lần gọi. Dùng `None` rồi khởi tạo bên trong hàm.', null);
+      }
+      if (/\bis\s+(-?\d+|"[^"]*"|'[^']*')\b/.test(line)) {
+        const before = line.match(/\bis\s+(-?\d+|"[^"]*"|'[^']*')\b/)[0];
+        const after = before.replace(/\bis\b/, '==');
+        const p = patchLine(lineNo, before, after, 'Đổi is thành ==');
+        if (p) add('warning', lineNo, 'py-is-literal', `Dòng ${lineNo}: Dùng \`is\` để so sánh giá trị`, '`is` so sánh danh tính đối tượng, không phải giá trị. Đã tự động đổi thành `==`.', p);
+      }
+      if (/^\s*except\s*:\s*$/.test(line)) {
+        const p = patchLine(lineNo, 'except:', 'except Exception:', 'Bắt lỗi cụ thể');
+        if (p) add('warning', lineNo, 'py-bare-except', `Dòng ${lineNo}: \`except:\` bắt mọi ngoại lệ (kể cả Ctrl+C)`, 'Nên bắt `Exception` hoặc loại lỗi cụ thể. Đã tự động sửa thành `except Exception:`.', p);
+      }
+      if (/\brange\s*\(\s*len\s*\(/.test(line)) {
+        add('info', lineNo, 'py-range-len', `Dòng ${lineNo}: Dùng \`range(len(...))\``, 'Pythonic hơn: `for x in arr:` hoặc `for i, x in enumerate(arr):`.', null);
+      }
+      if (/\.append\s*\(/.test(line) && /\bfor\b/.test(pyLines.slice(Math.max(0, i - 3), i + 1).join('\n'))) {
+        add('info', lineNo, 'py-list-append', `Dòng ${lineNo}: \`append\` trong vòng lặp`, 'Có thể thay bằng list comprehension để nhanh và gọn hơn.', null);
+      }
+      if (/\bprint\s*\([^)]*\/[^)]*\)/.test(line) && !/\/\//.test(line)) {
+        add('info', lineNo, 'py-division', `Dòng ${lineNo}: Dùng phép chia \`/\` (trả về float)`, 'Trong bài đếm/CP, `/` tạo số thực và có thể mất chính xác với số lớn. Dùng `//` nếu cần chia nguyên.', null);
+      }
+      const shadow = line.match(/^\s*(list|dict|set|str|int|sum|min|max|input|id)\s*=/);
+      if (shadow) {
+        add('info', lineNo, 'py-shadow-builtin', `Dòng ${lineNo}: Ghi đè hàm/kiểu tích hợp \`${shadow[1]}\``, 'Đặt tên biến trùng builtin sẽ che mất hàm gốc. Hãy đổi tên biến.', null);
+      }
+      if (/\b[A-Za-z_]\w*\s*\+=\s*["']/.test(line) && /\bfor\b/.test(pyLines.slice(Math.max(0, i - 3), i + 1).join('\n'))) {
+        add('warning', lineNo, 'py-string-concat', `Dòng ${lineNo}: Nối chuỗi bằng \`+=\` trong vòng lặp`, 'Mỗi lần `+=` tạo chuỗi mới, chi phí O(N^2). Dùng `"".join(parts)`.', null);
+      }
+    }
+    if (hasRecursion && !/setrecursionlimit/.test(fixed)) {
+      const p = { before: '<đầu tệp>', after: 'import sys\nsys.setrecursionlimit(1_000_000)', line: 1, applied: false, description: 'Tăng giới hạn đệ quy Python' };
+      add('warning', 1, 'py-recursion-limit', 'Đệ quy Python có thể chạm giới hạn 1000 tầng', 'Python mặc định giới hạn ~1000 lần gọi. Hãy thêm `import sys; sys.setrecursionlimit(1_000_000)`.', p);
+    }
+  }
+
+  return { findings, fixedCode: fixed, patches, complexity: drgxEstimateComplexity(original) };
+}
+
+function analyzeAndFixCode(code, lang = 'cpp', mode = 'bugcheck') {
+  const diag = drgxBuildDiagnostics(code, lang);
+  const lines = String(code || '').split(/\r?\n/);
+  const findings = diag.findings;
+  const fixedCode = diag.fixedCode;
+  const complexity = diag.complexity;
+  const hasChanges = fixedCode !== String(code || '');
+  const autofixPatch = {
+    available: hasChanges,
+    appliedCount: diag.patches.length,
+    patches: diag.patches.slice(0, 80),
+    fixedCode
+  };
+  const ruleCatalogue = DRGX_RULE_COUNT;
 
   if (mode === 'explain') {
     const algos = [];
-    if (hasSort) algos.push('Sắp xếp (`std::sort`)');
-    if (hasPriorityQueue) algos.push('Hàng đợi ưu tiên (`priority_queue` / Dijkstra / Greedy)');
-    if (hasMapSet) algos.push('Cây đỏ-đen (`std::map` / `std::set`)');
+    if (/\bsort\s*\(/.test(code)) algos.push('Sắp xếp (`std::sort`)');
+    if (/\bpriority_queue\b/.test(code)) algos.push('Hàng đợi ưu tiên (`priority_queue` / Dijkstra / Greedy)');
+    if (/\b(map|set|multiset)\s*</.test(code)) algos.push('Cây đỏ-đen (`std::map` / `std::set`)');
     if (/\bdp\[|\bmemo\[/.test(code)) algos.push('Quy hoạch động (Dynamic Programming)');
     if (/\bdfs\b|\bbfs\b|\badj\[/.test(code)) algos.push('Duyệt đồ thị / Cây (DFS / BFS)');
     return {
@@ -873,16 +1418,21 @@ function analyzeAndFixCode(code, lang = 'cpp', mode = 'bugcheck') {
       algorithms: algos.length ? algos : ['Xử lý tuần tự / Toán học cơ bản'],
       findings,
       fixedCode,
+      hasChanges,
+      autofix_patch: autofixPatch,
+      ruleCount: ruleCatalogue,
+      firstErrorLine: findings.find(f => f.severity === 'error')?.line || 0,
       markdown: [
-        `### 📊 Tổng quan kỹ thuật`,
+        '### 📊 Tổng quan kỹ thuật',
         `- **Độ phức tạp thời gian ước lượng:** \`${complexity}\``,
         `- **Số dòng mã:** \`${lines.length}\` dòng`,
+        `- **Bộ quy tắc AST/GCC 15:** \`${ruleCatalogue}\` quy tắc tiếng Việt`,
         `- **Kỹ thuật nhận diện:** ${(algos.length ? algos : ['Tuần tự / Cơ bản']).join(', ')}`,
-        ``,
+        '',
         `### 🔍 Kiểm tra chất lượng mã (${findings.length} phát hiện)`,
         findings.length
-          ? findings.map((f, i) => `${i + 1}. **[${f.severity.toUpperCase()}] ${f.title}**\n   - ${f.detail}`).join('\n')
-          : `- ✅ Code sạch, đã tuân thủ tốt các quy tắc an toàn kiểu dữ liệu và I/O.`
+          ? findings.map((f, i) => `${i + 1}. **[${String(f.severity).toUpperCase()}] ${f.title}**\n   - ${f.detail}`).join('\n')
+          : '- ✅ Code sạch, đã tuân thủ tốt các quy tắc an toàn kiểu dữ liệu và I/O.'
       ].join('\n')
     };
   }
@@ -898,27 +1448,830 @@ function analyzeAndFixCode(code, lang = 'cpp', mode = 'bugcheck') {
         { name: 'Test 5 — Cực đại 64-bit an toàn', input: '1000000000000 2000000000000\n', expected: '3000000000000' },
         { name: 'Test 6 — Lệch bậc lớn', input: '1 999999999999\n', expected: '1000000000000' }
       ],
-      markdown: `Đã sinh **6 test góc (Corner Cases)** kiểm tra biên nhỏ nhất, số 0, số âm, và tràn số 32-bit (\`int\` vs \`long long\`). Bấm **"Nạp vào Test Runner"** để chạy kiểm thử ngay!`
+      markdown: 'Đã sinh **6 test góc (Corner Cases)** kiểm tra biên nhỏ nhất, số 0, số âm, và tràn số 32-bit (`int` vs `long long`). Bấm **"Nạp vào Test Runner"** để chạy kiểm thử ngay!'
     };
   }
 
+  const changesNote = hasChanges
+    ? '\n\n💡 **Đã tạo bản vá tự động!** Bấm nút **"✨ Áp dụng bản vá vào Editor"** hoặc **"🚀 Vá & Chạy Code Ngay"** bên dưới.'
+    : '';
   return {
-    title: mode === 'optimize' ? 'Tối ưu hóa hiệu năng C++17' : 'Chẩn đoán Bug & Tự động vá lỗi',
+    title: mode === 'optimize' ? 'Tối ưu hóa hiệu năng C++17' : 'Chẩn đoán Bug (AST 71 quy tắc + GCC 15) & Tự động vá lỗi',
     complexity,
     findings,
-    hasChanges: fixedCode !== code,
+    hasChanges,
     fixedCode,
+    autofix_patch: autofixPatch,
+    ruleCount: ruleCatalogue,
+    firstErrorLine: findings.find(f => f.severity === 'error')?.line || 0,
     markdown: [
-      `### 🛠️ Kết quả quét mã nguồn (${findings.length} vấn đề)`,
+      `### 🛠️ Kết quả quét mã nguồn (${findings.length} vấn đề · ${ruleCatalogue} quy tắc)`,
       `- **Độ phức tạp hiện tại:** \`${complexity}\``,
       findings.length
-        ? findings.map((f, i) => `${i + 1}. **[${f.severity === 'error' ? 'LỖI NGHIÊM TRỌNG' : 'CẢNH BÁO'}]** ${f.title}\n   - *Chi tiết:* ${f.detail}`).join('\n\n')
-        : `✅ Không phát hiện lỗi tràn số, thiếu Fast I/O hay lỗi cú pháp phổ biến.`,
-      fixedCode !== code
-        ? `\n💡 **Đã tạo bản vá tự động!** Bấm nút **"Áp dụng bản vá vào Editor"** bên dưới để cập nhật code ngay.`
-        : ''
+        ? findings.map((f, i) => `${i + 1}. **[${f.severity === 'error' ? 'LỖI NGHIÊM TRỌNG' : f.severity === 'warning' ? 'CẢNH BÁO' : 'THÔNG TIN'}]** ${f.title}\n   - *Chi tiết:* ${f.detail}${f.autofix_patch ? '\n   - *Bản vá 1-click:* `' + String(f.autofix_patch.before || '').slice(0, 80) + '` → `' + String(f.autofix_patch.after || '').slice(0, 80) + '`' : ''}`).join('\n\n')
+        : '✅ Không phát hiện lỗi tràn số, thiếu Fast I/O hay lỗi cú pháp phổ biến.',
+      changesNote
     ].join('\n')
   };
+}
+
+function drgxExplainCompilerOutput(raw, lang = 'cpp', exitCode = 0) {
+  const text = String(raw || '');
+  const out = [];
+  const seen = new Set();
+  const first = text.match(/(?:^|\n)[^\r\n:]*?:(\d+):(\d+):\s*(?:fatal error|error):\s*([^\r\n]+)/);
+  const errLine = first ? parseInt(first[1], 10) : 0;
+  function add(rule, severity, title, detail, line) {
+    if (seen.has(rule)) return;
+    seen.add(rule);
+    out.push({
+      line: line || errLine || 1,
+      severity,
+      rule,
+      title,
+      detail,
+      autofix_patch: null
+    });
+  }
+  const has = (re) => re.test(text);
+
+  if (has(/expected\s+['`]?;['`]?\s+before/i)) add('gcc-expected-semicolon', 'error', "GCC 15: `expected ';' before ...` — thiếu dấu chấm phẩy", 'Hãy thêm `;` vào cuối dòng được báo lỗi. Đây là lỗi cú pháp phổ biến nhất; bộ lọc AST phía trên đã cố gắng tự vá.', errLine);
+  if (has(/no match for\s+['`]?operator<</i)) add('gcc-no-operator-shift', 'error', "GCC 15: `no match for 'operator<<'`", 'Bạn đang in một kiểu chưa có `operator<<` (ví dụ `vector`, `pair`, struct) hoặc dùng `cin <<` sai chiều. Hãy in từng phần tử hoặc nạp `<bits/stdc++.h>` + `using namespace std;`.', errLine);
+  if (has(/no match for\s+['`]?operator>>/i)) add('gcc-no-operator-extract', 'error', "GCC 15: `no match for 'operator>>'`", 'Thường do `cout >>` thay vì `cout <<`, hoặc nhập trực tiếp vào kiểu không hỗ trợ. Kiểm tra lại chiều toán tử.', errLine);
+  if (has(/cannot convert/i)) add('gcc-cannot-convert', 'error', 'GCC 15: `cannot convert ...` — sai kiểu dữ liệu', 'Ví dụ gán `std::string` vào `int`, hoặc truyền `int` vào hàm cần `long long&`. Hãy dùng `stoi`, `to_string`, hoặc ép kiểu tường minh.', errLine);
+  if (has(/ambiguous overload/i)) add('gcc-ambiguous-overload', 'error', 'GCC 15: `ambiguous overload` — gọi hàm mơ hồ', 'Có nhiều hàm cùng tên nhận các kiểu khác nhau (thường gặp với `abs`, `max`, `min` giữa `int` và `size_t`). Hãy ép kiểu cụ thể, ví dụ `max<long long>(a, b)`.', errLine);
+  if (has(/variable-sized object may not be initialized/i)) add('gcc-vla-init', 'error', 'GCC 15: `variable-sized object may not be initialized`', 'Không thể khởi tạo mảng có kích thước động bằng `= {0}`. Dùng `vector<int> a(n, 0);` hoặc `memset(a, 0, sizeof(a))` sau khi khai báo.', errLine);
+  if (has(/was not declared in this scope/i) || has(/is not a member of\s+['`]?std/i)) add('gcc-not-declared', 'error', 'GCC 15: biến/hàm chưa được khai báo', 'Thường do thiếu `#include <bits/stdc++.h>`, thiếu `using namespace std;`, hoặc gõ sai tên. Bộ lọc AST đã kiểm tra các trường hợp này.', errLine);
+  if (has(/redefinition of/i)) add('gcc-redefinition', 'error', 'GCC 15: `redefinition of ...` — khai báo trùng', 'Bạn đã khai báo cùng một biến/hàm hai lần. Hãy đổi tên hoặc xóa khai báo thừa.', errLine);
+  if (has(/no matching function for call/i)) add('gcc-no-matching-function', 'error', 'GCC 15: `no matching function for call`', 'Số lượng hoặc kiểu tham số không khớp. Kiểm tra lại chữ ký hàm và ép kiểu.', errLine);
+  if (has(/too few arguments/i)) add('gcc-too-few-args', 'error', 'GCC 15: truyền thiếu tham số', 'Hàm được gọi với ít đối số hơn khai báo. Hãy bổ sung tham số.', errLine);
+  if (has(/too many arguments/i)) add('gcc-too-many-args', 'error', 'GCC 15: truyền dư tham số', 'Hàm được gọi với nhiều đối số hơn khai báo. Hãy kiểm tra lại.', errLine);
+  if (has(/control reaches end of non-void function/i)) add('gcc-missing-return', 'warning', 'GCC 15: hàm không trả về giá trị', 'Hàm có kiểu trả về khác `void` nhưng thiếu `return` ở một nhánh. Đây là Undefined Behavior.', errLine);
+  if (has(/undefined reference to\s+[`'"]?WinMain/i)) add('linker-winmain', 'error', 'Linker: `undefined reference to WinMain`', 'Không tìm thấy `int main()`. Hãy thêm hàm `main` hoặc kiểm tra lại tên `mian`/`man`. Bộ lọc AST có thể tự chèn khung `main`.', 1);
+  if (has(/undefined reference to/i)) add('linker-undefined-reference', 'error', 'Linker: `undefined reference to ...`', 'Bạn gọi một hàm/biến chưa được định nghĩa hoặc thiếu file nguồn khi liên kết. Kiểm tra khai báo và tên hàm.', 1);
+  if (has(/ld returned 1 exit status/i) || has(/collect2\.exe.*error/i)) add('linker-ld-exit', 'error', 'Linker: `ld returned 1 exit status`', 'Lỗi liên kết tổng hợp. Nếu file `.exe` cũ đang mở, hãy đóng chương trình/tiến trình đó rồi biên dịch lại. Dọn các file `.exe` trong thư mục build nếu cần.', 1);
+  if (has(/Permission denied|Cannot open output file|text file busy/i)) add('linker-locked-exe', 'error', 'Không ghi được file `.exe` (file đang bị khóa)', 'Một tiến trình cũ đang giữ file thực thi. Hãy đóng cửa sổ chương trình, tắt antivirus tạm thời hoặc đổi tên file build.', 1);
+  if (has(/0xC0000005|3221225477|Access Violation/i)) add('runtime-access-violation', 'error', 'Runtime NTSTATUS `0xC0000005` — Access Violation', 'Truy cập bộ nhớ ngoài biên (mảng/vector) hoặc con trỏ null. Hãy kiểm tra chỉ số `i + 1`, `v[v.size()-1]` khi rỗng, và các vòng lặp `<= n`.', 1);
+  if (has(/0xC00000FD|3221225725|Stack Overflow/i)) add('runtime-stack-overflow', 'error', 'Runtime NTSTATUS `0xC00000FD` — Stack Overflow', 'Đệ quy thiếu điểm dừng hoặc mảng quá lớn khai báo trong hàm. Hãy thêm `if` dừng, giảm kích thước mảng, hoặc chuyển mảng ra ngoài/`static`.', 1);
+  if (has(/0xC0000094|3221225592|Integer Divide by Zero/i)) add('runtime-divide-zero', 'error', 'Runtime NTSTATUS `0xC0000094` — chia cho 0', 'Mẫu số bằng 0 trong phép `/` hoặc `%`. Hãy kiểm tra `if (mau != 0)` trước khi chia.', 1);
+  if (has(/IndentationError/i)) add('py-indentation', 'error', 'Python: `IndentationError` — thụt lề sai', 'Python dùng thụt lề để xác định khối lệnh. Hãy dùng đúng 4 dấu cách và không trộn tab với space.', 1);
+  if (has(/SyntaxError/i)) add('py-syntax', 'error', 'Python: `SyntaxError` — lỗi cú pháp', 'Kiểm tra dấu `:`, ngoặc và từ khóa. Đọc dòng được báo lỗi để sửa.', 1);
+  if (has(/NameError/i)) add('py-name', 'error', 'Python: `NameError` — tên chưa định nghĩa', 'Biến/hàm được dùng trước khi khai báo hoặc gõ sai tên.', 1);
+  if (has(/IndexError/i)) add('py-index', 'error', 'Python: `IndexError` — chỉ số ngoài phạm vi', 'List/string không có phần tử tại chỉ số đó. Kiểm tra `len()` trước khi truy cập.', 1);
+  if (has(/RecursionError/i)) add('py-recursion', 'error', 'Python: `RecursionError` — đệ quy quá sâu', 'Thêm `sys.setrecursionlimit(1_000_000)` hoặc chuyển sang vòng lặp.', 1);
+  if (has(/ZeroDivisionError/i)) add('py-zero-division', 'error', 'Python: `ZeroDivisionError` — chia cho 0', 'Kiểm tra mẫu số trước khi thực hiện `/` hoặc `%`.', 1);
+  if (has(/ModuleNotFoundError/i)) add('py-module', 'error', 'Python: `ModuleNotFoundError`', 'Thư viện chưa được cài hoặc tên module sai. Hãy dùng thư viện chuẩn hoặc cài bằng `pip`.', 1);
+  if (has(/TypeError/i)) add('py-type', 'error', 'Python: `TypeError` — sai kiểu dữ liệu', 'Ví dụ cộng `str` với `int`. Hãy dùng `int()`, `str()` hoặc kiểm tra kiểu.', 1);
+
+  const status = Number(exitCode) >>> 0;
+  if (status === 0xC0000005) add('runtime-access-violation', 'error', 'Runtime NTSTATUS `0xC0000005` — Access Violation', 'Truy cập ngoài biên mảng/vector hoặc con trỏ null. Hãy kiểm tra các chỉ số và điều kiện vòng lặp.', 1);
+  if (status === 0xC00000FD) add('runtime-stack-overflow', 'error', 'Runtime NTSTATUS `0xC00000FD` — Stack Overflow', 'Đệ quy thiếu điểm dừng hoặc mảng lớn trên stack. Hãy thêm điều kiện dừng/chuyển mảng sang `static`.', 1);
+  if (status === 0xC0000094) add('runtime-divide-zero', 'error', 'Runtime NTSTATUS `0xC0000094` — chia cho 0', 'Kiểm tra mẫu số trước phép chia/lấy dư.', 1);
+
+  return out;
+}
+
+// ============================================================================
+// Empirical Time & Space Complexity Regression Engine (MIT 6.046 / 6.172)
+// ============================================================================
+function drgxMedian(values) {
+  if (!values.length) return 0;
+  const a = values.slice().sort((x, y) => x - y);
+  const m = Math.floor(a.length / 2);
+  return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+}
+
+function drgxDefaultProfileInput(n, mode = 'array') {
+  if (mode === 'single') return `${n}\n`;
+  if (mode === 'pairs') {
+    const rows = [];
+    for (let i = 0; i < n; i++) rows.push(`${(i * 37) % 1000000000} ${(i * 91 + 7) % 1000000000}`);
+    return `${n}\n${rows.join('\n')}\n`;
+  }
+  let seed = 123456789 + Number(n);
+  const vals = [];
+  for (let i = 0; i < n; i++) {
+    seed = (1103515245 * seed + 12345) % 2147483648;
+    vals.push(seed % 1000000000);
+  }
+  return `${n}\n${vals.join(' ')}\n`;
+}
+
+async function drgxGenerateProfileInput(n, opts, tmpDir) {
+  if (opts.generator && String(opts.generator).trim()) {
+    const genPath = path.join(tmpDir, 'profile_gen.py');
+    fs.writeFileSync(genPath, String(opts.generator), 'utf8');
+    const r = await runProcessWithInput(PYTHON_BIN, [genPath, String(n)], '', 8000, tmpDir);
+    if (!r.ok) throw new Error(`Generator lỗi tại N=${n}: ${(r.stderr || r.stdout || '').trim().slice(0, 500)}`);
+    return r.stdout;
+  }
+  if (opts.inputTemplate) {
+    return String(opts.inputTemplate).replace(/\{\{\s*N\s*\}\}|\{\s*N\s*\}/g, String(n));
+  }
+  return drgxDefaultProfileInput(n, opts.inputMode || 'array');
+}
+
+// ---------------------------------------------------------------------------
+// Self-timing harness (MIT 6.172 style). The solution's `main` is renamed to
+// `drgx_user_main`, and a generated harness calls it repeatedly inside one
+// process, measuring only the solution body with steady_clock. This removes
+// ~50 ms of Windows process-spawn noise and lets N=250..4000 produce clean
+// log-log slopes even for O(N^2).
+// ---------------------------------------------------------------------------
+const DRGX_PROFILE_HARNESS_SRC = String.raw`#include <bits/stdc++.h>
+#include <chrono>
+#ifdef _WIN32
+#include <io.h>
+#endif
+using namespace std;
+extern int drgx_user_main();
+
+int main(int argc, char** argv) {
+    if (argc < 4) return 2;
+    int mode = atoi(argv[1]);
+    const char* inPath = argv[2];
+    const char* outPath = argv[3];
+    int forceReps = argc > 4 ? atoi(argv[4]) : 0;
+    string data;
+    {
+        ifstream f(inPath, ios::binary);
+        ostringstream ss;
+        ss << f.rdbuf();
+        data = ss.str();
+    }
+#ifdef _WIN32
+    freopen("NUL", "w", stdout);
+#else
+    freopen("/dev/null", "w", stdout);
+#endif
+    auto emit = [&](double us, int reps) {
+        char buf[256];
+        snprintf(buf, sizeof buf, "DRGX_PROFILE time_us=%.3f reps=%d\n", us, reps);
+        ofstream out(outPath, ios::binary | ios::trunc);
+        out << buf;
+    };
+    if (mode == 1) {
+        if (!freopen(inPath, "r", stdin)) return 3;
+        clearerr(stdin);
+        cin.clear();
+        drgx_user_main();
+        cout.flush();
+        double total = 0.0;
+        int reps = 0;
+        int cap = forceReps > 0 ? forceReps : 400;
+        do {
+            if (reps > 0) {
+                fseek(stdin, 0, SEEK_SET);
+                clearerr(stdin);
+                cin.clear();
+            }
+            auto t0 = chrono::steady_clock::now();
+            drgx_user_main();
+            auto t1 = chrono::steady_clock::now();
+            cout.flush();
+            total += chrono::duration<double, micro>(t1 - t0).count();
+            reps++;
+        } while (reps < cap && (forceReps > 0 ? reps < cap : total < 60000.0));
+        emit(total / reps, reps);
+    } else {
+        auto one = [&]() {
+            istringstream in(data);
+            streambuf* old = cin.rdbuf(in.rdbuf());
+            cin.clear();
+            drgx_user_main();
+            cout.flush();
+            cin.rdbuf(old);
+        };
+        one();
+        auto timeReps = [&](int reps) {
+            auto t0 = chrono::steady_clock::now();
+            for (int i = 0; i < reps; i++) one();
+            auto t1 = chrono::steady_clock::now();
+            return chrono::duration<double, micro>(t1 - t0).count() / reps;
+        };
+        double u1 = timeReps(1);
+        int reps = forceReps > 0 ? forceReps : (int)ceil(60000.0 / max(u1, 1.0));
+        if (reps < 1) reps = 1;
+        if (reps > 200) reps = 200;
+        double us = reps > 1 ? timeReps(reps) : u1;
+        emit(us, reps);
+    }
+    return 0;
+}
+`;
+
+const DRGX_PROFILE_PY_WRAPPER = String.raw`import sys, io, os, time
+
+script = sys.argv[1]
+inp = sys.argv[2]
+outp = sys.argv[3]
+force = int(sys.argv[4]) if len(sys.argv) > 4 else 0
+
+src = open(script, 'rb').read()
+code = compile(src, script, 'exec')
+data = open(inp, 'rb').read()
+devnull = open(os.devnull, 'w', encoding='utf-8', errors='replace')
+real_out = sys.stdout
+
+class FakeStdin(io.TextIOWrapper):
+    pass
+
+def make_stdin():
+    return FakeStdin(io.BytesIO(data), encoding='utf-8', errors='replace', newline='')
+
+g = {'__name__': '__main__', '__file__': script}
+
+def one():
+    sys.stdin = make_stdin()
+    sys.stdout = devnull
+    try:
+        exec(code, g)
+    except SystemExit:
+        pass
+    finally:
+        sys.stdout = real_out
+
+try:
+    one()
+    def timed(reps):
+        t0 = time.perf_counter()
+        for _ in range(reps):
+            one()
+        t1 = time.perf_counter()
+        return (t1 - t0) * 1e6 / reps
+    u1 = timed(1)
+    reps = force if force > 0 else max(1, min(100, int(12000.0 / max(u1, 1.0) + 0.999)))
+    us = timed(reps) if reps > 1 else u1
+    with open(outp, 'w', encoding='utf-8') as f:
+        f.write('DRGX_PROFILE time_us=%.3f reps=%d\n' % (us, reps))
+except BaseException as e:
+    sys.stderr.write('DRGX_PROFILE_ERROR ' + type(e).__name__ + ': ' + str(e)[:300] + '\n')
+    sys.exit(3)
+`;
+
+let drgxHarnessObjectPromise = null;
+function drgxEnsureHarnessObject() {
+  if (drgxHarnessObjectPromise) return drgxHarnessObjectPromise;
+  drgxHarnessObjectPromise = (async () => {
+    const dir = path.join(os.tmpdir(), 'drgx_profile_cache');
+    fs.mkdirSync(dir, { recursive: true });
+    const src = path.join(dir, `drgx_harness_${process.pid}.cpp`);
+    const obj = path.join(dir, `drgx_harness_${process.pid}.o`);
+    if (fs.existsSync(obj)) return obj;
+    fs.writeFileSync(src, DRGX_PROFILE_HARNESS_SRC, 'utf8');
+    const r = await runProcessWithInput(
+      GXX_BIN,
+      ['-std=c++17', '-O2', '-pipe', '-c', src, '-o', obj],
+      '',
+      30000,
+      dir
+    );
+    if (!r.ok) {
+      drgxHarnessObjectPromise = null;
+      try { fs.unlinkSync(obj); } catch (_) {}
+      throw new Error(`Không biên dịch được profiler harness: ${(r.stderr || r.stdout || '').trim().slice(0, 600)}`);
+    }
+    return obj;
+  })();
+  return drgxHarnessObjectPromise;
+}
+
+async function drgxBuildCppProfiler(code, tmpDir) {
+  const srcPath = path.join(tmpDir, 'solution.cpp');
+  fs.writeFileSync(srcPath, code, 'utf8');
+  const objPath = path.join(tmpDir, 'solution.o');
+  const compile = await runProcessWithInput(
+    GXX_BIN,
+    ['-std=c++17', '-O2', '-pipe', '-c', srcPath, '-o', objPath],
+    '',
+    20000,
+    tmpDir
+  );
+  if (!compile.ok) {
+    return { ok: false, stage: 'rename', compileOutput: (compile.stderr || compile.stdout || '').trim() };
+  }
+  // Rename `main` after codegen (not via -Dmain) so the compiler still applies
+  // the C++ rule "falling off main returns 0" for solutions without `return`.
+  const rename = await runProcessWithInput(
+    OBJCOPY_BIN,
+    ['--redefine-sym', 'main=_Z14drgx_user_mainv', objPath],
+    '',
+    10000,
+    tmpDir
+  );
+  if (!rename.ok) {
+    return { ok: false, stage: 'rename', compileOutput: (rename.stderr || rename.stdout || '').trim() };
+  }
+  let harnessObj;
+  try {
+    harnessObj = await drgxEnsureHarnessObject();
+  } catch (err) {
+    return { ok: false, stage: 'harness', compileOutput: String(err.message || err) };
+  }
+  const exePath = path.join(tmpDir, 'solution_profile.exe');
+  const link = await runProcessWithInput(
+    GXX_BIN,
+    ['-std=c++17', '-O2', objPath, harnessObj, '-o', exePath],
+    '',
+    25000,
+    tmpDir
+  );
+  if (!link.ok || !fs.existsSync(exePath)) {
+    return { ok: false, stage: 'link', compileOutput: (link.stderr || link.stdout || '').trim() };
+  }
+  return { ok: true, exePath, args: [] };
+}
+
+function drgxWritePythonWrapper(tmpDir) {
+  const wrapper = path.join(tmpDir, 'drgx_py_profile.py');
+  fs.writeFileSync(wrapper, DRGX_PROFILE_PY_WRAPPER, 'utf8');
+  return wrapper;
+}
+
+function drgxParseProfileTime(file) {
+  try {
+    const text = fs.readFileSync(file, 'utf8');
+    const m = text.match(/time_us=([0-9.]+)\s+reps=(\d+)/);
+    if (!m) return null;
+    const us = parseFloat(m[1]);
+    if (!Number.isFinite(us) || us <= 0) return null;
+    return { timeUs: us, reps: parseInt(m[2], 10) || 1 };
+  } catch (_) {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PowerShell keeps the child process handle so PeakWorkingSet64 is exact.
+// Timing itself comes from the in-process harness, not from PowerShell.
+// ---------------------------------------------------------------------------
+const DRGX_PS_PROFILE_SCRIPT = [
+  "$ErrorActionPreference = 'Stop'",
+  "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8",
+  "Write-Output 'READY'",
+  "while ($true) {",
+  "  $line = [Console]::In.ReadLine()",
+  "  if ($null -eq $line -or $line -eq 'QUIT') { break }",
+  "  if (-not $line.StartsWith('RUN|')) { continue }",
+  "  $parts = $line.Split('|')",
+  "  if ($parts.Length -lt 4) { Write-Output 'ERROR|bad protocol'; continue }",
+  "  try {",
+  "    $exe = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($parts[1]))",
+  "    $argText = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($parts[2]))",
+  "    $timeoutMs = [int]$parts[3]",
+  "    $psi = New-Object System.Diagnostics.ProcessStartInfo",
+  "    $psi.FileName = $exe",
+  "    $psi.Arguments = $argText",
+  "    $psi.UseShellExecute = $false",
+  "    $psi.RedirectStandardInput = $true",
+  "    $psi.RedirectStandardOutput = $true",
+  "    $psi.RedirectStandardError = $true",
+  "    $psi.CreateNoWindow = $true",
+  "    $p = New-Object System.Diagnostics.Process",
+  "    $p.StartInfo = $psi",
+  "    [void]$p.Start()",
+  "    $outTask = $p.StandardOutput.ReadToEndAsync()",
+  "    $errTask = $p.StandardError.ReadToEndAsync()",
+  "    $writer = $p.StandardInput",
+  "    $writer.Close()",
+  "    $sw = [System.Diagnostics.Stopwatch]::StartNew()",
+  "    $peak = 0",
+  "    $timedOut = 0",
+  "    while (-not $p.HasExited) {",
+  "      try { $p.Refresh(); $v = $p.PeakWorkingSet64; if ($v -gt $peak) { $peak = $v } } catch {}",
+  "      if ($sw.ElapsedMilliseconds -gt $timeoutMs) { $timedOut = 1; try { $p.Kill() } catch {}; break }",
+  "      Start-Sleep -Milliseconds 1",
+  "    }",
+  "    $p.WaitForExit()",
+  "    Write-Output ('RESULT|' + $peak + '|' + $p.ExitCode + '|' + $timedOut)",
+  "    try { [void]$outTask.Result; [void]$errTask.Result } catch {}",
+  "  } catch {",
+  "    Write-Output ('ERROR|' + ($_.Exception.Message -replace '[\\r\\n]+', ' '))",
+  "  }",
+  "}"
+].join('\n');
+
+let drgxPsProfilerPromise = null;
+function drgxGetPowerShellProfiler() {
+  if (process.platform !== 'win32') return Promise.resolve(null);
+  if (drgxPsProfilerPromise) return drgxPsProfilerPromise;
+  drgxPsProfilerPromise = new Promise(resolve => {
+    const ps = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+    if (!fs.existsSync(ps)) return resolve(null);
+    let proc;
+    try {
+      proc = spawn(ps, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(DRGX_PS_PROFILE_SCRIPT, 'utf16le').toString('base64')], {
+        windowsHide: true,
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+    } catch (_) {
+      return resolve(null);
+    }
+    let buffer = '';
+    let ready = false;
+    let waiter = null;
+    let closed = false;
+    const b64 = s => Buffer.from(String(s), 'utf8').toString('base64');
+    const startTimer = setTimeout(() => {
+      try { proc.kill(); } catch (_) {}
+      resolve(null);
+    }, 9000);
+
+    const api = {
+      run(exe, args, timeoutMs) {
+        return new Promise((res, rej) => {
+          if (closed || !ready) return rej(new Error('PowerShell profiler chưa sẵn sàng'));
+          const argText = args.map(a => /\s/.test(String(a)) ? `"${String(a).replace(/"/g, '\\"')}"` : String(a)).join(' ');
+          const line = 'RUN|' + b64(exe) + '|' + b64(argText) + '|' + timeoutMs;
+          const timer = setTimeout(() => {
+            waiter = null;
+            rej(new Error('PowerShell profiler timeout'));
+          }, timeoutMs + 6000);
+          waiter = resp => {
+            clearTimeout(timer);
+            if (resp.startsWith('ERROR|')) return rej(new Error(resp.slice(6)));
+            const p = resp.split('|');
+            res({
+              peakBytes: parseInt(p[1], 10) || 0,
+              exitCode: parseInt(p[2], 10),
+              timedOut: p[3] === '1'
+            });
+          };
+          try { proc.stdin.write(line + '\n'); }
+          catch (err) { clearTimeout(timer); waiter = null; rej(err); }
+        });
+      },
+      close() {
+        closed = true;
+        try { proc.stdin.write('QUIT\n'); } catch (_) {}
+        try { proc.kill(); } catch (_) {}
+      }
+    };
+
+    function handleLine(line) {
+      if (line === 'READY') {
+        ready = true;
+        clearTimeout(startTimer);
+        resolve(api);
+        return;
+      }
+      if (waiter && (line.startsWith('RESULT|') || line.startsWith('ERROR|'))) {
+        const w = waiter;
+        waiter = null;
+        w(line);
+      }
+    }
+
+    proc.stdout.on('data', chunk => {
+      buffer += chunk.toString('utf8');
+      let idx;
+      while ((idx = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, idx).replace(/\r$/, '');
+        buffer = buffer.slice(idx + 1);
+        handleLine(line);
+      }
+    });
+    proc.stderr.on('data', () => {});
+    proc.on('error', () => {
+      closed = true;
+      clearTimeout(startTimer);
+      resolve(null);
+    });
+    proc.on('close', () => {
+      closed = true;
+      clearTimeout(startTimer);
+      if (!ready) resolve(null);
+      if (waiter) {
+        const w = waiter;
+        waiter = null;
+        w('ERROR|PowerShell profiler đã đóng');
+      }
+    });
+  });
+  return drgxPsProfilerPromise;
+}
+
+async function drgxRunMeasured(profiler, exe, args, timeoutMs, cwd) {
+  const started = Date.now();
+  if (profiler) {
+    try {
+      const r = await profiler.run(exe, args, timeoutMs);
+      return { ...r, wallUs: (Date.now() - started) * 1000 };
+    } catch (_) {}
+  }
+  return await drgxNativeTimedRun(exe, args, '', timeoutMs, cwd);
+}
+
+function drgxNativeTimedRun(cmd, args, input, timeoutMs, cwd) {
+  return new Promise(resolve => {
+    const start = process.hrtime.bigint();
+    let proc;
+    try {
+      proc = spawn(cmd, args, {
+        cwd,
+        env: process.env,
+        windowsHide: true,
+        stdio: ['pipe', 'ignore', 'ignore']
+      });
+    } catch (err) {
+      return resolve({ wallUs: 0, peakBytes: null, exitCode: -1, timedOut: false, error: String(err.message || err) });
+    }
+    let timedOut = false;
+    let done = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try { proc.kill('SIGKILL'); } catch (_) {}
+    }, timeoutMs);
+    proc.on('error', err => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve({ wallUs: Number(process.hrtime.bigint() - start) / 1000, peakBytes: null, exitCode: -1, timedOut, error: String(err.message || err) });
+    });
+    proc.on('close', code => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve({ wallUs: Number(process.hrtime.bigint() - start) / 1000, peakBytes: null, exitCode: code == null ? -1 : code, timedOut });
+    });
+    try {
+      if (input) proc.stdin.write(input);
+      proc.stdin.end();
+    } catch (_) {}
+  });
+}
+
+async function drgxMeasureProfileOverhead(profiler, lang, tmpDir) {
+  const samples = [];
+  if (lang === 'cpp') {
+    const calib = await compileCppSource('int main() { return 0; }\n', 'profile_calib');
+    if (calib.ok) {
+      for (let i = 0; i < 3; i++) {
+        const r = await drgxRunMeasured(profiler, calib.exeFile, [], 3000, tmpDir);
+        if (!r.timedOut && r.wallUs > 0) samples.push(r.wallUs);
+      }
+    }
+  } else if (lang === 'python') {
+    for (let i = 0; i < 3; i++) {
+      const r = await drgxRunMeasured(profiler, PYTHON_BIN, ['-c', 'pass'], 3000, tmpDir);
+      if (!r.timedOut && r.wallUs > 0) samples.push(r.wallUs);
+    }
+  }
+  return samples.length ? Math.min(...samples) : 0;
+}
+
+function drgxClassifyComplexity(k) {
+  if (!Number.isFinite(k)) return 'Không xác định';
+  if (k < 0.25) return 'O(1)';
+  if (k < 0.6) return 'O(log N)';
+  if (k < 1.15) return 'O(N)';
+  if (k < 1.55) return 'O(N log N)';
+  if (k < 2.4) return 'O(N^2)';
+  return 'O(N^3)';
+}
+
+function drgxRegression(points) {
+  const valid = points.filter(p => p.verdict === 'OK' && p.timeUs > 0 && p.n > 1);
+  if (valid.length < 2) {
+    return { valid: false, k: NaN, c: NaN, r2: 0, equation: 'Không đủ dữ liệu hợp lệ', complexity: 'Không xác định' };
+  }
+  const xs = valid.map(p => Math.log2(p.n));
+  const ys = valid.map(p => Math.log2(Math.max(p.timeUs, 0.001)));
+  const n = xs.length;
+  const mx = xs.reduce((a, b) => a + b, 0) / n;
+  const my = ys.reduce((a, b) => a + b, 0) / n;
+  let num = 0;
+  let den = 0;
+  for (let i = 0; i < n; i++) {
+    num += (xs[i] - mx) * (ys[i] - my);
+    den += (xs[i] - mx) ** 2;
+  }
+  const k = den === 0 ? 0 : num / den;
+  const c = my - k * mx;
+  let ssRes = 0;
+  let ssTot = 0;
+  for (let i = 0; i < n; i++) {
+    const pred = k * xs[i] + c;
+    ssRes += (ys[i] - pred) ** 2;
+    ssTot += (ys[i] - my) ** 2;
+  }
+  const r2 = ssTot === 0 ? 1 : Math.max(0, Math.min(1, 1 - ssRes / ssTot));
+  const complexity = drgxClassifyComplexity(k);
+  return {
+    valid: true,
+    k,
+    c,
+    r2,
+    complexity,
+    equation: `log2 T(N) = ${k.toFixed(4)} · log2 N + ${c.toFixed(4)}`
+  };
+}
+
+function drgxProject(k, c, n) {
+  const lg = k * Math.log2(n) + c;
+  if (!Number.isFinite(lg)) return { ms: Infinity, overflow: true };
+  const us = Math.pow(2, Math.min(lg, 60));
+  return { ms: us / 1000, overflow: lg > 60 };
+}
+
+async function drgxProfileComplexity(body = {}) {
+  const code = String(body.code ?? '');
+  const langRaw = String(body.lang || 'cpp').toLowerCase();
+  const lang = (langRaw === 'py' || langRaw === 'python') ? 'python' : (langRaw === 'c++' ? 'cpp' : langRaw);
+  if (lang !== 'cpp' && lang !== 'python') throw new Error('Profiler hỗ trợ C++17 và Python 3');
+  if (!code.trim()) throw new Error('Code đang trống — không thể đo độ phức tạp');
+
+  const requested = Array.isArray(body.sizes) && body.sizes.length
+    ? body.sizes.map(x => parseInt(x, 10)).filter(x => Number.isFinite(x) && x >= 1 && x <= 10000000).slice(0, 12)
+    : DRGX_PROFILE_SIZES.slice();
+  const sizes = [...new Set(requested)].sort((a, b) => a - b);
+  if (sizes.length < 2) throw new Error('Cần ít nhất 2 kích thước N hợp lệ');
+  const timeLimitMs = Math.min(20000, Math.max(200, parseInt(body.timeLimitMs || '5000', 10)));
+  const repeats = Math.min(5, Math.max(1, parseInt(body.repeats || '2', 10)));
+  const started = Date.now();
+  const warnings = [];
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'drgx_profile_'));
+
+  try {
+    let exe = '';
+    let baseArgs = [];
+    let pythonWrapper = '';
+    let scriptPath = '';
+    const usesCStdio = /\b(scanf|printf|gets|fgets|getchar|puts|fputs|fread|fwrite|freopen|fopen)\s*\(/.test(code);
+    const usesSelfFreopen = /\bfreopen\s*\(/.test(code);
+    const forceReps = usesSelfFreopen ? 1 : 0;
+    const harnessMode = usesCStdio && !/\b(cin|cout|cerr)\b/.test(code) ? 1 : 0;
+
+    if (lang === 'cpp') {
+      const built = await drgxBuildCppProfiler(code, tmpDir);
+      if (!built.ok) {
+        const fallback = await compileCppSource(code, 'profile_fallback');
+        if (!fallback.ok) {
+          fallback.cleanup();
+          const diag = analyzeAndFixCode(code, lang, 'bugcheck');
+          return {
+            ok: false,
+            error: 'CE',
+            lang: 'cpp',
+            compileOutput: built.compileOutput || fallback.compileOutput,
+            findings: diag.findings,
+            fixedCode: diag.fixedCode,
+            hasChanges: diag.hasChanges,
+            autofix_patch: diag.autofix_patch,
+            message: 'Biên dịch thất bại — hãy sửa các lỗi GCC 15 bên dưới rồi đo lại.',
+            warnings
+          };
+        }
+        exe = fallback.exeFile;
+        baseArgs = [];
+        warnings.push('Không dựng được self-timing harness; dùng đo wall-clock có hiệu chỉnh (kém chính xác hơn).');
+      } else {
+        exe = built.exePath;
+      }
+    } else {
+      scriptPath = path.join(tmpDir, 'solution.py');
+      fs.writeFileSync(scriptPath, code, 'utf8');
+      pythonWrapper = drgxWritePythonWrapper(tmpDir);
+      exe = PYTHON_BIN;
+    }
+
+    const profiler = await drgxGetPowerShellProfiler();
+    const overheadUs = await drgxMeasureProfileOverhead(profiler, lang, tmpDir);
+    if (overheadUs > 0) warnings.push(`Đã hiệu chỉnh overhead khởi động tiến trình ~${Math.round(overheadUs)} µs.`);
+
+    const points = [];
+    let generatorError = null;
+    for (const n of sizes) {
+      if (Date.now() - started > 90000) {
+        warnings.push('Dừng sớm do tổng thời gian đo vượt 90 giây.');
+        break;
+      }
+      let input = '';
+      try {
+        input = await drgxGenerateProfileInput(n, {
+          generator: body.generator,
+          inputTemplate: body.inputTemplate,
+          inputMode: body.inputMode
+        }, tmpDir);
+      } catch (err) {
+        generatorError = String(err.message || err);
+        break;
+      }
+      const inputPath = path.join(tmpDir, `input_${n}.txt`);
+      fs.writeFileSync(inputPath, input, 'utf8');
+
+      const rawSamples = [];
+      const peakSamples = [];
+      let lastExit = 0;
+      let timeouts = 0;
+      let harnessReps = 0;
+      let runError = '';
+      for (let r = 0; r < repeats; r++) {
+        const timeFile = path.join(tmpDir, `time_${n}_${r}.txt`);
+        try { fs.unlinkSync(timeFile); } catch (_) {}
+        let args;
+        if (lang === 'cpp') {
+          args = [String(harnessMode), inputPath, timeFile, String(forceReps)];
+        } else {
+          args = [pythonWrapper, scriptPath, inputPath, timeFile, String(forceReps)];
+        }
+        const run = await drgxRunMeasured(profiler, exe, args, timeLimitMs, tmpDir);
+        const measured = drgxParseProfileTime(timeFile);
+        const fallbackUs = Math.max(1, run.wallUs - overheadUs);
+        rawSamples.push(measured ? measured.timeUs : fallbackUs);
+        if (measured && measured.reps > 0) harnessReps = Math.max(harnessReps, measured.reps);
+        if (run.peakBytes && run.peakBytes > 0) peakSamples.push(run.peakBytes);
+        lastExit = run.exitCode;
+        if (run.timedOut) timeouts++;
+        if (run.error) runError = run.error;
+      }
+      const bestUs = rawSamples.length ? Math.min(...rawSamples) : 0;
+      const verdict = timeouts === repeats ? 'TLE' : (lastExit === 0 ? 'OK' : 'RE');
+      points.push({
+        n,
+        timeUs: Math.round(bestUs * 1000) / 1000,
+        rawTimeUs: Math.round(bestUs * 1000) / 1000,
+        peakKb: peakSamples.length ? Math.round(Math.max(...peakSamples) / 1024) : null,
+        verdict,
+        exitCode: lastExit,
+        harnessReps: harnessReps || undefined,
+        error: runError || undefined
+      });
+    }
+
+    if (profiler) profiler.close();
+    if (generatorError) {
+      return {
+        ok: false,
+        error: 'GENERATOR',
+        message: generatorError,
+        points,
+        warnings
+      };
+    }
+    if (!points.length) {
+      return { ok: false, error: 'NO_DATA', message: 'Không thu được mẫu đo nào.', warnings };
+    }
+
+    const regression = drgxRegression(points);
+    const ast = analyzeAndFixCode(code, lang, 'explain');
+    const heuristicK = { 'O(1)': 0, 'O(log N)': 0.4, 'O(N)': 1, 'O(N log N)': 1.3, 'O(N^2)': 2, 'O(N^3)': 3 }[ast.complexity] ?? 1;
+    const useK = regression.valid ? regression.k : heuristicK;
+    const useC = regression.valid ? regression.c : Math.log2(Math.max(points[0].timeUs, 0.001)) - useK * Math.log2(points[0].n);
+    const p1e5 = drgxProject(useK, useC, 1e5);
+    const p1e6 = drgxProject(useK, useC, 1e6);
+    const tle1e5 = p1e5.ms > 1000;
+    const tle1e6 = p1e6.ms > 1000;
+    if (tle1e5 || tle1e6) {
+      warnings.push('Dự phóng vượt 1000 ms (TLE) ở ít nhất một mốc N lớn — cần tối ưu thuật toán hoặc dùng Fast I/O.');
+    }
+    if (!regression.valid) warnings.push('Không đủ mẫu OK để hồi quy; đang dùng độ phức tạp heuristic từ AST.');
+    if (regression.valid && regression.r2 < 0.9) warnings.push(`R² = ${regression.r2.toFixed(4)} < 0.90: mô hình chưa ổn định (nhiễu tiến trình hoặc code có nhiều nhánh).`);
+    const maxTime = Math.max(...points.map(p => p.timeUs));
+    if (maxTime < 2000) warnings.push('T(N) rất nhỏ (< 2 ms) — hãy dùng N lớn hơn hoặc generator nặng hơn để tăng độ tin cậy.');
+    if (points.some(p => p.verdict === 'TLE')) warnings.push('Có mẫu vượt time limit và bị loại khỏi hồi quy.');
+    if (points.some(p => p.verdict === 'RE')) warnings.push('Có mẫu kết thúc với mã lỗi runtime (RE) và bị loại khỏi hồi quy.');
+
+    const peakKb = points.reduce((mx, p) => p.peakKb != null ? Math.max(mx, p.peakKb) : mx, 0);
+    const harnessReps = Math.max(0, ...points.map(p => p.harnessReps || 0));
+    return {
+      ok: true,
+      lang: lang === 'cpp' ? 'C++17' : 'Python 3',
+      sizes,
+      points,
+      regression: {
+        model: 'log2 T(N) = k · log2 N + c',
+        k: Number(useK.toFixed(6)),
+        c: Number(useC.toFixed(6)),
+        r2: regression.valid ? Number(regression.r2.toFixed(6)) : 0,
+        equation: regression.valid
+          ? `T(N) ≈ 2^(${regression.k.toFixed(4)} · log2 N + ${regression.c.toFixed(4)}) µs`
+          : `T(N) ≈ 2^(${useK.toFixed(4)} · log2 N + ${useC.toFixed(4)}) µs (heuristic)`,
+        complexity: regression.valid ? regression.complexity : ast.complexity,
+        confidence: regression.valid ? (regression.r2 >= 0.98 ? 'cao' : regression.r2 >= 0.9 ? 'trung bình' : 'thấp') : 'heuristic'
+      },
+      projections: {
+        n1e5: { n: 100000, timeMs: Math.round(p1e5.ms * 1000) / 1000, tle: tle1e5, overflow: !!p1e5.overflow },
+        n1e6: { n: 1000000, timeMs: Math.round(p1e6.ms * 1000) / 1000, tle: tle1e6, overflow: !!p1e6.overflow }
+      },
+      harness: {
+        mode: lang === 'cpp' ? (harnessMode === 1 ? 'stdio-loop' : 'iostream-loop') : 'python-exec-loop',
+        reps: harnessReps || null,
+        calibratedOverheadUs: Math.round(overheadUs * 1000) / 1000
+      },
+      peakKb: peakKb || null,
+      warnings,
+      astComplexity: ast.complexity,
+      ruleCount: DRGX_RULE_COUNT,
+      findings: ast.findings,
+      fixedCode: ast.fixedCode,
+      hasChanges: ast.hasChanges,
+      autofix_patch: ast.autofix_patch,
+      elapsedMs: Date.now() - started
+    };
+  } finally {
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {}
+  }
 }
 
 // Proxy helper to oj_server.exe (port 8080)
@@ -1061,18 +2414,24 @@ const server = http.createServer(async (req, res) => {
 
   try {
     // 1. Health & Doctor
-    if (pathname === '/api/studio/health' && req.method === 'GET') {
+    if ((pathname === '/api/studio/health' || pathname === '/api/health') && req.method === 'GET') {
       const ojOnline = await checkPortListening(OJ_PORT);
       return sendJson(res, 200, {
         status: 'ok',
         product: 'DrgX Studio Standalone App',
-        version: '2.5.0',
+        version: '2.7.0',
         port: PORT,
         ojPort: OJ_PORT,
         ojOnline,
         workspace: activeWorkspace,
         gxx: GXX_BIN,
-        python: PYTHON_BIN
+        python: PYTHON_BIN,
+        capabilities: {
+          profileComplexity: true,
+          diagnosticRules: DRGX_RULE_COUNT,
+          autofixPatch: true,
+          profileSizes: DRGX_PROFILE_SIZES
+        }
       });
     }
 
@@ -1104,6 +2463,74 @@ const server = http.createServer(async (req, res) => {
         version: ojUp ? `Online @ 127.0.0.1:${OJ_PORT} (47 problems)` : 'Offline'
       });
       return sendJson(res, 200, { ok: checks.every(c => c.ok), checks, workspace: activeWorkspace });
+    }
+
+    // 1b. Compiler / Runtime Diagnostic API (50+ AST rules + GCC 15 + NTSTATUS + autofix_patch)
+    if ((pathname === '/api/studio/diagnose' || pathname === '/api/diagnose') && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const code = String(body.code ?? '');
+      const lang = String(body.lang || 'cpp').toLowerCase();
+      let stderr = String(body.stderr ?? body.compileOutput ?? body.runtimeStderr ?? '');
+      let compiler = null;
+      if (!stderr.trim() && body.autoCompile !== false && code.trim()) {
+        if (lang === 'cpp' || lang === 'c++' || lang === 'c') {
+          compiler = await syntaxCheckCppSource(code);
+          stderr = compiler.output || '';
+        } else if (lang === 'python' || lang === 'py') {
+          compiler = await syntaxCheckPythonSource(code);
+          stderr = compiler.output || '';
+        }
+      }
+      const analysis = analyzeAndFixCode(code, lang, 'bugcheck');
+      const compilerFindings = drgxExplainCompilerOutput(stderr, lang, body.exitCode || body.exit_code || 0);
+      const merged = analysis.findings.slice();
+      for (const cf of compilerFindings) {
+        const duplicate = merged.some(f => f.rule === cf.rule && (f.line === cf.line || cf.line === 1));
+        if (duplicate) continue;
+        const patch = (analysis.autofix_patch.patches || []).find(p => p.line === cf.line) || null;
+        merged.push({ ...cf, autofix_patch: patch });
+      }
+      merged.sort((a, b) => (a.line || 0) - (b.line || 0));
+      const firstError = merged.find(f => f.severity === 'error')?.line || 0;
+      const markdown = [
+        `### 🛠️ Chẩn đoán AST + GCC 15 (${merged.length} phát hiện · ${DRGX_RULE_COUNT} quy tắc)`,
+        compiler && compiler.checked
+          ? `- **GCC 15 syntax check:** ${compiler.ok ? '✅ PASS' : '❌ FAIL'} (${compiler.timeMs} ms)`
+          : '- **GCC 15 syntax check:** bỏ qua (dùng stderr do client cung cấp)',
+        '',
+        merged.length
+          ? merged.map((f, i) => `${i + 1}. **[${String(f.severity).toUpperCase()}] Dòng ${f.line}: ${f.title}**\n   - ${f.detail}${f.autofix_patch ? '\n   - *1-click patch:* `' + String(f.autofix_patch.before || '').slice(0, 90) + '` → `' + String(f.autofix_patch.after || '').slice(0, 90) + '`' : ''}`).join('\n\n')
+          : '✅ Không phát hiện lỗi cú pháp, kiểu dữ liệu hay logic CP nào.'
+      ].join('\n');
+      return sendJson(res, 200, {
+        ok: true,
+        lang,
+        compiler,
+        findings: merged,
+        firstErrorLine: firstError,
+        fixedCode: analysis.fixedCode,
+        hasChanges: analysis.hasChanges,
+        autofix_patch: analysis.autofix_patch,
+        complexity: analysis.complexity,
+        ruleCount: DRGX_RULE_COUNT,
+        markdown
+      });
+    }
+
+    // 1c. Empirical Time & Space Complexity Regression Engine (MIT 6.046 / 6.172)
+    if ((pathname === '/api/profile-complexity' || pathname === '/api/studio/profile-complexity') && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      try {
+        const result = await drgxProfileComplexity(body);
+        return sendJson(res, 200, result);
+      } catch (err) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'PROFILE_ERROR',
+          message: String(err.message || err),
+          ruleCount: DRGX_RULE_COUNT
+        });
+      }
     }
 
     // 2. Workspace & File Explorer

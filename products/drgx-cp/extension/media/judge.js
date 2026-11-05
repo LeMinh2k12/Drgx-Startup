@@ -221,6 +221,10 @@
     if (context.state.examCode) {
       chips.push('<span class="chip accent">Phòng <b>' + esc(context.state.examCode) + '</b></span>');
     }
+    if (context.state.receiptShort) {
+      chips.push('<span class="chip accent" title="' + esc(context.state.receiptShort) + '">🔐 <b>' +
+        esc(context.state.receiptShort.split(' ')[0]) + '</b></span>');
+    }
     if (context.running) {
       chips.push('<span class="chip">Đang chấm <b>' + context.settled.length + '/' + context.total + '</b></span>');
     }

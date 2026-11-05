@@ -26,6 +26,9 @@ const state = {
     { name: 'Test #2 (64-bit)', input: '1000000000 2000000000\n', expected: '3000000000', actual: '', verdict: '' }
   ],
   lastAiFixedCode: '',
+  lastComplexFixedCode: '',
+  astFindings: [],
+  complexResult: null,
   hintLevel: 1,
   pomoSeconds: 25 * 60,
   pomoRunning: false,
@@ -352,6 +355,25 @@ function localFallbackApiGet(url) {
 
 function localFallbackApiPost(url, body) {
   body = body || {};
+  if (url.startsWith('/api/studio/diagnose') || url.startsWith('/api/diagnose')) {
+    const pf = evaluateThemisPreflight(body.code, body.problem_id || 'BAY_MAU');
+    return {
+      ok: false,
+      error: 'OFFLINE',
+      message: 'Chẩn đoán 71 quy tắc cần DrgX Studio native server (node server.js hoặc drgx studio).',
+      findings: (pf.findings || []).map(f => ({ line: 1, severity: 'warning', rule: f.rule, title: f.title, detail: f.fix, autofix_patch: null })),
+      fixedCode: null,
+      hasChanges: false,
+      ruleCount: 71
+    };
+  }
+  if (url.startsWith('/api/profile-complexity') || url.startsWith('/api/studio/profile-complexity')) {
+    return {
+      ok: false,
+      error: 'OFFLINE',
+      message: 'Profiler cần DrgX Studio native server để biên dịch harness và đo thực nghiệm.'
+    };
+  }
   if (url.startsWith('/api/studio/file')) {
     if (body.path) LOCAL_SIM_FILES[body.path] = body.content || '';
     return { ok: true };
@@ -1870,6 +1892,310 @@ function loadAiGeneratedTests() {
   renderTestCases();
   switchDock('tests');
   showToast(`📥 Đã nạp ${state.testCases.length} test hiểm vào Bộ Test!`);
+}
+
+/* ---------- 📈 Empirical Complexity Profiler & AST Diagnostics ---------- */
+function openComplexityPanel() {
+  switchRight('complex');
+  const legend = document.getElementById('complexChartLegend');
+  if (legend && !state.complexResult) {
+    legend.textContent = 'Bấm “📈 Đo Độ Phức Tạp” để chạy N = 250 → 4000 và hồi quy log-log.';
+  }
+}
+
+function complexityActiveLang() {
+  const sel = document.getElementById('editorLangSelect');
+  const raw = sel ? sel.value : detectLangFromFilename(state.activeFile);
+  return raw === 'py' ? 'python' : raw;
+}
+
+function setComplexStatus(text) {
+  const el = document.getElementById('complexStatus');
+  if (el) el.textContent = text;
+}
+
+function setComplexApplyEnabled(enabled) {
+  const btn = document.getElementById('btnApplyComplexityFix');
+  if (btn) btn.disabled = !enabled;
+}
+
+function formatComplexMs(ms) {
+  if (!Number.isFinite(ms)) return '∞';
+  if (ms >= 1e9) return (ms / 1e9).toFixed(2) + ' tỷ ms';
+  if (ms >= 1000) return (ms / 1000).toFixed(3) + ' s';
+  if (ms >= 1) return ms.toFixed(3) + ' ms';
+  return (ms * 1000).toFixed(1) + ' µs';
+}
+
+async function runComplexityProfile() {
+  const ta = document.getElementById('codeTextarea');
+  if (!ta) return;
+  const lang = complexityActiveLang();
+  if (lang === 'html') {
+    showToast('⚠️ Profiler chỉ hỗ trợ C++17 và Python 3');
+    return;
+  }
+  switchRight('complex');
+  const btn = document.getElementById('btnProfileComplexity');
+  if (btn) btn.disabled = true;
+  setComplexStatus(`⏳ Đang biên dịch self-timing harness và đo N = 250 → 4000 (${lang === 'python' ? 'Python 3' : 'C++17'})...`);
+  try {
+    const res = await apiPost('/api/profile-complexity', {
+      code: ta.value,
+      lang,
+      repeats: 2,
+      timeLimitMs: 8000
+    });
+    if (!res || res.ok === false) {
+      setComplexStatus(`❌ ${res && (res.message || res.error) ? (res.message || res.error) : 'Không đo được độ phức tạp'}`);
+      if (res && Array.isArray(res.findings) && res.findings.length) renderAstFindings(res.findings, res);
+      if (res && res.fixedCode && res.hasChanges) {
+        state.lastComplexFixedCode = res.fixedCode;
+        setComplexApplyEnabled(true);
+      }
+      showToast('❌ Profiler không chạy được — xem chi tiết trong panel');
+      return;
+    }
+    state.complexResult = res;
+    if (Array.isArray(res.findings)) renderAstFindings(res.findings, res);
+    renderComplexityChart(res);
+    renderComplexitySummary(res);
+    renderComplexityTable(res);
+    if (res.fixedCode && res.hasChanges) {
+      state.lastComplexFixedCode = res.fixedCode;
+      setComplexApplyEnabled(true);
+    } else {
+      state.lastComplexFixedCode = '';
+      setComplexApplyEnabled(false);
+    }
+    const r = res.regression || {};
+    setComplexStatus(`✅ ${res.lang || lang} · ${(res.points || []).length} mốc N · ${res.elapsedMs || 0} ms · harness ${(res.harness && res.harness.mode) || 'n/a'}`);
+    showToast(`📈 ${r.complexity || '?'} · k=${r.k} · R²=${r.r2}`);
+  } catch (err) {
+    setComplexStatus(`❌ ${String(err && err.message || err)}`);
+    showToast('❌ Lỗi khi gọi profiler');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function runAstDiagnostics() {
+  const ta = document.getElementById('codeTextarea');
+  if (!ta) return;
+  const lang = complexityActiveLang();
+  switchRight('complex');
+  const btn = document.getElementById('btnAstDiagnose');
+  if (btn) btn.disabled = true;
+  setComplexStatus('⏳ Đang quét 71 quy tắc AST + GCC 15 syntax check...');
+  try {
+    const res = await apiPost('/api/studio/diagnose', {
+      code: ta.value,
+      lang,
+      autoCompile: true
+    });
+    if (!res || res.ok === false) {
+      setComplexStatus(`❌ ${res && (res.message || res.error) ? (res.message || res.error) : 'Không chẩn đoán được'}`);
+      if (res && Array.isArray(res.findings)) renderAstFindings(res.findings, res);
+      showToast('❌ Chẩn đoán AST không chạy được');
+      return;
+    }
+    state.astFindings = res.findings || [];
+    renderAstFindings(state.astFindings, res);
+    if (res.fixedCode && res.hasChanges) {
+      state.lastComplexFixedCode = res.fixedCode;
+      setComplexApplyEnabled(true);
+    } else {
+      state.lastComplexFixedCode = '';
+      setComplexApplyEnabled(false);
+    }
+    if (res.firstErrorLine && res.firstErrorLine > 0) {
+      state.errorLine = res.firstErrorLine;
+      scheduleEditorRender();
+    }
+    const compilerNote = res.compiler ? (res.compiler.ok ? ' · GCC syntax ✅ PASS' : ' · GCC syntax ❌ FAIL') : '';
+    setComplexStatus(`✅ ${(res.findings || []).length} phát hiện · ${res.ruleCount || 71} quy tắc${compilerNote}`);
+    showToast(`🩺 ${(res.findings || []).length} phát hiện AST/GCC 15`);
+  } catch (err) {
+    setComplexStatus(`❌ ${String(err && err.message || err)}`);
+    showToast('❌ Lỗi khi gọi chẩn đoán AST');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function renderComplexityChart(res) {
+  const svg = document.getElementById('complexChart');
+  if (!svg) return;
+  const pts = ((res && res.points) || []).filter(p => p && p.timeUs > 0).slice().sort((a, b) => a.n - b.n);
+  if (!pts.length) {
+    svg.innerHTML = '<text x="170" y="95" text-anchor="middle" class="complex-chart-label">Chưa có dữ liệu</text>';
+    return;
+  }
+  const W = 340, H = 190, ml = 42, mr = 10, mt = 12, mb = 28;
+  const xmax = Math.max(...pts.map(p => p.n));
+  const ymax = Math.max(1, Math.max(...pts.map(p => p.timeUs)) * 1.1);
+  const sx = n => ml + (n / xmax) * (W - ml - mr);
+  const sy = t => H - mb - (Math.min(t, ymax) / ymax) * (H - mt - mb);
+  const parts = [];
+  for (let i = 0; i <= 4; i++) {
+    const y = mt + (i / 4) * (H - mt - mb);
+    const val = ymax * (1 - i / 4);
+    parts.push(`<line class="complex-chart-grid" x1="${ml}" y1="${y.toFixed(1)}" x2="${W - mr}" y2="${y.toFixed(1)}"/>`);
+    parts.push(`<text class="complex-chart-label" x="${ml - 3}" y="${(y + 2.6).toFixed(1)}" text-anchor="end">${val >= 1000 ? (val / 1000).toFixed(1) + 'ms' : val.toFixed(0) + 'µs'}</text>`);
+  }
+  parts.push(`<line class="complex-chart-axis" x1="${ml}" y1="${H - mb}" x2="${W - mr}" y2="${H - mb}"/>`);
+  parts.push(`<line class="complex-chart-axis" x1="${ml}" y1="${mt}" x2="${ml}" y2="${H - mb}"/>`);
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${sx(p.n).toFixed(1)},${sy(p.timeUs).toFixed(1)}`).join(' ');
+  parts.push(`<path class="complex-chart-line" d="${line}"/>`);
+  const reg = (res && res.regression) || {};
+  if (Number.isFinite(reg.k) && Number.isFinite(reg.c)) {
+    const regLine = pts.map((p, i) => {
+      const lg = reg.k * Math.log2(p.n) + reg.c;
+      const us = Math.pow(2, Math.min(lg, 60));
+      return `${i ? 'L' : 'M'}${sx(p.n).toFixed(1)},${sy(us).toFixed(1)}`;
+    }).join(' ');
+    parts.push(`<path class="complex-chart-reg" d="${regLine}"/>`);
+  }
+  for (const p of pts) {
+    parts.push(`<circle class="complex-chart-dot" cx="${sx(p.n).toFixed(1)}" cy="${sy(p.timeUs).toFixed(1)}" r="3"><title>N=${p.n} · T=${p.timeUs} µs${p.peakKb ? ' · Peak=' + p.peakKb + ' KB' : ''}</title></circle>`);
+    parts.push(`<text class="complex-chart-value" x="${sx(p.n).toFixed(1)}" y="${(sy(p.timeUs) - 5).toFixed(1)}" text-anchor="middle">${p.timeUs >= 1000 ? (p.timeUs / 1000).toFixed(1) + 'ms' : p.timeUs.toFixed(0)}</text>`);
+    parts.push(`<text class="complex-chart-label" x="${sx(p.n).toFixed(1)}" y="${H - mb + 11}" text-anchor="middle">${p.n}</text>`);
+  }
+  parts.push(`<text class="complex-chart-label" x="${W - mr}" y="${H - 6}" text-anchor="end">N</text>`);
+  parts.push(`<text class="complex-chart-label" x="4" y="${mt + 4}">T(N)</text>`);
+  svg.innerHTML = parts.join('');
+  const legend = document.getElementById('complexChartLegend');
+  if (legend) {
+    const r = (res && res.regression) || {};
+    legend.innerHTML = `T(N) thực nghiệm (nét liền) · hồi quy log-log (nét đứt) · <b>${escHtml(r.complexity || '?')}</b> · R² = ${escHtml(String(r.r2 != null ? r.r2 : '?'))}`;
+  }
+}
+
+function renderComplexitySummary(res) {
+  const box = document.getElementById('complexSummary');
+  if (!box) return;
+  const r = res.regression || {};
+  const conf = r.confidence || 'thấp';
+  const confClass = conf === 'cao' ? 'good' : conf === 'trung bình' ? 'warn' : 'bad';
+  const warns = Array.isArray(res.warnings) ? res.warnings : [];
+  const astNote = res.astComplexity && res.astComplexity !== r.complexity
+    ? `<div style="margin-top:4px;color:var(--text-2)">Heuristic AST: <b>${escHtml(res.astComplexity)}</b> (đối chiếu)</div>`
+    : '';
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span class="complex-big">${escHtml(r.complexity || '?')}</span>
+      <span class="complex-pill ${confClass}">R² = ${escHtml(String(r.r2 != null ? r.r2 : '?'))}</span>
+      <span class="complex-pill ${Number(r.k) >= 1.55 ? 'bad' : 'good'}">k = ${escHtml(String(r.k != null ? r.k : '?'))}</span>
+      <span class="complex-pill ${confClass}">${escHtml(conf)}</span>
+    </div>
+    <div class="complex-eq" style="margin-top:5px">log₂ T(N) = ${escHtml(String(r.k))} · log₂ N + ${escHtml(String(r.c))}</div>
+    <div style="margin-top:4px;color:var(--text-2);font-size:10.7px">
+      ${escHtml(res.lang || '')} · Peak RAM: <b>${res.peakKb ? escHtml(String(res.peakKb)) + ' KB' : '—'}</b>
+      · Harness: ${escHtml((res.harness && res.harness.mode) || 'n/a')}${res.harness && res.harness.reps ? ' ×' + escHtml(String(res.harness.reps)) : ''}
+    </div>
+    ${astNote}
+    ${warns.length ? `<ul class="complex-warn-list" style="margin-top:6px">${warns.map(w => `<li>${escHtml(w)}</li>`).join('')}</ul>` : ''}
+  `;
+}
+
+function renderComplexityTable(res) {
+  const box = document.getElementById('complexTableWrap');
+  if (!box) return;
+  const pts = (res && res.points) || [];
+  if (!pts.length) {
+    box.innerHTML = '';
+    return;
+  }
+  const rows = pts.map(p => `
+    <tr>
+      <td class="num">${p.n}</td>
+      <td class="num">${Number(p.timeUs).toFixed(2)}</td>
+      <td class="num">${p.peakKb != null ? p.peakKb : '—'}</td>
+      <td><span class="badge ${p.verdict === 'OK' ? 'AC' : p.verdict}">${escHtml(p.verdict)}</span></td>
+    </tr>`).join('');
+  box.innerHTML = `
+    <table class="complex-table">
+      <thead><tr><th>N</th><th>T (µs)</th><th>Peak (KB)</th><th>Kết quả</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  const proj = document.getElementById('complexProjection');
+  if (proj) {
+    const p1 = (res.projections && res.projections.n1e5) || {};
+    const p2 = (res.projections && res.projections.n1e6) || {};
+    const card = (p) => `
+      <div class="complex-proj-card ${p.tle ? 'tle' : 'ok'}">
+        <div style="color:var(--text-2)">N = ${Number(p.n || 0).toLocaleString('vi-VN')}</div>
+        <b>${escHtml(formatComplexMs(Number(p.timeMs)))}</b>
+        <span class="complex-pill ${p.tle ? 'bad' : 'good'}">${p.tle ? '⚠️ TLE' : '✅ OK'}</span>
+      </div>`;
+    proj.innerHTML = card(p1) + card(p2);
+  }
+}
+
+function renderAstFindings(findings, res) {
+  state.astFindings = Array.isArray(findings) ? findings : [];
+  const box = document.getElementById('astFindings');
+  const count = document.getElementById('astFindingCount');
+  if (count) count.textContent = String(state.astFindings.length);
+  if (!box) return;
+  const compilerBanner = res && res.compiler
+    ? `<div class="complex-empty" style="border-style:solid;border-color:${res.compiler.ok ? 'rgba(34,197,94,.45)' : 'rgba(239,68,68,.45)'}">
+         ${res.compiler.ok ? '✅ GCC 15 syntax check: PASS' : '❌ GCC 15 syntax check: FAIL'} · ${escHtml(String(res.compiler.timeMs || 0))} ms
+       </div>`
+    : '';
+  if (!state.astFindings.length) {
+    box.innerHTML = compilerBanner + '<div class="complex-empty">✅ Không phát hiện lỗi cú pháp, kiểu dữ liệu, linker hay runtime NTSTATUS nào.</div>';
+    return;
+  }
+  const order = { error: 0, warning: 1, info: 2 };
+  const items = state.astFindings
+    .map((f, idx) => ({ f, idx }))
+    .sort((a, b) => (order[a.f.severity] ?? 9) - (order[b.f.severity] ?? 9) || (a.f.line || 0) - (b.f.line || 0));
+  const icons = { error: '🚨', warning: '⚠️', info: 'ℹ️' };
+  const cards = items.map(({ f, idx }) => {
+    const sev = f.severity === 'error' ? 'error' : f.severity === 'info' ? 'info' : 'warning';
+    const patch = f.autofix_patch;
+    const patchHtml = patch
+      ? `<div class="finding-patch">↳ ${escHtml(String(patch.before || '').slice(0, 120) || '(đầu tệp)')} → ${escHtml(String(patch.after || '').slice(0, 120) || '(xóa)')}</div>
+         <div class="finding-actions"><button class="btn sm" onclick="applyFindingPatch(${idx})">✨ Vá dòng này</button></div>`
+      : '';
+    return `<div class="finding-card ${sev}">
+      <div class="finding-title">${icons[sev] || '•'} Dòng ${escHtml(String(f.line || 1))}: ${escHtml(f.title || '')}</div>
+      <div class="finding-detail">${escHtml(f.detail || '')}</div>
+      ${patchHtml}
+    </div>`;
+  }).join('');
+  box.innerHTML = compilerBanner + cards;
+}
+
+function applyFindingPatch(index) {
+  const f = state.astFindings[index];
+  const p = f && f.autofix_patch;
+  const ta = document.getElementById('codeTextarea');
+  if (!ta || !p) {
+    showToast('⚠️ Không có bản vá cho phát hiện này');
+    return;
+  }
+  if (p.before && ta.value.includes(p.before)) {
+    ta.value = ta.value.replace(p.before, p.after || '');
+    state.errorLine = 0;
+    onEditorContentMutated();
+    showToast('✨ Đã vá 1 phát hiện vào Editor');
+    return;
+  }
+  applyComplexityFix();
+}
+
+function applyComplexityFix() {
+  const ta = document.getElementById('codeTextarea');
+  if (!ta || !state.lastComplexFixedCode) {
+    showToast('⚠️ Chưa có bản vá nào để áp dụng');
+    return;
+  }
+  ta.value = state.lastComplexFixedCode;
+  state.errorLine = 0;
+  onEditorContentMutated();
+  showToast('✨ Đã áp dụng toàn bộ bản vá vào Editor');
 }
 
 async function sendAiChat() {

@@ -282,8 +282,9 @@ function analyzeCodeMetrics(code) {
 
   for (const rawLine of lines) {
     const line = rawLine.replace(/\/\/.*$/, '').trim();
-    if (/\b(for|while)\s*\(/.test(line)) {
-      currentDepth++;
+    const loopOpens = (line.match(/\b(for|while)\s*\(/g) || []).length;
+    if (loopOpens > 0) {
+      currentDepth += loopOpens;
       if (currentDepth > maxLoopDepth) maxLoopDepth = currentDepth;
     }
     if (currentDepth > 0 && /\bendl\b/.test(line)) {
@@ -323,6 +324,379 @@ function analyzeCodeMetrics(code) {
     timeComplexity,
     spaceComplexity
   };
+}
+
+// ─── Empirical Complexity & Memory Estimator (MIT 6.006 / 6.858) ───
+const CPP_TYPE_SIZES = {
+  'char': 1, 'signed char': 1, 'unsigned char': 1, 'bool': 1,
+  'int8_t': 1, 'uint8_t': 1,
+  'short': 2, 'short int': 2, 'unsigned short': 2, 'unsigned short int': 2,
+  'int16_t': 2, 'uint16_t': 2,
+  'int': 4, 'signed': 4, 'signed int': 4, 'unsigned': 4, 'unsigned int': 4,
+  'float': 4, 'int32_t': 4, 'uint32_t': 4,
+  'long': 4, 'long int': 4, 'unsigned long': 4, 'unsigned long int': 4,
+  'long long': 8, 'long long int': 8, 'unsigned long long': 8, 'unsigned long long int': 8,
+  'double': 8, 'int64_t': 8, 'uint64_t': 8, 'size_t': 8, 'ssize_t': 8,
+  'long double': 16, '__int128': 16
+};
+const CPP_MEMORY_LIMIT_MB = 256;
+const CPP_STACK_LIMIT_BYTES = 1024 * 1024;
+const MEMORY_ESTIMATOR_DEMO = [
+  '#include <bits/stdc++.h>',
+  'using namespace std;',
+  'const int N = 10000;',
+  'int a[10000][10000];   // Ma trận 10^8 phần tử int 32-bit',
+  'int main() {',
+  '    long long sum = 0;',
+  '    for (int i = 0; i < N; i++)',
+  '        for (int j = 0; j < N; j++) a[i][j] = i + j;',
+  '    cout << a[0][0];',
+  '    return 0;',
+  '}'
+].join('\n');
+
+function normalizeCppType(raw) {
+  let t = String(raw || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  t = t.replace(/\blong long int\b/g, 'long long')
+    .replace(/\blong int\b/g, 'long')
+    .replace(/\bshort int\b/g, 'short')
+    .replace(/\bunsigned short\b/g, 'unsigned short')
+    .replace(/\bunsigned long long\b/g, 'unsigned long long')
+    .replace(/\bunsigned long\b/g, 'unsigned long');
+  if (t === 'signed') t = 'signed int';
+  if (t === 'unsigned') t = 'unsigned int';
+  return t;
+}
+
+function stripCppNoise(code) {
+  const src = String(code || '');
+  let out = '';
+  let i = 0;
+  while (i < src.length) {
+    const two = src.slice(i, i + 2);
+    if (two === '//') {
+      while (i < src.length && src[i] !== '\n') { out += ' '; i++; }
+    } else if (two === '/*') {
+      out += '  '; i += 2;
+      while (i < src.length && src.slice(i, i + 2) !== '*/') {
+        out += src[i] === '\n' ? '\n' : ' ';
+        i++;
+      }
+      if (i < src.length) { out += '  '; i += 2; }
+    } else if (src[i] === '"' || src[i] === "'") {
+      const quote = src[i];
+      out += ' '; i++;
+      while (i < src.length && src[i] !== quote) {
+        if (src[i] === '\\' && i + 1 < src.length) { out += '  '; i += 2; continue; }
+        out += src[i] === '\n' ? '\n' : ' ';
+        i++;
+      }
+      if (i < src.length) { out += ' '; i++; }
+    } else {
+      out += src[i]; i++;
+    }
+  }
+  return out;
+}
+
+function evalArithmeticExpr(expr) {
+  const s = String(expr == null ? '' : expr).replace(/\s+/g, '');
+  if (!s || !/^[0-9+\-*/()]+$/.test(s)) return null;
+  let i = 0;
+  function parseExpr() {
+    let v = parseTerm();
+    while (s[i] === '+' || s[i] === '-') {
+      const op = s[i++];
+      const r = parseTerm();
+      v = op === '+' ? v + r : v - r;
+    }
+    return v;
+  }
+  function parseTerm() {
+    let v = parseFactor();
+    while (s[i] === '*' || s[i] === '/') {
+      const op = s[i++];
+      const r = parseFactor();
+      v = op === '*' ? v * r : Math.floor(v / r);
+    }
+    return v;
+  }
+  function parseFactor() {
+    if (s[i] === '(') {
+      i++;
+      const v = parseExpr();
+      if (s[i] === ')') i++;
+      return v;
+    }
+    if (s[i] === '-') { i++; return -parseFactor(); }
+    if (s[i] === '+') { i++; return parseFactor(); }
+    const start = i;
+    while (i < s.length && /[0-9]/.test(s[i])) i++;
+    if (start === i) throw new Error('bad-expr');
+    return parseInt(s.slice(start, i), 10);
+  }
+  try {
+    const v = parseExpr();
+    if (i !== s.length || !Number.isFinite(v)) return null;
+    return v;
+  } catch (_) {
+    return null;
+  }
+}
+
+function resolveDimension(expr, consts) {
+  const cleaned = String(expr == null ? '' : expr).replace(/\s+/g, '');
+  if (!cleaned) return null;
+  let unresolved = false;
+  const expanded = cleaned.replace(/[A-Za-z_]\w*/g, (id) => {
+    if (Object.prototype.hasOwnProperty.call(consts, id)) return '(' + consts[id] + ')';
+    unresolved = true;
+    return id;
+  });
+  if (unresolved) return null;
+  return evalArithmeticExpr(expanded);
+}
+
+function parseCppConstants(cleanCode) {
+  const consts = {};
+  const trySet = (name, expr) => {
+    if (Object.prototype.hasOwnProperty.call(consts, name)) return;
+    const v = resolveDimension(expr, consts);
+    if (v != null && Number.isFinite(v) && v >= 0) consts[name] = Math.floor(v);
+  };
+  let m;
+  const defineRe = /^\s*#\s*define\s+([A-Za-z_]\w*)\s+([^\n]+)$/gm;
+  while ((m = defineRe.exec(cleanCode)) !== null) trySet(m[1], m[2]);
+  const pending = [];
+  const declRe = /(?:^|[;{}])\s*(?:static\s+)?(?:const|constexpr)\s+(?:unsigned\s+)?(?:long\s+long|long|short|int|size_t)\s+([^;{}]+);/g;
+  while ((m = declRe.exec(cleanCode)) !== null) {
+    for (const chunk of m[1].split(',')) {
+      const km = chunk.match(/^\s*([A-Za-z_]\w*)\s*=\s*(.+)$/);
+      if (km) pending.push([km[1], km[2]]);
+    }
+  }
+  for (let pass = 0; pass < 4; pass++) {
+    for (const [name, expr] of pending) trySet(name, expr);
+  }
+  return consts;
+}
+
+function estimateCppMemory(code, options) {
+  const opts = options || {};
+  const limitMb = Number(opts.limitMb != null ? opts.limitMb : CPP_MEMORY_LIMIT_MB) || CPP_MEMORY_LIMIT_MB;
+  const clean = stripCppNoise(code);
+  const consts = parseCppConstants(clean);
+  const items = [];
+
+  const addItem = (kind, name, type, dims, count, bytes, symbolic, decl, index) => {
+    const prefix = clean.slice(0, index);
+    const depth = (prefix.match(/\{/g) || []).length - (prefix.match(/\}/g) || []).length;
+    items.push({
+      kind, name, type, dims,
+      elements: count,
+      bytes,
+      symbolic: !!symbolic,
+      scope: depth > 0 ? 'local' : 'global',
+      decl
+    });
+  };
+
+  const typePattern = '(?:unsigned\\s+|signed\\s+)?(?:long\\s+long|long\\s+double|short(?:\\s+int)?|long(?:\\s+int)?|int|char|bool|float|double|size_t|__int128|u?int(?:8|16|32|64)_t)';
+  const declRe = new RegExp('\\b(' + typePattern + ')\\s+([A-Za-z_]\\w*)\\s*((?:\\[[^\\]\\n]*\\]\\s*)+)', 'g');
+  let m;
+  while ((m = declRe.exec(clean)) !== null) {
+    const type = normalizeCppType(m[1]);
+    const baseSize = CPP_TYPE_SIZES[type];
+    const dims = [];
+    let symbolic = false;
+    const dimRe = /\[([^\]]*)\]/g;
+    let dm;
+    while ((dm = dimRe.exec(m[3])) !== null) {
+      const v = resolveDimension(dm[1], consts);
+      if (v == null || v < 0) { symbolic = true; dims.push(null); }
+      else dims.push(Math.floor(v));
+    }
+    let count = 1;
+    for (const d of dims) {
+      if (d == null) { count = null; break; }
+      count *= d;
+    }
+    const unit = baseSize == null ? 4 : baseSize;
+    addItem('array', m[2], type, dims, count, count == null ? null : count * unit, symbolic,
+      m[0].replace(/\s+/g, ' ').trim(), m.index);
+  }
+
+  // vector<vector<T>> a(n, vector<T>(m))
+  const vec2Re = /\bvector\s*<\s*vector\s*<\s*([A-Za-z_]\w*)\s*>\s*>\s+([A-Za-z_]\w*)\s*\(\s*([^,;{}()]+)\s*,\s*vector\s*<\s*[A-Za-z_]\w*\s*>\s*\(\s*([^),;{}]+)/g;
+  while ((m = vec2Re.exec(clean)) !== null) {
+    const innerType = normalizeCppType(m[1]);
+    const unit = CPP_TYPE_SIZES[innerType] == null ? 4 : CPP_TYPE_SIZES[innerType];
+    const n = resolveDimension(m[3], consts);
+    const k = resolveDimension(m[4], consts);
+    const symbolic = n == null || k == null;
+    const count = symbolic ? null : n * k;
+    addItem('vector2d', m[2], 'vector<vector<' + innerType + '>>', [n, k], count,
+      count == null ? null : count * unit, symbolic,
+      m[0].replace(/\s+/g, ' ').trim(), m.index);
+  }
+
+  // vector<T> v(n)
+  const vec1Re = /\bvector\s*<\s*([A-Za-z_]\w*)\s*>\s+([A-Za-z_]\w*)\s*\(\s*([^,;{}()]+)/g;
+  while ((m = vec1Re.exec(clean)) !== null) {
+    const innerType = normalizeCppType(m[1]);
+    const unit = CPP_TYPE_SIZES[innerType] == null ? 4 : CPP_TYPE_SIZES[innerType];
+    const n = resolveDimension(m[3], consts);
+    const symbolic = n == null;
+    addItem('vector', m[2], 'vector<' + innerType + '>', [n], n, symbolic ? null : n * unit, symbolic,
+      m[0].replace(/\s+/g, ' ').trim(), m.index);
+  }
+
+  // std::array<T, N> a;
+  const stdArrRe = /\barray\s*<\s*([^,>]+?)\s*,\s*([^>]+)\s*>\s+([A-Za-z_]\w*)/g;
+  while ((m = stdArrRe.exec(clean)) !== null) {
+    const type = normalizeCppType(m[1]);
+    const unit = CPP_TYPE_SIZES[type] == null ? 4 : CPP_TYPE_SIZES[type];
+    const n = resolveDimension(m[2], consts);
+    const symbolic = n == null;
+    addItem('array', m[3], type, [n], n, symbolic ? null : n * unit, symbolic,
+      m[0].replace(/\s+/g, ' ').trim(), m.index);
+  }
+
+  // bitset<N> b;
+  const bitsetRe = /\bbitset\s*<\s*([^>]+)\s*>\s+([A-Za-z_]\w*)/g;
+  while ((m = bitsetRe.exec(clean)) !== null) {
+    const n = resolveDimension(m[1], consts);
+    const symbolic = n == null;
+    addItem('bitset', m[2], 'bitset', [n], n, symbolic ? null : Math.ceil(n / 8), symbolic,
+      m[0].replace(/\s+/g, ' ').trim(), m.index);
+  }
+
+  // Deduplicate identical declarations captured by multiple regexes.
+  const unique = [];
+  const seen = new Set();
+  for (const it of items) {
+    const key = it.name + '|' + it.decl + '|' + it.scope;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(it);
+  }
+
+  let fixedBytes = 0;
+  let symbolicCount = 0;
+  let localBytes = 0;
+  for (const it of unique) {
+    if (it.bytes == null) { symbolicCount++; continue; }
+    fixedBytes += it.bytes;
+    if (it.scope === 'local') localBytes += it.bytes;
+  }
+  const limitBytes = limitMb * 1024 * 1024;
+  const mb = fixedBytes / (1024 * 1024);
+  const overBytes = Math.max(0, fixedBytes - limitBytes);
+  return {
+    limitMb,
+    limitBytes,
+    fixedBytes,
+    fixedMb: Math.floor(mb * 10) / 10,
+    exactMb: mb,
+    mle: fixedBytes > limitBytes,
+    overBytes,
+    overMb: Math.floor((overBytes / (1024 * 1024)) * 10) / 10,
+    localBytes,
+    stackRisk: localBytes > CPP_STACK_LIMIT_BYTES,
+    symbolicCount,
+    items: unique,
+    consts
+  };
+}
+
+function formatMemoryBytes(bytes) {
+  if (bytes == null) return 'phụ thuộc N';
+  if (bytes >= 1024 * 1024) return '≈ ' + (Math.floor((bytes / (1024 * 1024)) * 10) / 10) + ' MB';
+  if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return bytes + ' B';
+}
+
+function formatMemoryEstimatorReport(result, code) {
+  const metrics = analyzeCodeMetrics(code);
+  const lines = [];
+  lines.push('### 🧠 Empirical Complexity & Memory Estimator (MIT 6.006 / 6.858)');
+  lines.push('');
+  lines.push(`- **Giới hạn bộ nhớ giả định**: ${result.limitMb} MB`);
+  lines.push(`- **Tổng bộ nhớ tĩnh ước tính**: ${formatMemoryBytes(result.fixedBytes)} (${result.fixedBytes.toLocaleString('en-US')} bytes)`);
+  lines.push(`- **Kết luận**: ${result.mle
+    ? `❌ MLE — vượt giới hạn ${result.overMb} MB (${result.overBytes.toLocaleString('en-US')} bytes)`
+    : '✅ Trong giới hạn bộ nhớ'}`);
+  if (result.stackRisk) {
+    lines.push(`- ⚠️ **Stack Overflow (RE)**: mảng cục bộ chiếm ${formatMemoryBytes(result.localBytes)} > 1 MB stack mặc định của Windows — hãy chuyển ra global/static hoặc dùng \`vector\` (heap).`);
+  }
+  if (result.symbolicCount > 0) {
+    lines.push(`- ℹ️ ${result.symbolicCount} khai báo phụ thuộc N (vector động) — dùng công thức O(N) bên dưới để ước lượng khi biết N.`);
+  }
+
+  lines.push('', '#### 1. Bảng phân tích khai báo', '');
+  if (result.items.length) {
+    lines.push('| Khai báo | Kiểu | Số phần tử | Bộ nhớ | Vùng |');
+    lines.push('|---|---|---|---|---|');
+    for (const it of result.items) {
+      const elems = it.symbolic ? 'N (động)' : (it.elements != null ? it.elements.toLocaleString('en-US') : '?');
+      const mem = it.bytes == null ? 'phụ thuộc N' : `${formatMemoryBytes(it.bytes)} (${it.bytes.toLocaleString('en-US')} B)`;
+      lines.push(`| \`${it.decl}\` | ${it.type} | ${elems} | ${mem} | ${it.scope === 'local' ? 'Local/Stack' : 'Global/Static'} |`);
+    }
+  } else {
+    lines.push('_Không phát hiện mảng tĩnh có kích thước cố định. Bộ nhớ chủ yếu là cấu trúc động (O(N))._');
+  }
+
+  lines.push('', '#### 2. Độ phức tạp thời gian (Empirical từ độ sâu vòng lặp)');
+  lines.push(`- Độ sâu vòng lặp tối đa: **${metrics.maxLoopDepth}** → \`${metrics.timeComplexity}\``);
+  if (metrics.maxLoopDepth >= 2) {
+    lines.push(`- Với N = 10^5: ~10^${5 * metrics.maxLoopDepth} phép tính → vượt ngân sách ~10^8 phép tính/giây (nguy cơ TLE).`);
+  }
+  if (metrics.hasEndlInLoop) {
+    lines.push('- ⚠️ Phát hiện `endl` trong vòng lặp — thay bằng `\'\\n\'` để tránh flush bộ đệm liên tục.');
+  }
+
+  const recs = [];
+  if (result.mle) {
+    recs.push('Giảm kích thước về đúng N thực tế thay vì hằng số tối đa (ví dụ `int a[n][m]` với `n, m` đọc từ input).');
+    recs.push('Dùng kiểu nhỏ hơn khi miền giá trị cho phép: `short`/`int16_t` (2 B) hoặc `bitset` (1 bit/phần tử).');
+    recs.push('Với ma trận thưa, thay `int a[N][M]` bằng `vector<vector<int>>` co giãn hoặc `unordered_map<long long, int>`.');
+    recs.push('Tái sử dụng mảng giữa các testcase (`fill`/`memset`) thay vì cấp phát mới.');
+  }
+  if (result.stackRisk) {
+    recs.push('Chuyển mảng lớn ra **global/static** (vùng BSS) hoặc dùng `vector` (heap) để tránh tràn stack Windows (1 MB).');
+  }
+  if (recs.length) {
+    lines.push('', '#### 3. Khuyến nghị tối ưu');
+    recs.forEach((r, i) => lines.push(`${i + 1}. ${r}`));
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
+async function memoryEstimator() {
+  const ed = vscode.window.activeTextEditor;
+  let code = '';
+  if (ed) {
+    code = ed.selection && !ed.selection.isEmpty
+      ? ed.document.getText(ed.selection)
+      : ed.document.getText();
+  }
+  if (!String(code).trim()) {
+    code = MEMORY_ESTIMATOR_DEMO;
+    vscode.window.showInformationMessage('🧠 Chưa có file đang mở — đang chạy ví dụ mẫu `int a[10000][10000]` để minh họa MLE.');
+  }
+  const result = estimateCppMemory(code);
+  const report = formatMemoryEstimatorReport(result, code);
+  if (output) {
+    output.show(true);
+    output.appendLine('');
+    output.appendLine(report);
+  }
+  const shortMsg = result.mle
+    ? `❌ MLE: ${formatMemoryBytes(result.fixedBytes)} > ${result.limitMb} MB (vượt ${result.overMb} MB)`
+    : `✅ Bộ nhớ tĩnh ${formatMemoryBytes(result.fixedBytes)} / ${result.limitMb} MB — an toàn`;
+  vscode.window.showInformationMessage(`🧠 Empirical Memory Estimator: ${shortMsg}`);
+  return result;
 }
 
 function localOfflineReview(code) {
@@ -864,6 +1238,10 @@ function renderHomeHtml(webview, showIntro = true) {
       <h3>🧪 AI Sinh Testcase Mẫu (Ctrl+Alt+T)</h3>
       <p>Tự động tạo bộ input/output kiểm thử và lưu vào thư mục tests/.</p>
     </div>
+    <div class="card" onclick="cmd('memoryEstimator')">
+      <h3>🧠 Empirical Memory Estimator</h3>
+      <p>Ước lượng bộ nhớ mảng C++ tức thì: <b>int a[10000][10000] ≈ 381.4 MB</b> → vượt 256 MB ⇒ MLE.</p>
+    </div>
     <div class="card" onclick="cmd('skin')">
       <h3>🎨 Đổi skin giao diện (${skin.replace('DrgX ', '')})</h3>
       <p>5 skin DrgX đồng bộ với Web &amp; CP Studio: Ion, Nebula, Tokyo, Matrix, Dawn.</p>
@@ -976,6 +1354,7 @@ function openHome(context, showIntro = true) {
     if (msg.command === 'askAi') vscode.commands.executeCommand('drgxDev.askAi');
     if (msg.command === 'reviewCode') vscode.commands.executeCommand('drgxDev.reviewCode');
     if (msg.command === 'generateTests') vscode.commands.executeCommand('drgxDev.generateTests');
+    if (msg.command === 'memoryEstimator') vscode.commands.executeCommand('drgxDev.memoryEstimator');
     if (msg.command === 'skin') vscode.commands.executeCommand('drgxDev.skin');
     if (msg.command === 'learn') vscode.commands.executeCommand('drgxDev.learn');
   }, undefined, context.subscriptions);
@@ -998,6 +1377,7 @@ function activate(context) {
     vscode.commands.registerCommand('drgxDev.askAi', askAi),
     vscode.commands.registerCommand('drgxDev.generateTests', generateTests),
     vscode.commands.registerCommand('drgxDev.reviewCode', reviewCode),
+    vscode.commands.registerCommand('drgxDev.memoryEstimator', memoryEstimator),
     vscode.commands.registerCommand('drgxDev.triggerCopilot', () => {
       vscode.commands.executeCommand('editor.action.inlineSuggest.trigger');
     }),
@@ -1013,4 +1393,10 @@ function deactivate() {
   if (debounceTimer) clearTimeout(debounceTimer);
 }
 
-module.exports = { activate, deactivate };
+module.exports = {
+  activate,
+  deactivate,
+  estimateCppMemory,
+  formatMemoryEstimatorReport,
+  analyzeCodeMetrics
+};

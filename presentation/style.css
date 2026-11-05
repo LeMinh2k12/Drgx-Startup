@@ -1214,6 +1214,22 @@ html.shot .f, html.shot .rv, html.shot .stg > *, html.shot table.t tbody tr, htm
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   .slide.chapter { clip-path: none; }
 }
+/* ================= Council Formula & Quick-Key Bands (PL1–PL5) ================= */
+.formula-band{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:16px}
+.formula-card{background:linear-gradient(160deg,color-mix(in srgb,var(--a1) 9%,transparent),transparent 62%),var(--panel);border:1px solid var(--line2);border-radius:14px;padding:12px 16px}
+.formula-card h4{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1);margin:0 0 6px;font-weight:800}
+.formula-card .eq{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:19px;line-height:1.5;color:var(--text)}
+.formula-card .eq sub,.formula-card .eq sup{font-size:.66em}
+.formula-card p{font-size:12.5px;line-height:1.45;color:var(--muted);margin:5px 0 0}
+.formula-card code{font-family:var(--mono);font-size:12px;color:var(--a2)}
+.keycap{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;border:1px solid var(--line2);border-bottom-width:3px;border-radius:7px;font:800 14px var(--mono);color:var(--text);background:var(--panel2);margin-right:6px}
+.quickkeys{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;font-size:13px;color:var(--muted)}
+.quickkeys>span{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
+.quickkeys .keycap{height:26px;min-width:26px;font-size:12.5px;margin-right:2px}
+.eqline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:8px;font-size:13px;color:var(--muted)}
+.eqline .math{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:16.5px;color:var(--a1);font-style:italic}
+.eqline b{color:var(--text)}
+
 @media print {
   @page { size: 1920px 1080px; margin: 0; }
   html, body { overflow: visible; height: auto; background: var(--bg); }

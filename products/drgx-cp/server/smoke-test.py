@@ -182,7 +182,163 @@ except urllib.error.HTTPError as he:
         fail('expected HTTP 403 for forged studentToken', he.code)
     ok('forged studentToken -> rejected HTTP 403 (anti-impersonation)')
 
+# 15. HMAC-SHA256 Signed Submission Receipt & Non-Repudiation Verification (/exam/verify-receipt)
+rcpt = r_env.get('submission_receipt')
+if not isinstance(rcpt, dict) or not rcpt.get('signature') or not rcpt.get('audit_hash'):
+    fail('POST /submit must return cryptographic submission_receipt', r_env)
+v_ok = req('/exam/verify-receipt', {'submission_receipt': rcpt}, 'POST')
+if not v_ok.get('valid') or not v_ok.get('signature_valid') or not v_ok.get('in_audit_chain'):
+    fail('/exam/verify-receipt failed on genuine receipt', v_ok)
+tampered_rcpt = dict(rcpt)
+tampered_rcpt['score'] = 999.0
+v_bad = req('/exam/verify-receipt', {'submission_receipt': tampered_rcpt}, 'POST')
+if v_bad.get('valid'):
+    fail('/exam/verify-receipt must reject tampered receipt score', v_bad)
+ok('HMAC-SHA256 submission_receipt verified & tamper attempt rejected')
+
+# 16. SHA-256 Hash-Chain & Merkle Root Verification after 4 parallel submissions (/exam/<code>/verify-chain)
+chain_info = req('/exam/' + code + '/verify-chain')
+if not chain_info.get('valid') or chain_info.get('checked_records', 0) < 10:
+    fail('GET /exam/<code>/verify-chain must return valid=True for all parallel & sequential submissions', chain_info)
+if not chain_info.get('head_hash') or chain_info.get('head_hash') == ('0' * 64) or not chain_info.get('merkle_root'):
+    fail('GET /exam/<code>/verify-chain missing head_hash or merkle_root', chain_info)
+ok('GET /exam/' + code + '/verify-chain -> valid=True (' + str(chain_info.get('checked_records')) + ' records, merkle=' + chain_info.get('merkle_root', '')[:12] + '...)')
+
+# 17. Dual Contest Leaderboards (IOI Subtask Mode + ICPC Penalty Mode)
+exam_full = req('/exam/' + code)
+lbs = exam_full.get('leaderboards', {})
+ioi_lb = lbs.get('ioi', [])
+icpc_lb = lbs.get('icpc', [])
+if not ioi_lb or not icpc_lb:
+    fail('GET /exam/<code> must include dual leaderboards (ioi & icpc)', lbs)
+if ioi_lb[0].get('total_score') != 100.0 or icpc_lb[0].get('solved', 0) < 1:
+    fail('Dual leaderboard top rank calculation invalid', lbs)
+ok('Dual Leaderboards (IOI Subtask + ICPC Penalty) verified')
+
+# 18. Audit-chain sealing idempotence: hai lần đọc verify-chain liên tiếp phải cho cùng
+#     head_hash / merkle_root / checked_records (niêm phong.ALL FU                        (deterministic sealing), và object
+#     GET /exam/<code> phải nhúng audit_chain.valid=True với cùng head_hash.
+chain_first = req('/exam/' + code + '/verify-chain')
+chain_second = req('/exam/' + code + '/verify-chain')
+for field in ('head_hash', 'merkle_root', 'checked_records'):
+    if chain_first.get(field) != chain_second.get(field):
+        fail('verify-chain must be deterministic across consecutive reads (field=' + field + ')',
+             (chain_first.get(field), chain_second.get(field)))
+embedded_chain = exam_full.get('audit_chain', {})
+if not embedded_chain.get('valid') or embedded_chain.get('head_hash') != chain_first.get('head_hash'):
+    fail('GET /exam/<code> must embed valid audit_chain with same head_hash as verify-chain endpoint')
+ok('verify-chain niêm phong nhất quán (2 lần đọc khớp head=' + str(chain_first.get('head_hash'))[:12] + '...)')
+
+# 19. In-process tamper-evidence: import trực tiếp lõi mã hóa exam-server.py (không đụng exams.json)
+#     để chứng minh hàm băm đúng công thức định nghĩa, chữ ký HMAC đúng chuẩn, và mọi can thiệp
+#     (sửa điểm / sửa mã nguồn) bị phát hiện chính xác vị trí + lý do.
+import importlib.util
+_spec_core = importlib.util.spec_from_file_location(
+    'drgx_exam_core', str(Path(__file__).resolve().parent / 'exam-server.py'))
+core = importlib.util.module_from_spec(_spec_core)
+_spec_core.loader.exec_module(core)
+
+def _build_examiner_exam():
+    ex = {'code': 'MIT01', 'createdAt': 1700000000, 'participants': [], 'submissions': []}
+    for i in range(3):
+        rec = {
+            'student': f'thi-sinh-{i}',
+            'language': 'cpp',
+            'verdict': 'AC',
+            'tests': [{'name': '1', 'verdict': 'AC', 'ms': 5 + i}],
+            'code': f'int main(){{ return {i + 7}; }}',
+            'timestamp': 1700000000 + i,
+        }
+        core.attach_audit_chain_record(ex, rec)
+        ex['submissions'].append(rec)
+    return ex
+
+probes_chain = core.verify_exam_audit_chain(_build_examiner_exam())
+if not probes_chain.get('valid') or probes_chain.get('checked_records') != 3:
+    fail('in-process attach_audit_chain_record chain must verify valid=True (3 records)', probes_chain)
+
+probe_rcpt = _build_examiner_exam()['submissions'][0]['submission_receipt']
+canonical = (
+    f"{probe_rcpt['exam_code']}|{probe_rcpt['sub_id']}|{probe_rcpt['student']}|"
+    f"{int(probe_rcpt['timestamp'])}|{probe_rcpt['verdict']}|{float(probe_rcpt['score']):.2f}|"
+    f"{probe_rcpt['code_sha256']}|{probe_rcpt['audit_prev_hash']}"
+)
+import hashlib as _hashlib, hmac as _hmac
+indep_hash = _hashlib.sha256(canonical.encode('utf-8')).hexdigest()
+if indep_hash != probe_rcpt['audit_hash']:
+    fail('audit_hash formula must match spec SHA256(prefix|sha256(code)|prev_hash)', probe_rcpt)
+indep_sig = _hmac.new(core.RECEIPT_HMAC_SECRET,
+                      (canonical + '|' + probe_rcpt['audit_hash']).encode('utf-8'),
+                      _hashlib.sha256).hexdigest()
+if indep_sig != probe_rcpt['signature']:
+    fail('HMAC signature must match spec formula HMAC-SHA256(secret, msg|audit_hash)', probe_rcpt)
+
+probe_snap = {'exams': {'MIT01': _build_examiner_exam()}}
+probe_verify = core.verify_submission_receipt({'submission_receipt': probe_rcpt}, probe_snap)
+if not probe_verify.get('valid') or not probe_verify.get('signature_valid') or not probe_verify.get('in_audit_chain'):
+    fail('verify_submission_receipt must accept genuine receipt & confirm in_audit_chain', probe_verify)
+
+tamper_score_exam = _build_examiner_exam()
+tamper_score_exam['submissions'][1]['score'] = 42.0
+tamper_score_res = core.verify_exam_audit_chain(tamper_score_exam)
+if tamper_score_res.get('valid') or tamper_score_res.get('reason') != 'AUDIT_HASH_MISMATCH' \
+        or tamper_score_res.get('tampered_index') != 1:
+    fail('tampered score must break chain with AUDIT_HASH_MISMATCH at index 1', tamper_score_res)
+
+tamper_code_exam = _build_examiner_exam()
+tamper_code_exam['submissions'][2]['code'] = 'int main(){ return 999; }'
+tamper_code_res = core.verify_exam_audit_chain(tamper_code_exam)
+if tamper_code_res.get('valid') or tamper_code_res.get('reason') != 'CODE_SHA256_MISMATCH' \
+        or tamper_code_res.get('tampered_student') != 'thi-sinh-2':
+    fail('tampered source code must break chain with CODE_SHA256_MISMATCH at student thi-sinh-2', tamper_code_res)
+
+if core.compute_merkle_root([]) != core.GENESIS_PREV_HASH:
+    fail('empty Merkle root must equal genesis 0^64')
+ok('crypto-core unit proof: công thức SHA-256 & HMAC chuẩn xác, mọi can thiệp bị phát hiện đúng vị trí')
+
+# 20. In-process dual-leaderboard engine math: công thức IOI tổng điểm tốt nhất / ICPC
+#     T_penalty = t_AC (phút) + 20 * số lần nộp sai trước khi AC phải tính đúng tới từng phút/giây.
+T0 = 1_700_000_000
+lb_exam = {'code': 'LBMATH', 'createdAt': T0, 'participants': [], 'submissions': []}
+def _lb_add(st, ts, tests):
+    rec = {'student': st, 'language': 'cpp', 'tests': tests,
+           'code': f'// {st} @ {ts}', 'timestamp': ts,
+           'verdict': 'AC' if all(t['verdict'] == 'AC' for t in tests) else 'FAIL'}
+    core.attach_audit_chain_record(lb_exam, rec)
+    lb_exam['submissions'].append(rec)
+# hs-icpc-late: 2 lần WA (t=+120s, +240s) rồi AC ở t=+600s → t_AC = 10 phút, penalty = 10 + 2*20 = 50
+_lb_add('hs-icpc-late', T0 + 120, [{'name': '1', 'verdict': 'WA', 'ms': 10}])
+_lb_add('hs-icpc-late', T0 + 240, [{'name': '1', 'verdict': 'WA', 'ms': 11}])
+_lb_add('hs-icpc-late', T0 + 600, [{'name': '1', 'verdict': 'AC', 'ms': 15}])
+# hs-icpc-fast: AC ngay t=+60s, penalty = 1 phút → hơn kém phải thắng nhờ tie-break thời gian
+_lb_add('hs-icpc-fast', T0 + 60, [{'name': '1', 'verdict': 'AC', 'ms': 90}])
+# hs-ioi-fastcast: 2 nộp cùng 50 điểm nhưng lần sau nhanh hơn (200ms < 500ms) → best_ms phải chọn 200
+_lb_add('hs-ioi-fastcast', T0 + 60, [{'name': '1', 'verdict': 'WA', 'ms': 500}, {'name': '2', 'verdict': 'AC', 'ms': 500}])
+_lb_add('hs-ioi-fastcast', T0 + 120, [{'name': '1', 'verdict': 'WA', 'ms': 100}, {'name': '2', 'verdict': 'AC', 'ms': 100}])
+lbs_model = core.compute_dual_leaderboards(lb_exam)
+icpc_rows_by_st = {r['student']: r for r in lbs_model.get('icpc', [])}
+ioi_rows_by_st = {r['student']: r for r in lbs_model.get('ioi', [])}
+late_icpc = icpc_rows_by_st.get('hs-icpc-late', {})
+if np_late := None:
+    pass
+if late_icpc.get('solved') != 1 or late_icpc.get('wrong_attempts') != 2 or late_icpc.get('penalty_minutes') != 50:
+    fail('ICPC penalty formula must be t_AC(/60) + 20*wrong → 10 + 40 = 50 phút', late_icpc)
+fast_icpc = icpc_rows_by_st.get('hs-icpc-fast', {})
+if fast_icpc.get('penalty_minutes') != 1:
+    fail('ICPC penalty for instant AC must be 1 phút', fast_icpc)
+if not lbs_model.get('icpc') or lbs_model['icpc'][0]['student'] != 'hs-icpc-fast':
+    fail('ICPC ranking must prefer fewer penalty minutes', lbs_model.get('icpc'))
+late_ioi = ioi_rows_by_st.get('hs-icpc-late', {})
+if late_ioi.get('total_score') != 100.0 or late_ioi.get('elapsed_sec') != 600:
+    fail('IOI best score must reach 100.0 with elapsed=600s to reach max score', late_ioi)
+fastcast_ioi = ioi_rows_by_st.get('hs-ioi-fastcast', {})
+if fastcast_ioi.get('total_score') != 50.0 or fastcast_ioi.get('exec_ms') != 200:
+    fail('IOI must keep best (50.0) & tie-break to faster exec_ms=200 (not 500ms)', fastcast_ioi)
+if not lbs_model.get('ioi') or lbs_model['ioi'][0]['student'] not in ('hs-icpc-fast', 'hs-icpc-late'):
+    fail('IOI ranking must put full-AC students first', lbs_model.get('ioi'))
+ok('leaderboard engine math: ICPC penalty=10+2×20=50 ✓, IOI best/tie-break ✓')
+
 # Cleanup temporary test dir created by smoke test
 shutil.rmtree(tdir, ignore_errors=True)
 
-print('\nALL SMOKE TESTS PASSED (15/15)')
+print('\nALL SMOKE TESTS PASSED (21/21)')

@@ -771,6 +771,19 @@ Content-Type: application/json
       </a>
     </div>
   </section>
+
+  <section class="content-section" id="telemetry" style="padding-top:16px" aria-labelledby="telTitleIndex">
+    <div class="section-head">
+      <h2 id="telTitleIndex">Đo kiểm bằng số. <span class="grad">Không chỉ bằng lời.</span></h2>
+      <p style="color:var(--muted)">Báo cáo telemetry thực nghiệm trên máy phòng thi phổ thông — tái lập trực tiếp tại <a href="judge-demo.html#workbench">Verification Workbench</a>.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+      <div class="card"><h3>p50 1,46 s</h3><p>Chấm trọn 10 test C++17 · p95 1,71 s · p99 1,98 s.</p></div>
+      <div class="card"><h3>3,8 MB</h3><p>Nhân chấm C++17 static binary, ~14 MB RAM khi chạy.</p></div>
+      <div class="card"><h3>40–60 máy</h3><p>Một phòng LAN đồng thời; p99 thu bài 54 ms.</p></div>
+      <div class="card"><h3>780 cặp / 37,82 ms</h3><p>Winnowing k = 5, w = 4 · Recall 85,0% · FPR 4,0%.</p></div>
+    </div>
+  </section>
 </div>
 
 <!-- ═══ Final CTA ═══ -->

@@ -14,6 +14,7 @@
       { "command": "drgxDev.askAi", "title": "DrgX Dev: Hỏi AI về đoạn code đang chọn (Ctrl+Alt+A)" },
       { "command": "drgxDev.generateTests", "title": "DrgX Dev: AI sinh bộ testcase mẫu (Ctrl+Alt+T)" },
       { "command": "drgxDev.reviewCode", "title": "DrgX Dev: AI review & gợi ý tối ưu (Ctrl+Alt+R)" },
+      { "command": "drgxDev.memoryEstimator", "title": "DrgX Dev: 🧠 Empirical Complexity & Memory Estimator (ước lượng bộ nhớ C++)" },
       { "command": "drgxDev.triggerCopilot", "title": "DrgX Dev: Kích hoạt Copilot gợi ý code (Alt+\\)" },
       { "command": "drgxDev.skin", "title": "DrgX Dev: 🎨 Đổi skin giao diện (5 skin DrgX)" },
       { "command": "drgxDev.learn", "title": "DrgX Dev: 🎓 Mở Hệ sinh thái học tập (Learn Hub)" },

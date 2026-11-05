@@ -286,6 +286,7 @@ cout &lt;&lt; s;</div>
   cin &gt;&gt; x, s += x;
 cout &lt;&lt; s;</div>
     </div>
+    <div class="eqline rv d3"><span class="math">P(I) = [ Brute(I) ≠ Solution(I) ]</span><span>· Shrinker <b>ddmin Zeller</b> · <b>O(log |I|)</b> khi lỗi cục bộ</span><span>· <b>500 vòng</b> / seed tất định · p50 <b>1,8 s</b></span></div>
     <div class="console glass rv d4" id="stressOut"><span class="faint">▸ Bấm phím → (hoặc Enter / nút phía trên) để chạy đối kháng tự động giữa Brute và Solution…</span></div>
     <i class="f mark" data-run="stress"></i>
   </section>
@@ -341,6 +342,7 @@ int main() {
         <div class="toks" id="tokB"><span class="lab">B</span></div>
       </div>
     </div>
+    <div class="eqline rv d4"><span class="math">J(A,B) = |F<sub>A</sub> ∩ F<sub>B</sub>| / |F<sub>A</sub> ∪ F<sub>B</sub>|</span><span>· <b>k = 5, w = 4</b> · bảo đảm phát hiện đoạn trùng <b>≥ 8 token</b></span><span>· <b>780 cặp / 37,82 ms</b> · Recall <b>85,0%</b> · FPR <b>4,0%</b></span></div>
     <i class="f mark" data-run="win"></i>
   </section>
 
@@ -384,7 +386,7 @@ int main() {
         <div class="glass layer core" style="padding:18px 22px">
           <span class="own">TÀI SẢN TRÍ TUỆ (IP) DO NHÓM 9A2 TỰ PHÁT TRIỂN</span>
           <div class="lv">Tầng 02 · Lõi DrgX<small>Tự thiết kế &amp; lập trình</small></div>
-          <div class="chips"><span>Void-bit C++17 OJ (3,9 MB · ~14 MB RAM)</span><span>Differential Stress 3 cột</span><span>Winnowing Anti-Cheat</span><span>Exam Server LAN :8765</span><span>Bộ sửa 25 lỗi C++17</span><span>5 Skins</span></div>
+          <div class="chips"><span>Void-bit C++17 OJ (3,9 MB · ~14 MB RAM)</span><span>Differential Stress 3 cột</span><span>Winnowing Anti-Cheat</span><span>SHA-256 Audit Chain + HMAC Receipt</span><span>Exam Server LAN :8765</span><span>Bộ sửa 25 lỗi C++17</span><span>5 Skins</span></div>
         </div>
         <div class="glass stem-box" style="padding:18px 22px">
           <div class="ram-bars" style="margin-top:0">
@@ -636,6 +638,18 @@ int main() {
       <div class="glass card"><h3>🔒 Không thu thập mã nguồn mặc định (Zero Telemetry)</h3><p>Toàn bộ quá trình biên dịch và chấm bài diễn ra cục bộ. Trợ lý AI chỉ hoạt động khi người dùng chủ động bật trong Dev Studio (lọc chặn 46/50 = 92% câu xin code giải sẵn); bản CP Studio ghi đè &amp; khóa chỉ-đọc <span class="mono">settings.json</span> ngay khi khởi chạy (<span class="mono">p50 = 53,1 ms</span>).</p></div>
       <div class="glass card"><h3>🏫 Tuân thủ Luật BVDLCN 91/2025/QH15 &amp; NĐ 356/2025/NĐ-CP</h3><p>Điểm thi và bài làm của học sinh lưu trực tiếp trên máy chủ giáo viên trong mạng LAN của trường, không đẩy lên đám mây nước ngoài; tuân thủ Luật Bảo vệ dữ liệu cá nhân có hiệu lực từ 01/01/2026.</p></div>
     </div>
+    <div class="formula-band rv d4">
+      <div class="formula-card">
+        <h4>SHA-256 Hash-Chain Audit · exam-server.py</h4>
+        <div class="eq">h<sub>i</sub> = SHA-256( exam ‖ id<sub>i</sub> ‖ student ‖ t<sub>i</sub> ‖ verdict ‖ score ‖ SHA-256(code) ‖ h<sub>i−1</sub> )</div>
+        <p>Genesis h<sub>0</sub> = 0<sup>64</sup>; mỗi bài nộp là một mắt xích. Sửa hoặc xóa một bản ghi làm lệch toàn bộ chuỗi phía sau → phát hiện giả mạo trong <code>O(n)</code>.</p>
+      </div>
+      <div class="formula-card">
+        <h4>HMAC Receipt &amp; Merkle Root</h4>
+        <div class="eq">r = HMAC-SHA256(K, record ‖ h<sub>i</sub>) · R = H(H(A‖B) ‖ H(C‖D))</div>
+        <p>Biên lai HMAC chống chối bỏ (non-repudiation); Merkle root đại diện toàn phòng thi, chứng minh một bài nộp trong <code>O(log n)</code> hash.</p>
+      </div>
+    </div>
   </section>
 
   <section class="slide appendix" id="pl2" data-code="PL2" data-apx="1" data-title="PL2 · Vì sao cần DrgX khi đã có Themis & CP Editor?" data-time="0" data-rub="3.2"
@@ -648,6 +662,18 @@ int main() {
       <div class="glass card"><h3>⚡ Vì sao CP Editor / CPH (VS Code) chưa đủ cho trường học?</h3><p><b>CP Editor</b> và <b>CPH</b> hỗ trợ chấm mẫu cá nhân tốt (cùng tải 10 test <span class="mono">p50 = 1,46 s</span> tương đương DrgX F9) nhưng không có bộ tiền kiểm <span class="mono">freopen</span>, không tách cấu hình khóa AI giờ thi, không có giao diện Stress Test 3 cột tích hợp sẵn và không thu bài mạng LAN 40 máy.</p></div>
       <div class="glass card"><h3>🖥️ Phối hợp với Safe Exam Browser (SEB) &amp; Veyon ra sao?</h3><p>Kiểm tra thường xuyên 15–45 phút dùng <b>CP Studio + Veyon</b>; kỳ thi học kỳ / chọn đội tuyển mở <b>DrgX Web Lab (:8123)</b> bên trong trình duyệt khóa máy <b>Safe Exam Browser (SEB)</b> — chặn cứng <span class="mono">Alt+Tab</span>, Task Manager ở cấp hệ điều hành.</p></div>
       <div class="glass card"><h3>🛡️ Hào bảo vệ ngách của DrgX</h3><p>Kiến trúc Kép (Học có AI / Thi sạch AI) + Chấm <kbd>F9</kbd> tiền kiểm <span class="mono">freopen</span> + Stress Test 3 cột miễn phí + Phòng thi LAN tương thích <b>Themis</b> + Mức phí dịch vụ <b>6,0–12,0 triệu đ/trường/năm</b> vừa khít kinh phí chuyên môn thường xuyên của trường.</p></div>
+    </div>
+    <div class="formula-band rv d4">
+      <div class="formula-card">
+        <h4>Winnowing k-gram · k = 5, w = 4</h4>
+        <div class="eq">t = normalize(src) · h<sub>i</sub> = FNV-1a(t<sub>i</sub>…t<sub>i+k−1</sub>) · F = { min(h<sub>i..i+w−1</sub>) }</div>
+        <p>Bảo đảm toán học: mọi đoạn trùng dài ≥ <code>w + k − 1 = 8</code> token đều xuất hiện trong vân tay. J(A,B) = |F<sub>A</sub> ∩ F<sub>B</sub>| / |F<sub>A</sub> ∪ F<sub>B</sub>|.</p>
+      </div>
+      <div class="formula-card">
+        <h4>Đo kiểm trên 40 bài nộp</h4>
+        <div class="eq">C(40,2) = 780 cặp · 37,82 ms · Recall 85,0% · FPR 4,0%</div>
+        <p>Ngưỡng cảnh báo J ≥ 0,70; vùng 0,40–0,70 chuyển giám khảo đối chiếu CFG. Đổi tên biến hoặc thêm comment không làm giảm J vì định danh đã được chuẩn hóa thành <code>ID</code>.</p>
+      </div>
     </div>
   </section>
 
@@ -665,6 +691,18 @@ int main() {
         <tr><td>4. Lịch thi vào lớp 10 (T3–T6/2027) &amp; Vốn gia đình 60tr</td><td class="us"><span class="badge a">An toàn thanh khoản</span></td><td style="text-align:left">Đóng băng tính năng mới từ <b>01/03–15/06/2027</b> để 4 em thi lớp 10; Q1/2028 phụ huynh lập Công ty TNHH. Nếu chỉ có <b>60,0tr vốn 4 gia đình</b>, thu gọn chi ươm tạo xuống 52,0tr (giữ đệm +8,0tr), cuối 2029 tiền mặt đạt <b>+112,15tr</b>.</td></tr>
       </tbody>
     </table>
+    <div class="formula-band rv d4">
+      <div class="formula-card">
+        <h4>Differential Stress Test</h4>
+        <div class="eq">P(I) = [ Brute(I) ≠ Solution(I) ] · I* = ddmin(I, P)</div>
+        <p>Generator sinh test đối kháng; vòng lặp dừng ngay khi vị từ P(I) đúng. 500 vòng, seed tất định, <code>p50 = 1,8 s</code> cho tới phản ví dụ đầu tiên.</p>
+      </div>
+      <div class="formula-card">
+        <h4>Zeller ddmin · Δ giảm / ∇ bù</h4>
+        <div class="eq">|I*| ≤ |I| · trials ≤ 2|I|² · O(log |I|) khi lỗi cục bộ</div>
+        <p>Chia đôi Δ hoặc lấy phần bù ∇, giữ mảnh vẫn tái hiện lỗi; dừng khi 1-minimal. Mỗi bước loại bỏ một phần không gian ứng viên nên phản ví dụ hội đồng nhìn thấy luôn nhỏ nhất có thể.</p>
+      </div>
+    </div>
   </section>
 
   <section class="slide appendix" id="pl4" data-code="PL4" data-apx="1" data-title="PL4 · Giả định tài chính & Unit Economics" data-time="0" data-rub="4.1 4.2"
@@ -700,6 +738,13 @@ int main() {
         <tr><td>VI. Đội ngũ thực chiến &amp; Chủ quyền dữ liệu</td><td class="us"><b>An toàn 100%</b><div class="mini-bar"><i style="--w:100%;background:var(--a1)"></i></div></td><td style="text-align:left">Slide S01, S12, PL1: Đội ngũ 4 thành viên Lớp 9A2 THCS Sông Lô (đóng băng tính năng T3–T6/2027 ôn thi lớp 10); tuân thủ <b>Luật BVDLCN 91/2025/QH15</b>.</td></tr>
       </tbody>
     </table>
+    <div class="quickkeys rv d4" aria-label="Phím tắt điều hướng phản biện">
+      <span><i class="keycap">1</i>–<i class="keycap">5</i> Nhảy thẳng PL1–PL5</span>
+      <span><i class="keycap">A</i> Vào / thoát Phụ lục</span>
+      <span><i class="keycap">O</i> Lưới 12 slide + 5 phụ lục</span>
+      <span><i class="keycap">J</i> Hiện / ẩn tiêu chí chấm</span>
+      <span><i class="keycap">?</i> Bảng phím tắt đầy đủ</span>
+    </div>
   </section>
 </div></div>
 
@@ -847,7 +892,8 @@ int main() {
   <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>Về slide mở đầu / Nhảy tới slide kết</td></tr>
   <tr><td><kbd>Enter</kbd></td><td>Chạy lại bài Demo sống trên slide hiện tại (S7, S8, S9)</td></tr>
   <tr><td><kbd>M</kbd></td><td>Đổi chế độ: <b>Trọn bộ 12 Slide (≤ 2 phút · 115s)</b></td></tr>
-  <tr><td><kbd>A</kbd></td><td>Nhảy nhanh vào / thoát ra <b>5 Slide Phụ lục Hỏi đáp (PL1–PL5)</b></td></tr>
+  <tr><td><kbd>1</kbd>–<kbd>5</kbd></td><td>Nhảy thẳng tới Phụ lục PL1–PL5 khi trả lời phản biện</td></tr>
+<tr><td><kbd>A</kbd></td><td>Nhảy nhanh vào / thoát ra <b>5 Slide Phụ lục Hỏi đáp (PL1–PL5)</b></td></tr>
   <tr><td><kbd>N</kbd> · <kbd>P</kbd></td><td>Bật khung Lời thoại + Đồng hồ nhịp độ · Mở cửa sổ Presenter cho màn hình thứ 2</td></tr>
   <tr><td><kbd>O</kbd></td><td>Mở lưới tổng quan 12 slide chính (S01 → S12) &amp; 5 phụ lục (PL1 → PL5)</td></tr>
   <tr><td><kbd>J</kbd></td><td>Hiện/ẩn nhãn ghi chú tập dượt ở góc dưới slide</td></tr>

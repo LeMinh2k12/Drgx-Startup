@@ -723,6 +723,7 @@
     else if (k === 'p') openPresenter();
     else if (k === 'm') toggleMode();
     else if (k === 'a') go(isApx(slides[cur]) ? mainSeq().slice(-1)[0] : apxSeq()[0], true);
+    else if (/^[1-5]$/.test(k) && apxSeq()[+k - 1] !== undefined) { e.preventDefault(); go(apxSeq()[+k - 1], true); toast('Phụ lục PL' + k); } // PL hotkeys 1-5
     else if (k === 'j') { document.body.classList.toggle('judge'); toast(document.body.classList.contains('judge') ? 'Hiện tiêu chí chấm (tập dượt)' : 'Ẩn tiêu chí chấm'); }
     else if (k === 'l') document.body.classList.toggle('laser-on');
     else if (k === 'b' || k === '.') toggle($('#blank'));

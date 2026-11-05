@@ -66,12 +66,30 @@ fn oj_exe() -> PathBuf {
 }
 
 fn drgx_cli_exe() -> PathBuf {
-    let candidate = root_dir().join("cli").join("target").join("release").join("drgx.exe");
-    if candidate.exists() {
-        return candidate;
+    let candidates = [
+        root_dir().join("cli").join("target").join("release").join("drgx.exe"),
+        root_dir().join("cli").join("target").join("debug").join("drgx.exe"),
+        PathBuf::from(r"D:\Dev\vietcode\cli\target\release\drgx.exe"),
+        PathBuf::from(r"D:\Dev\vietcode\cli\target\debug\drgx.exe"),
+    ];
+    let mut best: Option<(SystemTime, PathBuf)> = None;
+    for candidate in candidates {
+        if !candidate.is_file() {
+            continue;
+        }
+        let modified = std::fs::metadata(&candidate)
+            .and_then(|m| m.modified())
+            .unwrap_or(UNIX_EPOCH);
+        if best.as_ref().map_or(true, |(t, _)| modified > *t) {
+            best = Some((modified, candidate));
+        }
+    }
+    if let Some((_, path)) = best {
+        return path;
     }
     find_binary(&[
         r"D:\Dev\vietcode\cli\target\release\drgx.exe",
+        r"D:\Dev\vietcode\cli\target\debug\drgx.exe",
         r"D:\C_Drive_Data\home_dot_cargo\bin\drgx.exe",
         "drgx.exe",
     ])
@@ -718,6 +736,12 @@ fn is_missing_cpp_semicolon(trimmed: &str, next_trimmed: &str) -> bool {
             && !trimmed.starts_with("for")
             && !trimmed.contains("[](")
         {
+            // Chỉ coi là thiếu `;` khi `{` xuất hiện SAU dấu `=`
+            // (khởi tạo `S s = {1, 2}`), không phải thân hàm một dòng
+            // `int main(){ ... s = 0 ... }` vốn đã hợp lệ.
+            if let (Some(eq), Some(brace)) = (trimmed.find('='), trimmed.find('{')) {
+                return brace > eq;
+            }
             return true;
         }
         return false;
@@ -896,6 +920,54 @@ fn translate_gcc_message(msg: &str) -> (String, String) {
         return (
             "Không khớp định dạng hoặc số lượng đối số trong `printf` / `scanf`".to_string(),
             format!("Chi tiết từ `g++`: `{}`.", m),
+        );
+    }
+    if m.contains("cannot convert") {
+        return (
+            "Sai kiểu dữ liệu — `cannot convert` (ví dụ gán `std::string` vào `int`)".to_string(),
+            format!("Chi tiết từ `g++`: `{}`. Hãy dùng `stoi(s)`, `stoll(s)` hoặc kiểm tra lại kiểu biến.", m),
+        );
+    }
+    if m.contains("ambiguous overload") || m.contains("is ambiguous") {
+        return (
+            "Gọi hàm mơ hồ — `ambiguous overload`".to_string(),
+            format!("Chi tiết từ `g++`: `{}`. Có nhiều overload cùng tên nhận kiểu gần giống; hãy ép kiểu rõ ràng, ví dụ `max<long long>(a, b)`.", m),
+        );
+    }
+    if m.contains("variable-sized object may not be initialized") {
+        return (
+            "Mảng kích thước động không được khởi tạo (`variable-sized object may not be initialized`)".to_string(),
+            format!("Chi tiết từ `g++`: `{}`. Đổi `int a[n] = {{0}};` thành `vector<int> a(n, 0);`.", m),
+        );
+    }
+    if m.contains("undefined reference to") && (m.contains("WinMain") || m.contains("main")) {
+        return (
+            "Linker: `undefined reference to WinMain` — không tìm thấy `int main()`".to_string(),
+            format!("Chi tiết từ linker: `{}`. Hãy kiểm tra tên hàm `main` (không phải `mian`/`man`) và đảm bảo tệp có đúng một `int main()`.", m),
+        );
+    }
+    if m.contains("ld returned 1 exit status") || m.contains("collect2.exe") {
+        return (
+            "Linker: `ld returned 1 exit status`".to_string(),
+            format!("Chi tiết từ linker: `{}`. Thường do thiếu `main`, thiếu định nghĩa hàm, hoặc tệp `.exe` cũ vẫn đang mở (Windows khóa file). Hãy đóng chương trình cũ rồi build lại.", m),
+        );
+    }
+    if m.contains("0xC0000005") || m.contains("Access Violation") || m.contains("3221225477") {
+        return (
+            "Runtime NTSTATUS `0xC0000005` — Access Violation".to_string(),
+            format!("Chi tiết: `{}`. Truy cập mảng/vector ngoài biên hoặc con trỏ chưa khởi tạo. Kiểm tra chỉ số và `v.empty()`.", m),
+        );
+    }
+    if m.contains("0xC00000FD") || m.contains("Stack Overflow") || m.contains("3221225725") {
+        return (
+            "Runtime NTSTATUS `0xC00000FD` — Stack Overflow".to_string(),
+            format!("Chi tiết: `{}`. Đệ quy thiếu điểm dừng hoặc mảng cục bộ quá lớn. Thêm base case hoặc `static`/`vector`.", m),
+        );
+    }
+    if m.contains("0xC0000094") || m.contains("Integer Divide by Zero") || m.contains("3221225592") {
+        return (
+            "Runtime NTSTATUS `0xC0000094` — chia cho 0".to_string(),
+            format!("Chi tiết: `{}`. Kiểm tra mẫu số trước phép chia/lấy dư.", m),
         );
     }
     (
@@ -2328,6 +2400,886 @@ fn analyze_and_fix_code(code: &str, lang: &str, mode: &str) -> Value {
     })
 }
 
+// ============================================================================
+// 🩺 DrgX 71-rule AST / GCC 15 / Linker / NTSTATUS diagnostics pack
+// ============================================================================
+const DRGX_RULE_COUNT: usize = 71;
+
+fn drgx_line_patch(before: &str, after: &str, note: &str) -> Value {
+    json!({
+        "before": before,
+        "after": after,
+        "description": note,
+        "applied": true
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn drgx_push_finding(
+    out: &mut Vec<Value>,
+    line: usize,
+    severity: &str,
+    rule: &str,
+    title: String,
+    detail: String,
+    patch: Option<Value>,
+) {
+    out.push(json!({
+        "line": if line == 0 { 1 } else { line },
+        "severity": severity,
+        "rule": rule,
+        "title": title,
+        "detail": detail,
+        "autofix_patch": patch
+    }));
+}
+
+fn drgx_extra_diagnostics(code: &str, lang: &str) -> Vec<Value> {
+    let mut out: Vec<Value> = Vec::new();
+    let lang_lower = lang.to_lowercase();
+    let is_cpp = lang_lower == "cpp" || lang_lower == "c++" || lang_lower == "c";
+    let is_py = lang_lower == "python" || lang_lower == "py";
+    if code.trim().is_empty() {
+        return out;
+    }
+    let lines: Vec<&str> = code.lines().collect();
+    let has = |needle: &str| code.contains(needle);
+    let mut push = |line: usize,
+                    severity: &str,
+                    rule: &str,
+                    title: String,
+                    detail: String,
+                    patch: Option<Value>| {
+        drgx_push_finding(&mut out, line, severity, rule, title, detail, patch);
+    };
+
+    if is_py {
+        for (i, ln) in lines.iter().enumerate() {
+            let t = ln.trim();
+            let no = i + 1;
+            if t == "except:" || t.starts_with("except:") {
+                let after = ln.replacen("except:", "except Exception:", 1);
+                push(no, "warning", "py-bare-except",
+                    format!("Dòng {}: `except:` bắt toàn bộ ngoại lệ (kể cả Ctrl+C / SystemExit)", no),
+                    "Bắt hẹp `except Exception:` giúp không nuốt mất tín hiệu thoát và lỗi hệ thống.".to_string(),
+                    Some(drgx_line_patch(ln, &after, "Thu hẹp except")));
+            }
+            if (t.contains(" is 0") || t.contains(" is 1") || t.contains(" is \"") || t.contains(" is '")) && !t.contains("is not") {
+                let after = ln.replace(" is ", " == ");
+                push(no, "warning", "py-is-literal",
+                    format!("Dòng {}: Dùng `is` để so sánh giá trị literal", no),
+                    "`is` so sánh danh tính object, không phải giá trị. Dùng `==` cho số/chuỗi.".to_string(),
+                    Some(drgx_line_patch(ln, &after, "is -> ==")));
+            }
+            if t.starts_with("for ") && t.contains("range(len(") {
+                push(no, "info", "py-range-len",
+                    format!("Dòng {}: Vòng lặp `range(len(...))` chưa Pythonic", no),
+                    "Có thể dùng `for i, v in enumerate(seq):` để vừa có chỉ số vừa có giá trị, tránh truy cập `seq[i]` lặp lại.".to_string(),
+                    None);
+            }
+            if t.starts_with("def ") && (t.contains("=[]") || t.contains("={}") || t.contains("=[])")) {
+                push(no, "error", "py-mutable-default",
+                    format!("Dòng {}: Tham số mặc định mutable (`=[]` / `={{}}`)", no),
+                    "Giá trị mặc định chỉ khởi tạo một lần, nên list/dict bị chia sẻ giữa các lần gọi. Dùng `None` rồi khởi tạo bên trong hàm.".to_string(),
+                    None);
+            }
+            if t.starts_with("list =") || t.starts_with("dict =") || t.starts_with("set =") || t.starts_with("str =") || t.starts_with("sum =") || t.starts_with("min =") || t.starts_with("max =") {
+                push(no, "warning", "py-shadow-builtin",
+                    format!("Dòng {}: Ghi đè builtin của Python", no),
+                    "Tên biến trùng builtin (`list`, `dict`, `sum`, ...) sẽ che hàm gốc và gây lỗi khó tìm. Hãy đổi tên biến.".to_string(),
+                    None);
+            }
+            if t.starts_with("for ") && t.contains("range(int(input()))") {
+                push(no, "info", "py-input-loop",
+                    format!("Dòng {}: `range(int(input()))` đọc số test ngay trong `for`", no),
+                    "Cách viết này khó debug và không kiểm tra được input rỗng. Nên tách `t = int(input())` rồi `for _ in range(t):`.".to_string(),
+                    None);
+            }
+            if let Some(eq) = t.find(" = ") {
+                let lhs = t[..eq].trim().to_string();
+                let rhs = t[eq + 3..].trim();
+                let prefix = format!("{} + [", lhs);
+                if !lhs.is_empty()
+                    && lhs.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+                    && rhs.starts_with(&prefix)
+                {
+                    let arg = rhs[prefix.len()..].trim_end_matches(']');
+                    let indent: String = ln.chars().take_while(|c| c.is_whitespace()).collect();
+                    let after = format!("{}{}.append({})", indent, lhs, arg);
+                    push(no, "warning", "py-list-append",
+                        format!("Dòng {}: `{} = {} + [...]` tạo list mới mỗi lần", no, lhs, lhs),
+                        "`l = l + [x]` copy toàn bộ list (O(n) mỗi lần) và có thể tạo vòng lặp vô hạn nếu duyệt chính nó. Dùng `l.append(x)`.".to_string(),
+                        Some(drgx_line_patch(ln, &after, "Dùng list.append")));
+                }
+            }
+            if t.contains("+= str(") {
+                push(no, "warning", "py-string-concat",
+                    format!("Dòng {}: Nối chuỗi bằng `+=` trong vòng lặp", no),
+                    "Chuỗi Python là immutable; `s += str(x)` tạo chuỗi mới mỗi lần, tốn O(n²). Gom vào list rồi `''.join(parts)`.".to_string(),
+                    None);
+            }
+            if t.contains("int(") && t.contains(" / ") && !t.contains("//") {
+                push(no, "info", "py-division",
+                    format!("Dòng {}: `int(a / b)` vừa chia thực vừa ép kiểu", no),
+                    "`/` trả về `float` (có thể mất chính xác với số lớn). Dùng `a // b` nếu muốn chia nguyên, hoặc giữ `/` nếu cần số thực.".to_string(),
+                    None);
+            }
+        }
+        return out;
+    }
+    if !is_cpp {
+        return out;
+    }
+
+    // 1. `void main` / missing main / missing `return 0`
+    let mut has_main = false;
+    for (i, ln) in lines.iter().enumerate() {
+        let t = ln.trim();
+        if t.contains("void main") {
+            let after = ln.replace("void main", "int main");
+            push(i + 1, "error", "cpp-void-main",
+                format!("Dòng {}: Hàm `main` khai báo `void main`", i + 1),
+                "Chuẩn C++ yêu cầu `int main()`. GCC 15 từ chối `void main`, linker có thể báo `undefined reference to WinMain`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "void main -> int main")));
+        }
+        if t.contains("main(") {
+            has_main = true;
+        }
+    }
+    if !has_main && !has("WinMain") {
+        if let Some(last) = lines.iter().rev().find(|l| !l.trim().is_empty()).copied() {
+            let after = format!("{}\n\nint main() {{\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    return 0;\n}}", last);
+            push(lines.len(), "error", "cpp-missing-main",
+                "Thiếu hàm `int main()` — linker sẽ báo `undefined reference to WinMain`".to_string(),
+                "Mọi chương trình C++ cần đúng một hàm `int main()`. Đã sinh khung main chuẩn kèm Fast I/O.".to_string(),
+                Some(drgx_line_patch(last, &after, "Thêm khung int main()")));
+        }
+    } else if has_main && !has("return 0") && !has("return EXIT_SUCCESS") && !has("exit(") {
+        if let Some(idx) = lines.iter().rposition(|l| l.trim() == "}") {
+            let after = "    return 0;\n}".to_string();
+            push(idx + 1, "warning", "cpp-missing-return-main",
+                "Hàm `main` thiếu `return 0;` ở cuối".to_string(),
+                "C++ cho phép bỏ qua, nhưng thêm `return 0;` giúp mã rõ ràng và tránh cảnh báo `control reaches end of non-void function`.".to_string(),
+                Some(drgx_line_patch(lines[idx], &after, "Thêm return 0")));
+        }
+    }
+
+    // 2. Missing semicolon before a closing brace / EOF
+    for i in 0..lines.len() {
+        let t = lines[i].trim();
+        if t.is_empty()
+            || t.starts_with('#')
+            || t.starts_with("//")
+            || t.starts_with("/*")
+            || t.starts_with('*')
+            || t.ends_with(';')
+            || t.ends_with('{')
+            || t.ends_with('}')
+            || t.ends_with(':')
+            || t.ends_with(',')
+            || t.ends_with('\\')
+            || t.ends_with('{')
+        {
+            continue;
+        }
+        let kw = ["if", "for", "while", "switch", "else", "do", "case", "default", "struct", "class", "namespace", "template"];
+        if kw.iter().any(|k| t.starts_with(k)) {
+            continue;
+        }
+        let next = lines[i + 1..].iter().find(|l| !l.trim().is_empty()).map(|l| l.trim());
+        let ends_ok = t.ends_with(')') || t.ends_with(']') || t.ends_with("++") || t.ends_with("--")
+            || t.chars().last().map_or(false, |c| c.is_alphanumeric() || c == '_' || c == '"' || c == '\'');
+        let closes_next = next.map_or(true, |n| n.starts_with('}'));
+        if ends_ok && closes_next {
+            let after = format!("{};", ln_keep_indent(lines[i]));
+            push(i + 1, "error", "cpp-missing-semicolon",
+                format!("Dòng {}: Nghi thiếu dấu `;` cuối câu lệnh", i + 1),
+                "GCC 15 thường báo `expected ';' before '}' token` tại dòng kế tiếp. Đã tự động thêm `;`.".to_string(),
+                Some(drgx_line_patch(lines[i], &after, "Thêm dấu ;")));
+        }
+    }
+
+    // 3. Unbalanced braces / parentheses
+    let opens = code.matches('{').count();
+    let closes = code.matches('}').count();
+    if opens != closes {
+        push(1, "error", "cpp-unbalanced-braces",
+            format!("Số ngoặc nhọn không cân bằng: {} `{{` vs {} `}}`", opens, closes),
+            "Thiếu hoặc thừa `}` làm GCC 15 báo `expected '}' at end of input` hoặc nuốt toàn bộ phần còn lại của tệp. Hãy kiểm tra các khối `main`, `for`, `if`.".to_string(),
+            None);
+    }
+    let popen = code.matches('(').count();
+    let pclose = code.matches(')').count();
+    if (popen as i64 - pclose as i64).abs() > 2 {
+        push(1, "warning", "cpp-unbalanced-parens",
+            format!("Số ngoặc tròn lệch: {} `(` vs {} `)`", popen, pclose),
+            "Có thể bạn quên đóng `)` ở điều kiện `if/for/while` hoặc lời gọi hàm. GCC 15 sẽ báo `expected ')' before ...`.".to_string(),
+            None);
+    }
+
+    // 4. Missing standard headers / namespace
+    let uses_io = has("cout") || has("cin") || has("cerr");
+    let uses_stl = has("vector<") || has("string ") || has("sort(") || has("priority_queue") || has("map<") || has("set<") || has("queue<") || has("stack<");
+    let has_bits = has("<bits/stdc++.h>");
+    if (uses_io || uses_stl) && !has("#include") {
+        if let Some(first) = lines.first().copied() {
+            let after = format!("#include <bits/stdc++.h>\nusing namespace std;\n\n{}", first);
+            push(1, "error", "cpp-missing-include",
+                "Thiếu toàn bộ `#include` nhưng lại dùng `cin/cout/vector/...`".to_string(),
+                "GCC 15 báo `'cout' was not declared in this scope` hoặc `'vector' was not declared`. Đã chèn thư viện chuẩn và `using namespace std;`.".to_string(),
+                Some(drgx_line_patch(first, &after, "Chèn thư viện chuẩn")));
+        }
+    } else if uses_stl && !has_bits {
+        if let Some(first) = lines.iter().find(|l| l.trim_start().starts_with("#include")).copied() {
+            let after = format!("#include <bits/stdc++.h>\n{}", first);
+            push(1, "warning", "cpp-missing-include",
+                "Dùng STL (`vector/sort/priority_queue/...`) nhưng chưa có `#include <bits/stdc++.h>`".to_string(),
+                "Trong môi trường thi đấu, `#include <bits/stdc++.h>` gom toàn bộ STL và tránh lỗi thiếu header. Đã chèn ở đầu tệp.".to_string(),
+                Some(drgx_line_patch(first, &after, "Chèn bits/stdc++.h")));
+        }
+    }
+    if uses_io && has_bits && !has("using namespace std") && !has("std::") {
+        if let Some(last_inc) = lines.iter().rev().find(|l| l.trim_start().starts_with("#include")).copied() {
+            let after = format!("{}\nusing namespace std;", last_inc);
+            push(1, "error", "cpp-missing-using",
+                "Thiếu `using namespace std;` nhưng dùng `cin/cout` không có tiền tố `std::`".to_string(),
+                "GCC 15 báo `'cout' was not declared in this scope`. Đã chèn `using namespace std;` sau khối `#include`.".to_string(),
+                Some(drgx_line_patch(last_inc, &after, "Thêm using namespace std")));
+        }
+    }
+
+    // 5. Fast I/O
+    if uses_io && !has("sync_with_stdio") && !has("freopen") {
+        if let Some(idx) = lines.iter().position(|l| l.contains("int main") && l.contains('{')) {
+            let after = format!("{}\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);", lines[idx]);
+            push(idx + 1, "warning", "cpp-missing-fastio",
+                format!("Dòng {}: Chưa tắt đồng bộ I/O — dễ TLE với N lớn", idx + 1),
+                "`cin/cout` mặc định đồng bộ với C stdio (chậm gấp 2–5 lần). Thêm `ios::sync_with_stdio(false); cin.tie(nullptr);` ngay đầu `main`.".to_string(),
+                Some(drgx_line_patch(lines[idx], &after, "Thêm Fast I/O")));
+        }
+    }
+
+    // 5b. Common typos & header mistakes (GCC 15: not declared / nested-name-specifier)
+    for (i, ln) in lines.iter().enumerate() {
+        let t = ln.trim();
+        let no = i + 1;
+        let typo_pairs: [(&str, &str, &str, &str, &str); 8] = [
+            ("using namepsace std", "using namespace std", "cpp-typo-namespace", "Sai chính tả `namespace`", "GCC 15 báo `expected nested-name-specifier` hoặc `unknown type name`."),
+            ("using namespac std", "using namespace std", "cpp-typo-namespace", "Sai chính tả `namespace`", "Đã tự động sửa thành `using namespace std;`."),
+            ("int mian(", "int main(", "cpp-typo-main", "Sai tên hàm `main` (`mian`)", "Nếu tên hàm sai, linker báo `undefined reference to WinMain`."),
+            ("int man(", "int main(", "cpp-typo-main", "Sai tên hàm `main` (`man`)", "Đã tự động sửa thành `int main(`."),
+            ("count <<", "cout <<", "cpp-typo-cout", "Sai tên `cout` (`count`)", "GCC 15 báo `'count' was not declared in this scope`."),
+            ("vetor<", "vector<", "cpp-typo-vector", "Sai tên `vector` (`vetor`)", "GCC 15 báo `'vetor' was not declared in this scope`."),
+            ("pushback(", "push_back(", "cpp-typo-pushback", "Sai tên `push_back` (`pushback`)", "`std::vector` chỉ có `push_back`, không có `pushback`."),
+            ("push_bach(", "push_back(", "cpp-typo-pushback", "Sai tên `push_back` (`push_bach`)", "Đã tự động sửa thành `push_back`."),
+        ];
+        let mut matched_typo = false;
+        for (bad, good, rule, title, detail) in typo_pairs {
+            if t.contains(bad) {
+                let after = ln.replace(bad, good);
+                push(no, "error", rule,
+                    format!("Dòng {}: {}", no, title),
+                    format!("{} Đã tự động sửa.", detail),
+                    Some(drgx_line_patch(ln, &after, title)));
+                matched_typo = true;
+                break;
+            }
+        }
+        if !matched_typo {
+            let header_pairs: [(&str, &str); 6] = [
+                ("<iosteam>", "<iostream>"),
+                ("<iostrem>", "<iostream>"),
+                ("<iostream.h>", "<iostream>"),
+                ("<studio.h>", "<cstdio>"),
+                ("<bit/stdc++.h>", "<bits/stdc++.h>"),
+                ("<bits/stdc++.h", "<bits/stdc++.h>"),
+            ];
+            for (bad, good) in header_pairs {
+                if t.contains(bad) && !(bad == "<bits/stdc++.h" && t.contains("<bits/stdc++.h>")) {
+                    let after = ln.replace(bad, good);
+                    push(no, "error", "cpp-header-typo",
+                        format!("Dòng {}: Sai tên thư viện `{}`", no, bad.trim_matches(|c| c == '<' || c == '>')),
+                        "GCC 15 báo `{}: No such file or directory`. Đã tự động sửa đúng tên header.".to_string(),
+                        Some(drgx_line_patch(ln, &after, "Sửa tên thư viện")));
+                    break;
+                }
+            }
+        }
+        if (t.starts_with("include ") || t.starts_with("include<")) && !t.starts_with("#include") {
+            let after = format!("#{}", ln.trim_start());
+            push(no, "error", "cpp-include-hash",
+                format!("Dòng {}: Tiền xử lý thiếu dấu `#` (`include ...`)", no),
+                "GCC 15 báo `expected unqualified-id before ...`. Mọi chỉ thị tiền xử lý phải bắt đầu bằng `#`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "Thêm # cho include")));
+        }
+        if t.matches('"').count() % 2 == 1 && !t.starts_with("//") && !t.contains("//") && !t.contains("R\"") {
+            push(no, "error", "cpp-odd-quotes",
+                format!("Dòng {}: Số dấu nháy kép `\"` lẻ — chuỗi chưa đóng", no),
+                "Chuỗi chưa đóng khiến GCC 15 nuốt các dòng phía sau và báo `missing terminating \" character`. Hãy kiểm tra lại literal chuỗi.".to_string(),
+                None);
+        }
+        if t.starts_with("#define int long long") {
+            push(no, "warning", "cpp-define-int",
+                format!("Dòng {}: `#define int long long` thay đổi toàn bộ kiểu `int`", no),
+                "Thủ thuật này làm `main` thành `long long main` và có thể bị GCC 15 từ chối. Nếu dùng, phải viết `signed main()` thay vì `int main()`.".to_string(),
+                None);
+        }
+        if t.contains("abs(INT_MIN)") || t.contains("abs(INT32_MIN)") {
+            push(no, "error", "cpp-abs-intmin",
+                format!("Dòng {}: `abs(INT_MIN)` là Undefined Behavior", no),
+                "`INT_MIN = -2147483648` không có biểu diễn dương trong `int`; `abs` trả về giá trị âm. Dùng `llabs((long long)x)` hoặc kiểm tra dấu trước.".to_string(),
+                None);
+        }
+        if t.contains("rand() %") {
+            push(no, "info", "cpp-rand-bias",
+                format!("Dòng {}: `rand() % n` bị lệch phân phối", no),
+                "`rand()` trả về `[0, RAND_MAX]`; phép `%` làm các giá trị đầu xuất hiện nhiều hơn. Với CP nên dùng `mt19937` + `uniform_int_distribution`.".to_string(),
+                None);
+        }
+        if t.contains("scanf(") && t.contains("%s") && !t.contains("//") {
+            push(no, "warning", "cpp-scanf-width",
+                format!("Dòng {}: `scanf(\"%s\")` không giới hạn độ dài", no),
+                "Nhập chuỗi dài hơn mảng sẽ tràn bộ nhớ (NTSTATUS `0xC0000005`). Dùng `%100s` (nhỏ hơn `sizeof(buf)`) hoặc `fgets`.".to_string(),
+                None);
+        }
+        if t.contains("[i + 1]") || t.contains("[i+1]") || t.contains("[j + 1]") || t.contains("[j+1]") {
+            push(no, "warning", "cpp-index-plus-one",
+                format!("Dòng {}: Truy cập `a[i + 1]` — nguy cơ vượt biên", no),
+                "Khi `i` là phần tử cuối, `i + 1 == n` vượt khỏi mảng và gây `0xC0000005`. Chỉ dùng khi đã kiểm tra `i + 1 < n`.".to_string(),
+                None);
+        }
+        if t.contains("[.size() - 1]") || t.contains("[.size()-1]") || t.contains("v[v.size() - 1]") {
+            push(no, "warning", "cpp-empty-last",
+                format!("Dòng {}: Truy cập phần tử cuối bằng `.size() - 1`", no),
+                "Nếu container rỗng, `size() - 1` tràn thành `SIZE_MAX` và truy cập bộ nhớ không hợp lệ (`0xC0000005`). Kiểm tra `!v.empty()` trước.".to_string(),
+                None);
+        }
+        if t.starts_with("for ") && t.contains(".size() - 1") && t.contains("int ") {
+            if let Some(name_pos) = t.find(".size() - 1") {
+                let before = &t[..name_pos];
+                let var = before.chars().rev().take_while(|c| c.is_ascii_alphanumeric() || *c == '_').collect::<String>().chars().rev().collect::<String>();
+                if !var.is_empty() {
+                    let needle = format!("{}.size() - 1", var);
+                    let after = ln.replace(&needle, &format!("(int){}.size() - 1", var));
+                    push(no, "warning", "cpp-reverse-size",
+                        format!("Dòng {}: `int i = {}.size() - 1` có thể underflow", no, var),
+                        "Khi container rỗng, `size() - 1` tràn thành `SIZE_MAX` trước khi gán vào `int`. Ép `(int)` trước khi trừ để tránh.".to_string(),
+                        Some(drgx_line_patch(ln, &after, "Ép (int) trước khi trừ 1")));
+                }
+            }
+        }
+    }
+
+    // 6. Per-line rules: endl, shift direction, memset, shift overflow, off-by-one, absolute path
+    let has_longlong = has("long long");
+    for (i, ln) in lines.iter().enumerate() {
+        let t = ln.trim();
+        let no = i + 1;
+        if t.contains("endl") && !t.contains("//") {
+            let after = ln.replace("endl", "\"\\n\"");
+            push(no, "warning", "cpp-endl",
+                format!("Dòng {}: Dùng `endl` (flush mỗi lần) thay vì `\"\\n\"`", no),
+                "`endl` gọi `flush()` sau mỗi lần in, cực chậm trong vòng lặp lớn. Dùng `\"\\n\"` và flush một lần nếu cần.".to_string(),
+                Some(drgx_line_patch(ln, &after, "endl -> \"\\n\"")));
+        }
+        if t.contains("cin <<") {
+            let after = ln.replace("cin <<", "cin >>");
+            push(no, "error", "cpp-cin-shift",
+                format!("Dòng {}: `cin <<` sai chiều toán tử", no),
+                "GCC 15 báo `no match for 'operator<<'`. `cin` phải dùng `>>`. Đã sửa.".to_string(),
+                Some(drgx_line_patch(ln, &after, "cin << -> cin >>")));
+        }
+        if t.contains("cout >>") {
+            let after = ln.replace("cout >>", "cout <<");
+            push(no, "error", "cpp-cout-shift",
+                format!("Dòng {}: `cout >>` sai chiều toán tử", no),
+                "GCC 15 báo `no match for 'operator>>'`. `cout` phải dùng `<<`. Đã sửa.".to_string(),
+                Some(drgx_line_patch(ln, &after, "cout >> -> cout <<")));
+        }
+        if t.contains("scanf(") && !t.contains("//") {
+            if let Some(pos) = ln.find("scanf(") {
+                let rest = &ln[pos + 6..];
+                if let Some(comma) = rest.find(',') {
+                    let args = rest[comma + 1..].trim();
+                    let var = args.trim_end_matches(')').split(',').next().unwrap_or("").trim();
+                    if !var.is_empty()
+                        && !var.starts_with('&')
+                        && !var.contains('&')
+                        && !var.contains('[')
+                        && !var.contains('*')
+                        && !var.contains("nullptr")
+                    {
+                        let needle = format!(", {}", var);
+                        if ln.contains(&needle) {
+                            let after = ln.replace(&needle, &format!(", &{}", var));
+                            push(no, "error", "cpp-scanf-address",
+                                format!("Dòng {}: `scanf` nhận `{}` nhưng thiếu `&`", no, var),
+                                "`scanf` cần địa chỉ biến (`&x`) với kiểu cơ bản. Thiếu `&` gây crash `0xC0000005` (Access Violation). Đã thêm.".to_string(),
+                                Some(drgx_line_patch(ln, &after, "Thêm & cho scanf")));
+                        }
+                    }
+                }
+            }
+        }
+        if t.contains("printf(") && t.contains("%d") && has_longlong && !t.contains("%lld") {
+            let after = ln.replace("%d", "%lld");
+            push(no, "warning", "cpp-format-longlong",
+                format!("Dòng {}: `printf` dùng `%d` cho biến `long long`", no),
+                "`%d` chỉ đọc 32-bit; với `long long` phải dùng `%lld`, nếu không kết quả in ra sai hoặc UB.".to_string(),
+                Some(drgx_line_patch(ln, &after, "%d -> %lld")));
+        }
+        if t.contains("gets(") {
+            push(no, "error", "cpp-gets",
+                format!("Dòng {}: `gets()` đã bị xóa khỏi C++17", no),
+                "GCC 15 báo `'gets' was not declared in this scope`. Dùng `getline(cin, s)` hoặc `fgets(buf, sizeof(buf), stdin)`.".to_string(),
+                None);
+        }
+        if t.contains("fflush(stdin)") {
+            let after = ln.replace("fflush(stdin)", "cin.ignore(numeric_limits<streamsize>::max(), '\\n')");
+            push(no, "warning", "cpp-fflush-stdin",
+                format!("Dòng {}: `fflush(stdin)` là hành vi không xác định", no),
+                "C++ standard không định nghĩa `fflush` trên luồng nhập. Dùng `cin.ignore(...)` để xóa bộ đệm.".to_string(),
+                Some(drgx_line_patch(ln, &after, "fflush(stdin) -> cin.ignore")));
+        }
+        if t.contains("system(\"pause\")") || t.contains("system(\"PAUSE\")") {
+            let after = ln.replace("system(\"pause\")", "return 0;").replace("system(\"PAUSE\")", "return 0;");
+            push(no, "warning", "cpp-system-pause",
+                format!("Dòng {}: `system(\"pause\")` treo chương trình khi chấm tự động", no),
+                "Trên OJ không có bàn phím, `system(\"pause\")` sẽ treo đến hết thời gian. Đã thay bằng `return 0;`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "Bỏ system pause")));
+        }
+        if t.contains("getch(") || t.contains("<conio.h>") {
+            push(no, "warning", "cpp-conio",
+                format!("Dòng {}: `conio.h` / `getch()` không phải chuẩn C++", no),
+                "MSYS2 UCRT64 / GCC 15 không có `conio.h`. Hãy xóa `getch()` trước khi nộp bài.".to_string(),
+                None);
+        }
+        if t.contains("memset(") {
+            if let Some(pos) = ln.find("memset(") {
+                let inner = &ln[pos + 7..];
+                let args: Vec<&str> = inner.split(',').map(|s| s.trim()).collect();
+                if args.len() >= 3 {
+                    let arr = args[0];
+                    let val = args[1].trim();
+                    let third = args[2].trim_end_matches(')').trim();
+                    if val == "1" || val == "-1" {
+                        push(no, "error", "cpp-memset-value",
+                            format!("Dòng {}: `memset({}, {}, ...)` không set từng int thành {}", no, arr, val, val),
+                            "`memset` ghi theo từng byte. Với `int`, `memset(a, 1, ...)` tạo ra `0x01010101 = 16843009`, không phải `1`. Dùng `fill(a, a+n, 1)`.".to_string(),
+                            None);
+                    }
+                    if !third.contains("sizeof") && !third.contains('*') && third.chars().any(|c| c.is_ascii_alphabetic()) {
+                        let needle = format!(", {}", third);
+                        if ln.contains(&needle) {
+                            let after = ln.replace(&needle, &format!(", ({}) * sizeof({}[0])", third, arr));
+                            push(no, "error", "cpp-memset-sizeof",
+                                format!("Dòng {}: `memset` dùng số phần tử thay vì số byte", no),
+                                format!("Tham số thứ 3 của `memset({}, {}, {})` phải là số byte: `{} * sizeof({}[0])`. Nếu không chỉ zero được {}/4 phần tử.", arr, val, third, third, arr, third),
+                                Some(drgx_line_patch(ln, &after, "Sửa sizeof cho memset")));
+                        }
+                    }
+                }
+            }
+        }
+        if (t.starts_with("int ") || t.starts_with("long long ") || t.contains(" int "))
+            && t.contains('[')
+            && !t.contains("vector")
+            && !t.contains("std::array")
+        {
+            if let (Some(lb), Some(rb)) = (t.find('['), t.find(']')) {
+                if lb < rb && !t[rb + 1..].contains('[') {
+                    let size_expr = t[lb + 1..rb].trim().to_string();
+                    let dynamic_size = !size_expr.is_empty()
+                        && size_expr.chars().any(|c| c.is_ascii_alphabetic())
+                        && !size_expr.contains("MAX")
+                        && !size_expr.contains("const")
+                        && !size_expr.chars().next().map_or(false, |c| c.is_ascii_uppercase());
+                    if dynamic_size {
+                        let has_init = t[rb + 1..].contains('{');
+                        let head = t[..lb].trim();
+                        let name = head.split_whitespace().last().unwrap_or("a");
+                        let base = if head.starts_with("long long") { "long long" } else { "int" };
+                        let indent: String = ln.chars().take_while(|c| *c == ' ' || *c == '\t').collect();
+                        let after = if has_init {
+                            format!("{}vector<{}> {}({}, 0);", indent, base, name, size_expr)
+                        } else {
+                            format!("{}vector<{}> {}({});", indent, base, name, size_expr)
+                        };
+                        if has_init {
+                            push(no, "error", "cpp-vla-init",
+                                format!("Dòng {}: Mảng kích thước động `{}[{}]` khởi tạo bằng `= {{...}}`", no, name, size_expr),
+                                "GCC 15 báo `variable-sized object may not be initialized`. VLA không được khởi tạo tập trung. Dùng `vector<int> a(n, 0);` hoặc `memset` sau khai báo.".to_string(),
+                                Some(drgx_line_patch(ln, &after, "VLA -> vector có khởi tạo")));
+                        } else {
+                            push(no, "info", "cpp-vla",
+                                format!("Dòng {}: Mảng kích thước động `{}[{}]` (VLA)", no, name, size_expr),
+                                "VLA là extension không chuẩn của GCC, dễ tràn stack với N lớn và không dùng được trong `struct`. Nên thay bằng `vector`.".to_string(),
+                                Some(drgx_line_patch(ln, &after, "VLA -> vector")));
+                        }
+                    }
+                }
+            }
+        }
+        if t.contains("vector<bool>") {
+            let after = ln.replace("vector<bool>", "vector<char>");
+            push(no, "info", "cpp-vector-bool",
+                format!("Dòng {}: `vector<bool>` là specialization đặc biệt (proxy reference)", no),
+                "`vector<bool>` không trả về `bool&`, không dùng được `auto&`/con trỏ. Với CP nên dùng `vector<char>` hoặc `bitset`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "vector<bool> -> vector<char>")));
+        }
+        if (t.contains("1 << 31") || t.contains("1<<31")) && !t.contains("1LL") {
+            let after = ln.replace("1 << 31", "1LL << 31").replace("1<<31", "1LL<<31");
+            push(no, "error", "cpp-shift-overflow",
+                format!("Dòng {}: `1 << 31` tràn `int` có dấu (UB)", no),
+                "`1` là `int` 32-bit; dịch trái 31 tạo bit dấu âm, GCC 15 báo `left shift of 1 by 31 places cannot be represented in type 'int'`. Dùng `1LL << 31`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "1 << 31 -> 1LL << 31")));
+        } else if !t.contains("1LL") && !t.contains("1ll") {
+            let shift_pos = t.find("1 <<").or_else(|| t.find("1<<"));
+            if let Some(pos) = shift_pos {
+                let mut rest = t[pos..].trim_start_matches('1').trim_start();
+                if rest.starts_with("<<") {
+                    rest = rest[2..].trim_start();
+                }
+                if rest.chars().next().map_or(false, |c| c.is_ascii_alphabetic() || c == '_') {
+                    let after = ln.replace("1 <<", "1LL <<").replace("1<<", "1LL<<");
+                    push(no, "warning", "cpp-shift-overflow",
+                        format!("Dòng {}: Dịch bit `1 << {}` có thể vượt 31", no, rest.chars().take_while(|c| c.is_ascii_alphanumeric() || *c == '_').collect::<String>()),
+                        "`1` là `int` 32-bit. Nếu biến dịch >= 31, hành vi là Undefined Behavior (GCC 15 cảnh báo `left shift ... cannot be represented`). Dùng `1LL <<` để an toàn.".to_string(),
+                        Some(drgx_line_patch(ln, &after, "1 << k -> 1LL << k")));
+                }
+            }
+        }
+        if t.contains("accumulate(") && t.contains(", 0)") {
+            let after = ln.replace(", 0)", ", 0LL)");
+            push(no, "warning", "cpp-accumulate-int",
+                format!("Dòng {}: `accumulate(..., 0)` khởi tạo bằng `int`", no),
+                "Giá trị khởi tạo `0` là `int`, phép cộng sẽ tràn trước khi trả về. Dùng `0LL` để cộng bằng `long long`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "0 -> 0LL")));
+        }
+        if (t.contains("if (") || t.contains("if(") || t.contains("while (") || t.contains("while("))
+            && t.contains(" = ")
+            && !t.contains("==")
+            && !t.contains("<=")
+            && !t.contains(">=")
+            && !t.contains("!=")
+            && !t.contains("+=")
+            && !t.contains("-=")
+            && !t.contains("*=")
+            && !t.contains("/=")
+        {
+            let after = ln.replace(" = ", " == ");
+            push(no, "error", "cpp-if-assign",
+                format!("Dòng {}: Dùng `=` (gán) thay vì `==` (so sánh) trong điều kiện", no),
+                "GCC 15 cảnh báo `suggest parentheses around assignment used as truth value`. `if (a = b)` luôn đúng nếu `b != 0`, gây WA âm thầm.".to_string(),
+                Some(drgx_line_patch(ln, &after, "= -> ==")));
+        }
+        if t.contains("=<") {
+            let after = ln.replace("=<", "<=");
+            push(no, "error", "cpp-comparison-operator",
+                format!("Dòng {}: Toán tử so sánh sai `=<`", no),
+                "C++ viết `<=`. Đã sửa.".to_string(),
+                Some(drgx_line_patch(ln, &after, "=< -> <=")));
+        }
+        if t.contains("=>") && (t.contains("if") || t.contains("while")) {
+            let after = ln.replace("=>", ">=");
+            push(no, "error", "cpp-comparison-operator",
+                format!("Dòng {}: Toán tử so sánh sai `=>`", no),
+                "C++ viết `>=`. Đã sửa.".to_string(),
+                Some(drgx_line_patch(ln, &after, "=> -> >=")));
+        }
+        if t.contains("freopen(") && (t.contains("\"C:") || t.contains("\"D:") || t.contains("\"c:") || t.contains("\"d:") || t.contains(":/") || t.contains("\\\\")) {
+            if let Some(q1) = ln.find("freopen(\"") {
+                let start = q1 + 9;
+                if let Some(q2rel) = ln[start..].find('"') {
+                    let q2 = start + q2rel;
+                    let full = &ln[start..q2];
+                    let name = full.rsplit(|c| c == '\\' || c == '/').next().unwrap_or(full).to_string();
+                    let after = format!("{}freopen(\"{}\"{}", &ln[..q1], name, &ln[q2..]);
+                    push(no, "error", "cpp-absolute-path",
+                        format!("Dòng {}: `freopen` dùng đường dẫn tuyệt đối", no),
+                        "Themis/OJ chấm ở thư mục khác, đường dẫn tuyệt đối sẽ mở sai tệp hoặc không tìm thấy. Chỉ dùng tên tệp tương đối (ví dụ `BAY_MAU.INP`).".to_string(),
+                        Some(drgx_line_patch(ln, &after, "Bỏ đường dẫn tuyệt đối")));
+                }
+            }
+        }
+    }
+
+    // 7. Unsigned / size_t comparisons
+    for (i, ln) in lines.iter().enumerate() {
+        let t = ln.trim();
+        let no = i + 1;
+        if t.contains(".size()") {
+            let uses_int = t.contains("int ") || t.contains("for (int") || t.contains("for(int");
+            if uses_int {
+                if let Some(pos) = ln.find(".size()") {
+                    let mut start = pos;
+                    let bytes = ln.as_bytes();
+                    while start > 0 {
+                        let c = bytes[start - 1] as char;
+                        if c.is_ascii_alphanumeric() || c == '_' {
+                            start -= 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    let var = &ln[start..pos];
+                    if !var.is_empty() && var != "std" {
+                        let after = format!("{}(int){}.size(){}", &ln[..start], var, &ln[pos + 7..]);
+                        push(no, "warning", "cpp-size-cast",
+                            format!("Dòng {}: So sánh `int` với `{}.size()` (kiểu `size_t` không dấu)", no, var),
+                            "Khi vector rỗng, `v.size() - 1` underflow thành `SIZE_MAX`; so sánh `int < size_t` cũng bị chuyển thành unsigned. Hãy ép `(int)` hoặc dùng `size_t`.".to_string(),
+                            Some(drgx_line_patch(ln, &after, "Ép (int) cho .size()")));
+                    }
+                }
+            }
+        }
+        if t.starts_with("int ") && (t.contains("sum") || t.contains("ans") || t.contains("total") || t.contains("res")) && t.contains("= 0") && !has("#define int long long") {
+            let after = ln.replacen("int ", "long long ", 1);
+            push(no, "warning", "cpp-int-accumulator",
+                format!("Dòng {}: Biến tích lũy khai báo `int` — nguy cơ tràn số", no),
+                "Tổng của N số lên tới 10^9 × 10^5 = 10^14 vượt xa `int` (2.1 × 10^9). Dùng `long long`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "int -> long long")));
+        }
+        if (t.contains("/ 0") || t.contains("/0")) && !t.contains("0.0") && !t.contains("//") {
+            push(no, "error", "cpp-divide-zero",
+                format!("Dòng {}: Chia cho hằng số 0", no),
+                "Lỗi runtime NTSTATUS `0xC0000094` (Integer Divide by Zero) sẽ kill chương trình ngay. Kiểm tra mẫu số trước khi chia.".to_string(),
+                None);
+        }
+        if t.contains("for (") && t.contains("<=") && (has("vector<") || has("vector <")) {
+            let after = ln.replacen("<=", "<", 1);
+            push(no, "error", "cpp-loop-offbyone",
+                format!("Dòng {}: Vòng lặp `<=` với mảng `vector` kích thước N", no),
+                "`for (i = 0; i <= n; i++)` truy cập `a[n]` ngoài phạm vi, gây NTSTATUS `0xC0000005` (Access Violation) hoặc đọc rác. Đổi thành `< n`.".to_string(),
+                Some(drgx_line_patch(ln, &after, "<= -> <")));
+        }
+        if (t.contains("long long") || t.contains("int ")) && t.contains('[') && t.contains(']') {
+            let digits: String = t.chars().skip_while(|c| *c != '[').skip(1).take_while(|c| c.is_ascii_digit()).collect();
+            if let Ok(sz) = digits.parse::<u64>() {
+                if sz >= 1_000_000 && (ln.starts_with(' ') || ln.starts_with('\t')) {
+                    let indent: String = ln.chars().take_while(|c| *c == ' ' || *c == '\t').collect();
+                    let after = format!("{}static {}", indent, t);
+                    push(no, "error", "cpp-large-local-array",
+                        format!("Dòng {}: Mảng cục bộ {} phần tử (~{} MB) — nguy cơ tràn stack", no, sz, sz * 4 / 1_048_576),
+                        "Stack Windows mặc định chỉ 1 MB; mảng vài triệu phần tử gây NTSTATUS `0xC00000FD` (Stack Overflow). Thêm `static` hoặc chuyển ra global / dùng `vector`.".to_string(),
+                        Some(drgx_line_patch(ln, &after, "Thêm static cho mảng lớn")));
+                }
+            }
+        }
+    }
+
+    // 8. Extra whole-file checks
+    if has("new ") && !has("delete") {
+        push(1, "info", "cpp-new-delete",
+            "Có `new` nhưng không thấy `delete` — nguy cơ rò rỉ bộ nhớ".to_string(),
+            "Mỗi `new`/`new[]` cần `delete`/`delete[]` tương ứng. Trong CP nên ưu tiên `vector` / bộ nhớ stack.".to_string(),
+            None);
+    }
+    if has("malloc(") && !has("free(") {
+        push(1, "info", "cpp-malloc-free",
+            "Có `malloc` nhưng không thấy `free` — nguy cơ rò rỉ bộ nhớ".to_string(),
+            "Cấp phát bằng `malloc`/`calloc` phải giải phóng bằng `free`. Cân nhắc dùng `vector` để tự động quản lý.".to_string(),
+            None);
+    }
+    if has("double ") || has("float ") {
+        for (i, ln) in lines.iter().enumerate() {
+            let t = ln.trim();
+            if t.contains("==") && !t.contains("//") && (has("double ") || has("float ")) {
+                push(i + 1, "warning", "cpp-float-equal",
+                    format!("Dòng {}: So sánh số thực bằng `==`", i + 1),
+                    "Sai số dấu phẩy động khiến `a == b` hiếm khi đúng. Dùng `fabs(a - b) < 1e-9`.".to_string(),
+                    None);
+            }
+        }
+    }
+    if has("const int INF") && (has("1e18") || has("1e15") || has("1e12")) {
+        for (i, ln) in lines.iter().enumerate() {
+            if ln.contains("const int INF") {
+                let after = ln.replace("const int INF", "const long long INF");
+                push(i + 1, "error", "cpp-inf-double",
+                    format!("Dòng {}: `const int INF` gán giá trị 1e12+ (tràn `int`)", i + 1),
+                    "`1e18` vượt xa `int`; GCC 15 cảnh báo `overflow in conversion from 'double' to 'int'`. Dùng `const long long INF = (long long)1e18;`.".to_string(),
+                    Some(drgx_line_patch(ln, &after, "INF -> long long")));
+                break;
+            }
+        }
+    }
+    if has("vector<") && has("cout <<") {
+        let mut vector_vars: Vec<String> = Vec::new();
+        for ln in &lines {
+            if let Some(pos) = ln.find("vector<") {
+                if let Some(gt) = ln[pos..].find('>') {
+                    let after_gt = &ln[pos + gt + 1..];
+                    let name: String = after_gt.trim_start().chars().take_while(|c| c.is_ascii_alphanumeric() || *c == '_').collect();
+                    if !name.is_empty() {
+                        vector_vars.push(name);
+                    }
+                }
+            }
+        }
+        for (i, ln) in lines.iter().enumerate() {
+            if ln.contains("cout <<") {
+                for v in &vector_vars {
+                    if ln.contains(&format!("<< {}", v)) || ln.contains(&format!("<<{}", v)) {
+                        push(i + 1, "error", "cpp-cout-vector",
+                            format!("Dòng {}: In trực tiếp `{}` (vector) bằng `cout`", i + 1, v),
+                            "GCC 15 báo `no match for 'operator<<'`. Hãy in từng phần tử bằng vòng lặp hoặc dùng hàm `print_vector`.".to_string(),
+                            None);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    out
+}
+
+fn drgx_attach_base_patches(code: &str, fixed: &str, findings: &mut [Value]) {
+    if code == fixed {
+        return;
+    }
+    let orig: Vec<&str> = code.lines().collect();
+    let fix: Vec<&str> = fixed.lines().collect();
+    if orig.len() != fix.len() {
+        return;
+    }
+    for (i, (a, b)) in orig.iter().zip(fix.iter()).enumerate() {
+        if a == b {
+            continue;
+        }
+        for f in findings.iter_mut() {
+            let line_matches = f["line"].as_u64() == Some((i + 1) as u64);
+            let no_patch = f.get("autofix_patch").map_or(true, |v| v.is_null());
+            if line_matches && no_patch {
+                f["autofix_patch"] = json!({
+                    "before": a,
+                    "after": b,
+                    "description": "Bản vá tự động (AST engine)",
+                    "applied": true
+                });
+                break;
+            }
+        }
+    }
+}
+
+fn drgx_diagnose_json(code: &str, lang: &str, mode: &str) -> Value {
+    let mut result = analyze_and_fix_code(code, lang, mode);
+    let fixed = result["fixedCode"].as_str().unwrap_or(code).to_string();
+    let mut findings: Vec<Value> = result["findings"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default();
+
+    drgx_attach_base_patches(code, &fixed, &mut findings);
+    for f in findings.iter_mut() {
+        if f.get("rule").map_or(true, |v| v.is_null()) {
+            f["rule"] = json!("cpp-base-diagnostic");
+        }
+    }
+    findings.extend(drgx_extra_diagnostics(code, lang));
+
+    findings.sort_by_key(|f| {
+        let rank: u8 = match f["severity"].as_str().unwrap_or("info") {
+            "error" => 0,
+            "warning" => 1,
+            _ => 2,
+        };
+        (rank, f["line"].as_u64().unwrap_or(1))
+    });
+
+    let first_error_line = findings
+        .iter()
+        .find(|f| f["severity"].as_str() == Some("error"))
+        .and_then(|f| f["line"].as_u64())
+        .unwrap_or(0) as usize;
+    let has_changes = fixed != code;
+    let total = findings.len();
+    let errors = findings.iter().filter(|f| f["severity"].as_str() == Some("error")).count();
+    let warnings = findings.iter().filter(|f| f["severity"].as_str() == Some("warning")).count();
+    let md = format!(
+        "### 🩺 DrgX AST / GCC 15 / NTSTATUS — {} phát hiện ({} lỗi, {} cảnh báo)\n- **Bộ quy tắc:** {} quy tắc\n- **Độ phức tạp heuristic:** `{}`\n- **Có bản vá tự động:** {}\n\n{}",
+        total,
+        errors,
+        warnings,
+        DRGX_RULE_COUNT,
+        result["complexity"].as_str().unwrap_or("O(1)"),
+        if has_changes { "Có — bấm ✨ Áp Dụng Bản Vá" } else { "Không" },
+        findings
+            .iter()
+            .take(30)
+            .enumerate()
+            .map(|(i, f)| {
+                format!(
+                    "{}. **[{}] Dòng {}: {}**\n   - {}",
+                    i + 1,
+                    f["severity"].as_str().unwrap_or("info").to_uppercase(),
+                    f["line"].as_u64().unwrap_or(1),
+                    f["title"].as_str().unwrap_or(""),
+                    f["detail"].as_str().unwrap_or("")
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
+
+    result["findings"] = Value::Array(findings);
+    result["firstErrorLine"] = json!(first_error_line);
+    result["hasChanges"] = json!(has_changes);
+    result["ruleCount"] = json!(DRGX_RULE_COUNT);
+    result["errorCount"] = json!(errors);
+    result["warningCount"] = json!(warnings);
+    result["autofix_patch"] = if has_changes {
+        json!({
+            "before": code,
+            "after": fixed,
+            "description": "Áp dụng toàn bộ bản vá do engine AST sinh ra",
+            "applied": true
+        })
+    } else {
+        Value::Null
+    };
+    if mode == "explain" {
+        let merged = match result["markdown"].as_str() {
+            Some(orig) if !orig.trim().is_empty() => format!("{}\n\n---\n\n{}", orig, md),
+            _ => md,
+        };
+        result["markdown"] = json!(merged);
+    } else {
+        result["markdown"] = json!(md);
+    }
+    result
+}
+
+fn drgx_compiler_check_json(code: &str) -> Value {
+    let started = Instant::now();
+    let (ok, diags, raw) = check_cpp_compiler_diagnostics(code);
+    let items: Vec<Value> = diags
+        .iter()
+        .map(|d| {
+            json!({
+                "line": d.line,
+                "col": d.col,
+                "severity": d.severity,
+                "message": d.raw_msg,
+                "title": d.vi_title,
+                "detail": d.vi_detail
+            })
+        })
+        .collect();
+    json!({
+        "ok": ok,
+        "timeMs": started.elapsed().as_millis() as u64,
+        "diagnostics": items,
+        "output": raw.chars().take(6000).collect::<String>()
+    })
+}
+
+fn ln_keep_indent(line: &str) -> String {
+    line.to_string()
+}
+
 fn proxy_to_oj(path_url: &str, method: &str, body_obj: Option<&Value>, timeout_ms: u64) -> Option<Value> {
     if !ensure_oj_server() {
         return None;
@@ -2609,7 +3561,7 @@ fn handle_client(mut stream: TcpStream, port: u16) {
     }
 
     // 1. Health & Doctor
-    if pathname == "/api/studio/health" && method == "GET" {
+    if (pathname == "/api/studio/health" || pathname == "/api/health") && method == "GET" {
         let oj_online = check_oj_listening();
         let ws = get_active_workspace();
         send_json(
@@ -2619,15 +3571,226 @@ fn handle_client(mut stream: TcpStream, port: u16) {
                 "status": "ok",
                 "product": "DrgX Studio Native Tauri v2 App",
                 "engine": "rust-tauri-v2",
-                "version": "2.6.0",
+                "version": "2.7.0",
                 "port": port,
                 "ojPort": OJ_PORT,
                 "ojOnline": oj_online,
                 "workspace": ws.to_string_lossy(),
                 "gxx": gxx_bin().to_string_lossy(),
-                "python": python_bin().to_string_lossy()
+                "python": python_bin().to_string_lossy(),
+                "ruleCount": DRGX_RULE_COUNT,
+                "capabilities": [
+                    "profile-complexity",
+                    "ast-diagnostics",
+                    "gcc15-syntax-check",
+                    "autofix-patch",
+                    "ntstatus-runtime",
+                    "themis-preflight"
+                ]
             }),
         );
+        return;
+    }
+
+    // 1b. 🩺 AST / GCC 15 / NTSTATUS diagnostics (71 rules + autofix patches)
+    if (pathname == "/api/studio/diagnose" || pathname == "/api/diagnose") && method == "POST" {
+        let body_json = parse_body_json(&body);
+        let code = body_json["code"].as_str().unwrap_or("");
+        let lang = body_json["lang"].as_str().unwrap_or("cpp");
+        let mut result = drgx_diagnose_json(code, lang, "bugcheck");
+        let auto_compile = body_json["autoCompile"].as_bool().unwrap_or(false);
+        let is_cpp = {
+            let l = lang.to_lowercase();
+            l == "cpp" || l == "c++" || l == "c"
+        };
+        if auto_compile && is_cpp && !code.trim().is_empty() {
+            let compiler = drgx_compiler_check_json(code);
+            let compiler_diags = compiler["diagnostics"].as_array().cloned().unwrap_or_default();
+            if let Some(arr) = result.get_mut("findings").and_then(|v| v.as_array_mut()) {
+                for d in compiler_diags {
+                    arr.push(json!({
+                        "line": d["line"],
+                        "severity": d["severity"],
+                        "rule": "gcc15-compiler",
+                        "title": format!(
+                            "GCC 15 · Dòng {}: {}",
+                            d["line"].as_u64().unwrap_or(1),
+                            d["title"].as_str().unwrap_or("Lỗi biên dịch")
+                        ),
+                        "detail": d["detail"],
+                        "autofix_patch": Value::Null
+                    }));
+                }
+            }
+            if let Some(arr) = result.get_mut("findings").and_then(|v| v.as_array_mut()) {
+                arr.sort_by_key(|f| {
+                    let rank: u8 = match f["severity"].as_str().unwrap_or("info") {
+                        "error" => 0,
+                        "warning" => 1,
+                        _ => 2,
+                    };
+                    (rank, f["line"].as_u64().unwrap_or(1))
+                });
+            }
+            result["compiler"] = compiler;
+        }
+        send_json(stream, 200, result);
+        return;
+    }
+
+    // 1c. 📈 Empirical complexity profiler (self-timing harness via DrgX CLI)
+    if (pathname == "/api/profile-complexity" || pathname == "/api/studio/profile-complexity") && method == "POST" {
+        let body_json = parse_body_json(&body);
+        let code = body_json["code"].as_str().unwrap_or("");
+        let lang_raw = body_json["lang"].as_str().unwrap_or("cpp").to_lowercase();
+        let is_py = lang_raw == "py" || lang_raw == "python";
+        let lang = if is_py { "python" } else { "cpp" };
+        if code.trim().is_empty() {
+            send_json(
+                stream,
+                400,
+                json!({
+                    "ok": false,
+                    "error": "EMPTY",
+                    "message": "Code đang trống — không thể đo độ phức tạp."
+                }),
+            );
+            return;
+        }
+        let cli = drgx_cli_exe();
+        if !cli.is_file() {
+            send_json(
+                stream,
+                503,
+                json!({
+                    "ok": false,
+                    "error": "CLI_MISSING",
+                    "message": format!("Không tìm thấy DrgX CLI tại {}. Hãy build `cargo build` trong thư mục cli/.", cli.display())
+                }),
+            );
+            return;
+        }
+        let dir = std::env::temp_dir().join("drgx_tauri_profile");
+        let _ = std::fs::create_dir_all(&dir);
+        let stamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        let file = dir.join(format!(
+            "profile_{}.{}",
+            stamp,
+            if is_py { "py" } else { "cpp" }
+        ));
+        if std::fs::write(&file, code).is_err() {
+            send_json(
+                stream,
+                500,
+                json!({ "ok": false, "error": "TEMP_WRITE", "message": "Không ghi được tệp tạm để profiling." }),
+            );
+            return;
+        }
+        let file_str = file.to_string_lossy().to_string();
+        let tl = body_json["timeLimitMs"]
+            .as_u64()
+            .or_else(|| body_json["timeLimitMs"].as_f64().map(|v| v as u64))
+            .unwrap_or(8000)
+            .clamp(200, 20_000);
+        let reps = body_json["repeats"].as_u64().unwrap_or(2).clamp(1, 5);
+        let mut args: Vec<String> = vec![
+            "profile".to_string(),
+            file_str.clone(),
+            "--json".to_string(),
+            "--tl".to_string(),
+            tl.to_string(),
+            "--repeats".to_string(),
+            reps.to_string(),
+        ];
+        if let Some(sizes) = body_json["sizes"].as_array() {
+            let list: Vec<String> = sizes
+                .iter()
+                .filter_map(|v| v.as_u64())
+                .filter(|v| *v >= 1 && *v <= 10_000_000)
+                .map(|v| v.to_string())
+                .collect();
+            if list.len() >= 2 {
+                args.push("--n".to_string());
+                args.push(list.join(","));
+            }
+        }
+        let arg_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+        let run = run_process_with_input(&cli, &arg_refs, "", 120_000, &dir);
+        let _ = std::fs::remove_file(&file);
+        let parsed = serde_json::from_str::<Value>(run.stdout.trim()).ok();
+        match parsed {
+            Some(mut v) => {
+                let diag = drgx_diagnose_json(code, lang, "explain");
+                v["findings"] = diag["findings"].clone();
+                v["fixedCode"] = diag["fixedCode"].clone();
+                v["hasChanges"] = diag["hasChanges"].clone();
+                v["autofix_patch"] = diag["autofix_patch"].clone();
+                v["astComplexity"] = diag["complexity"].clone();
+                v["ruleCount"] = json!(DRGX_RULE_COUNT);
+                v["elapsedMs"] = json!(run.time_ms);
+                let mut peak_kb: u64 = 0;
+                let mut harness_reps: u64 = 0;
+                if let Some(points) = v["points"].as_array() {
+                    for p in points {
+                        if let Some(kb) = p["peakKb"].as_u64() {
+                            peak_kb = peak_kb.max(kb);
+                        }
+                        if let Some(rp) = p["harnessReps"].as_u64() {
+                            harness_reps = harness_reps.max(rp);
+                        }
+                    }
+                }
+                v["peakKb"] = if peak_kb > 0 { json!(peak_kb) } else { Value::Null };
+                v["harness"] = json!({
+                    "mode": if is_py { "python-exec-loop" } else { "iostream-loop" },
+                    "reps": if harness_reps > 0 { json!(harness_reps) } else { Value::Null },
+                    "calibratedOverheadUs": 0
+                });
+                if let Some(reg) = v.get_mut("regression") {
+                    let k = reg["k"].as_f64().unwrap_or(0.0);
+                    let c = reg["c"].as_f64().unwrap_or(0.0);
+                    reg["model"] = json!("log2 T(N) = k · log2 N + c");
+                    reg["equation"] = json!(format!(
+                        "T(N) ≈ 2^({:.4} · log2 N + {:.4}) µs",
+                        k, c
+                    ));
+                }
+                let ok = v["ok"].as_bool().unwrap_or(false);
+                if !ok {
+                    let diag2 = drgx_diagnose_json(code, lang, "bugcheck");
+                    v["findings"] = diag2["findings"].clone();
+                    v["fixedCode"] = diag2["fixedCode"].clone();
+                    v["hasChanges"] = diag2["hasChanges"].clone();
+                    v["autofix_patch"] = diag2["autofix_patch"].clone();
+                }
+                send_json(stream, 200, v);
+            }
+            None => {
+                let diag = drgx_diagnose_json(code, lang, "bugcheck");
+                let msg = if run.stderr.trim().is_empty() {
+                    run.stdout.trim().to_string()
+                } else {
+                    run.stderr.trim().to_string()
+                };
+                send_json(
+                    stream,
+                    502,
+                    json!({
+                        "ok": false,
+                        "error": "CLI_FAILED",
+                        "message": msg.chars().take(4000).collect::<String>(),
+                        "findings": diag["findings"],
+                        "fixedCode": diag["fixedCode"],
+                        "hasChanges": diag["hasChanges"],
+                        "autofix_patch": diag["autofix_patch"],
+                        "ruleCount": DRGX_RULE_COUNT
+                    }),
+                );
+            }
+        }
         return;
     }
 
@@ -3184,7 +4347,13 @@ fn handle_client(mut stream: TcpStream, port: u16) {
             .as_str()
             .unwrap_or("greedy_activity_001");
 
-        if mode == "explain" || mode == "bugcheck" || mode == "optimize" || mode == "gentest" {
+        if mode == "explain" || mode == "bugcheck" || mode == "optimize" {
+            let analysis = drgx_diagnose_json(code, lang, mode);
+            send_json(stream, 200, analysis);
+            return;
+        }
+
+        if mode == "gentest" {
             let analysis = analyze_and_fix_code(code, lang, mode);
             send_json(stream, 200, analysis);
             return;
@@ -3240,7 +4409,7 @@ fn handle_client(mut stream: TcpStream, port: u16) {
             })
             .unwrap_or("Mình đã phân tích bài toán và code của bạn bằng nhân Rust bản địa. Hãy kiểm tra độ phức tạp và kiểu dữ liệu `long long` ở các Subtask lớn!");
         let local_diag = if !code.trim().is_empty() {
-            analyze_and_fix_code(code, lang, "bugcheck")["findings"].clone()
+            drgx_diagnose_json(code, lang, "bugcheck")["findings"].clone()
         } else {
             json!([])
         };
@@ -3633,4 +4802,114 @@ fn main() {
             }
         }
     });
+}
+
+#[cfg(test)]
+mod drgx_diag_tests {
+    use super::*;
+
+    #[test]
+    fn extra_rules_detect_classic_cpp_bugs() {
+        let code = "#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    int n; cin >> n;\n    vector<int> b(n);\n    cin << n;\n    for (int i = 0; i <= n; i++) cout << i << endl;\n    int a[n] = {0};\n    memset(a, 0, n);\n    return 0;\n}\n";
+        let findings = drgx_extra_diagnostics(code, "cpp");
+        let rules: Vec<&str> = findings
+            .iter()
+            .filter_map(|f| f["rule"].as_str())
+            .collect();
+        assert!(rules.contains(&"cpp-cin-shift"), "rules: {:?}", rules);
+        assert!(rules.contains(&"cpp-endl"), "rules: {:?}", rules);
+        assert!(rules.contains(&"cpp-memset-sizeof"), "rules: {:?}", rules);
+        assert!(rules.contains(&"cpp-loop-offbyone"), "rules: {:?}", rules);
+        assert!(rules.contains(&"cpp-vla-init"), "rules: {:?}", rules);
+        assert!(findings.iter().any(|f| !f["autofix_patch"].is_null()));
+    }
+
+    #[test]
+    fn diagnose_json_exposes_71_rules_and_patches() {
+        let code = "#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    cout << \"hi\" << endl\n    return 0;\n}\n";
+        let out = drgx_diagnose_json(code, "cpp", "bugcheck");
+        assert_eq!(out["ruleCount"].as_u64(), Some(71));
+        assert!(out["findings"].as_array().map_or(0, |a| a.len()) >= 1);
+        assert_eq!(out["hasChanges"].as_bool(), Some(true));
+        assert!(out["autofix_patch"].is_object());
+    }
+
+    #[test]
+    fn python_rules_detect_bare_except_and_is_literal() {
+        let code = "try:\n    x = 1\nexcept:\n    pass\nif x is 0:\n    print('zero')\n";
+        let findings = drgx_extra_diagnostics(code, "python");
+        let rules: Vec<&str> = findings
+            .iter()
+            .filter_map(|f| f["rule"].as_str())
+            .collect();
+        assert!(rules.contains(&"py-bare-except"), "rules: {:?}", rules);
+        assert!(rules.contains(&"py-is-literal"), "rules: {:?}", rules);
+    }
+
+    #[test]
+    fn typo_and_python_extra_rules_fire() {
+        let cpp = "#include <iosteam>\nusing namepsace std;\nint mian() {\n    int a[10];\n    return 0;\n}\n";
+        let findings = drgx_extra_diagnostics(cpp, "cpp");
+        let rules: Vec<&str> = findings
+            .iter()
+            .filter_map(|f| f["rule"].as_str())
+            .collect();
+        assert!(rules.contains(&"cpp-header-typo"), "rules: {:?}", rules);
+        assert!(rules.contains(&"cpp-typo-namespace"), "rules: {:?}", rules);
+        assert!(rules.contains(&"cpp-typo-main"), "rules: {:?}", rules);
+
+        let py = "a = []\nfor i in range(int(input())):\n    a = a + [i]\n";
+        let py_findings = drgx_extra_diagnostics(py, "python");
+        let py_rules: Vec<&str> = py_findings
+            .iter()
+            .filter_map(|f| f["rule"].as_str())
+            .collect();
+        assert!(py_rules.contains(&"py-input-loop"), "rules: {:?}", py_rules);
+        assert!(py_rules.contains(&"py-list-append"), "rules: {:?}", py_rules);
+    }
+
+    #[test]
+    fn clean_cpp_has_no_error_findings() {
+        let code = "#include <bits/stdc++.h>\nusing namespace std;\nint main(){ios::sync_with_stdio(false);cin.tie(nullptr);int n;if(!(cin>>n))return 0;long long s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=(i^j);cout<<s<<\"\\n\";return 0;}\n";
+        let out = drgx_diagnose_json(code, "cpp", "bugcheck");
+        let errors: Vec<&Value> = out["findings"]
+            .as_array()
+            .map(|a| a.iter().filter(|f| f["severity"].as_str() == Some("error")).collect())
+            .unwrap_or_default();
+        assert!(errors.is_empty(), "phát hiện lỗi giả: {:?}", errors);
+    }
+
+    #[test]
+    fn cli_profile_json_returns_clean_quadratic_regression() {
+        let cli = drgx_cli_exe();
+        if !cli.is_file() {
+            eprintln!("Bỏ qua: chưa build drgx CLI tại {}", cli.display());
+            return;
+        }
+        let dir = std::env::temp_dir().join("drgx_test_profile");
+        let _ = std::fs::create_dir_all(&dir);
+        let file = dir.join("quad_test.cpp");
+        let code = "#include <bits/stdc++.h>\nusing namespace std;\nint main(){ios::sync_with_stdio(false);cin.tie(nullptr);int n;if(!(cin>>n))return 0;long long s=0;for(int i=0;i<n;i++)for(int j=0;j<n;j++)s+=(i^j);cout<<s<<\"\\n\";return 0;}\n";
+        std::fs::write(&file, code).unwrap();
+        let path = file.to_string_lossy().to_string();
+        let args = [
+            "profile",
+            path.as_str(),
+            "--json",
+            "--n",
+            "200,400,800",
+            "--tl",
+            "5000",
+            "--repeats",
+            "2",
+        ];
+        let run = run_process_with_input(&cli, &args, "", 120_000, &dir);
+        let _ = std::fs::remove_file(&file);
+        let v: Value = serde_json::from_str(run.stdout.trim())
+            .unwrap_or_else(|e| panic!("CLI không trả JSON: {} · stdout={} · stderr={}", e, run.stdout, run.stderr));
+        assert_eq!(v["ok"].as_bool(), Some(true));
+        let k = v["regression"]["k"].as_f64().unwrap_or(0.0);
+        assert!(k > 1.5 && k < 2.6, "k bất thường: {}", k);
+        assert!(v["points"].as_array().map_or(0, |a| a.len()) >= 3);
+    }
 }

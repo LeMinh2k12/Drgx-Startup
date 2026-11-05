@@ -1,0 +1,116 @@
+{
+  "total_duration": 110.107,
+  "wait_after_sec": 1.0,
+  "cues": {
+    "S01": 0.0,
+    "S02": 10.131,
+    "S03": 19.835,
+    "S04": 29.624,
+    "S05": 39.328,
+    "S06": 48.52,
+    "S07": 57.285,
+    "S08": 65.773,
+    "S09": 73.749,
+    "S10": 82.195,
+    "S11": 91.547,
+    "S12": 101.163
+  },
+  "slides": [
+    {
+      "code": "S01",
+      "file": "1.m4a",
+      "start": 0.0,
+      "audio_dur": 9.131,
+      "audio_end": 9.131,
+      "next_slide_at": 10.131
+    },
+    {
+      "code": "S02",
+      "file": "2.m4a",
+      "start": 10.131,
+      "audio_dur": 8.704,
+      "audio_end": 18.835,
+      "next_slide_at": 19.835
+    },
+    {
+      "code": "S03",
+      "file": "3.m4a",
+      "start": 19.835,
+      "audio_dur": 8.789,
+      "audio_end": 28.624,
+      "next_slide_at": 29.624
+    },
+    {
+      "code": "S04",
+      "file": "4.m4a",
+      "start": 29.624,
+      "audio_dur": 8.704,
+      "audio_end": 38.328,
+      "next_slide_at": 39.328
+    },
+    {
+      "code": "S05",
+      "file": "5.m4a",
+      "start": 39.328,
+      "audio_dur": 8.192,
+      "audio_end": 47.52,
+      "next_slide_at": 48.52
+    },
+    {
+      "code": "S06",
+      "file": "6.m4a",
+      "start": 48.52,
+      "audio_dur": 7.765,
+      "audio_end": 56.285,
+      "next_slide_at": 57.285
+    },
+    {
+      "code": "S07",
+      "file": "7.aac",
+      "start": 57.285,
+      "audio_dur": 7.488,
+      "audio_end": 64.773,
+      "next_slide_at": 65.773
+    },
+    {
+      "code": "S08",
+      "file": "8.aac",
+      "start": 65.773,
+      "audio_dur": 6.976,
+      "audio_end": 72.749,
+      "next_slide_at": 73.749
+    },
+    {
+      "code": "S09",
+      "file": "9.aac",
+      "start": 73.749,
+      "audio_dur": 7.445,
+      "audio_end": 81.195,
+      "next_slide_at": 82.195
+    },
+    {
+      "code": "S10",
+      "file": "10.mp3",
+      "start": 82.195,
+      "audio_dur": 8.352,
+      "audio_end": 90.547,
+      "next_slide_at": 91.547
+    },
+    {
+      "code": "S11",
+      "file": "11.mp3",
+      "start": 91.547,
+      "audio_dur": 8.616,
+      "audio_end": 100.163,
+      "next_slide_at": 101.163
+    },
+    {
+      "code": "S12",
+      "file": "12.mp3",
+      "start": 101.163,
+      "audio_dur": 7.944,
+      "audio_end": 109.107,
+      "next_slide_at": 110.107
+    }
+  ]
+}

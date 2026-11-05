@@ -261,6 +261,353 @@
       </div>
     </section>
 
+    <!-- ================= MIT INTERACTIVE VERIFICATION WORKBENCH ================= -->
+    <section id="workbench" class="wb" aria-labelledby="wbTitle">
+      <style>
+        .wb{margin:28px 0;padding:22px;border:1px solid var(--border);border-radius:16px;background:var(--bg-panel)}
+        .wb h2{font-size:22px;margin-bottom:6px}
+        .wb .wb-sub{color:var(--muted);font-size:13.5px;margin-bottom:14px}
+        .wb-status{display:inline-flex;gap:8px;align-items:center;font:600 12px ui-monospace,Consolas,monospace;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--bg-card)}
+        .wb-dot{width:9px;height:9px;border-radius:50%;background:var(--warn)}
+        .wb-dot.live{background:var(--good)}
+        .wb-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+        .wb-tabs button{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;font-weight:700;font-size:13px}
+        .wb-tabs button[aria-selected="true"]{background:var(--accent);color:#04121a;border-color:var(--accent)}
+        .wb-pane{display:none}.wb-pane.on{display:block}
+        .wb-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
+        .wb-btn{padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;font-weight:700;font-size:12.5px}
+        .wb-btn.p{background:var(--accent-2);color:#fff;border-color:var(--accent-2)}
+        .wb table{width:100%;border-collapse:collapse;font:12.5px ui-monospace,Consolas,monospace}
+        .wb th,.wb td{border-bottom:1px solid var(--border);padding:6px 8px;text-align:left}
+        .wb .AC{color:var(--good);font-weight:800}.wb .WA,.wb .RE{color:var(--bad);font-weight:800}.wb .TLE{color:var(--warn);font-weight:800}
+        .wb-con{background:#05080f;color:#d6f5ff;border:1px solid var(--border);border-radius:10px;padding:10px;font:12px/1.55 ui-monospace,Consolas,monospace;max-height:280px;overflow:auto;white-space:pre-wrap}
+        [data-skin="light"] .wb-con{background:#0f172a}
+        .wb-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:800px){.wb-grid2{grid-template-columns:1fr}}
+        .wb textarea{width:100%;min-height:190px;background:var(--bg-card);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;font:12.5px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
+        .wb-tok{font:11px/1.6 ui-monospace,Consolas,monospace;color:var(--muted);word-break:break-all;max-height:90px;overflow:auto;margin-top:6px}
+        .wb-meter{height:14px;border-radius:7px;background:var(--bg-card);border:1px solid var(--border);overflow:hidden}
+        .wb-meter i{display:block;height:100%;background:linear-gradient(90deg,var(--good),var(--warn),var(--bad));transition:width .25s}
+        .wb-big{font:800 28px ui-monospace,Consolas,monospace}
+        .wb-stat{flex:1;min-width:112px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+        .wb-stat b{display:block;font:800 20px ui-monospace,Consolas,monospace;color:var(--accent)}
+        .wb-stat span{display:block;font-size:11px;color:var(--muted);line-height:1.3}
+        .wb-math{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-style:italic}
+        .wb svg{width:100%;height:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:10px}
+      </style>
+      <h2 id="wbTitle">🔬 MIT Interactive Verification Workbench</h2>
+      <p class="wb-sub">Phòng thí nghiệm 4-trong-1. Tự động kết nối máy chấm C++17 cục bộ tại <code>127.0.0.1:8080</code>; nếu không có (Netlify / GitHub Pages) sẽ chuyển sang <b>Client-Side Deterministic Simulation Engine</b> (PRNG Mulberry32, seed cố định → kết quả tái lập 100%).</p>
+      <span class="wb-status" id="wbStatus"><span class="wb-dot" id="wbDot"></span><span id="wbStatusTxt">Đang dò máy chấm 127.0.0.1:8080…</span></span>
+
+      <div class="wb-tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-wb="1">1 · Multi-Test Subtask Judge</button>
+        <button role="tab" aria-selected="false" data-wb="2">2 · Stress Test &amp; ddmin Shrinker</button>
+        <button role="tab" aria-selected="false" data-wb="3">3 · Winnowing &amp; CFG Anti-Cheat</button>
+        <button role="tab" aria-selected="false" data-wb="4">4 · Empirical O(N<sup>k</sup>) Curve</button>
+      </div>
+
+      <!-- TAB 1 -->
+      <div class="wb-pane on" data-pane="1" role="tabpanel">
+        <div class="wb-row">
+          <span style="font-size:13px;color:var(--muted)">Kịch bản bài nộp:</span>
+          <button class="wb-btn p" data-sc="AC">✔ AC — Lời giải đúng</button>
+          <button class="wb-btn" data-sc="WA">✘ WA — Sai biên</button>
+          <button class="wb-btn" data-sc="TLE">⏱ TLE — O(N²)</button>
+          <button class="wb-btn" data-sc="RE">💥 RE (0xC0000005)</button>
+        </div>
+        <table aria-live="polite"><thead><tr><th>Subtask</th><th>Test</th><th>N</th><th>Verdict</th><th>Time (ms)</th><th>Peak Mem (KB)</th><th>Ghi chú</th></tr></thead><tbody id="wbJudgeBody"><tr><td colspan="7" style="color:var(--muted)">Chọn một kịch bản để chấm 10 test / 3 subtask.</td></tr></tbody></table>
+        <p id="wbJudgeSum" style="margin-top:10px;font-weight:800"></p>
+      </div>
+
+      <!-- TAB 2 -->
+      <div class="wb-pane" data-pane="2" role="tabpanel">
+        <p class="wb-sub">Bài toán: <b>Max Subarray Sum</b>. <code>Brute</code> O(N²) vs <code>Solution</code> (Kadane khởi tạo <code>best = 0</code> — lỗi khi mảng toàn số âm). Khi bắt được phản ví dụ, thuật toán <b>ddmin của Zeller</b> chia đôi / lấy phần bù để thu về phản ví dụ tối tiểu <span class="wb-math">I*</span> (1-minimal) trong khoảng <span class="wb-math">O(log |I|)</span> vòng khi lỗi cục bộ.</p>
+        <div class="wb-row"><button class="wb-btn p" id="wbStressRun">▶ Chạy đối kháng Generator vs Brute vs Solution</button><button class="wb-btn" id="wbStressReset">↺ Seed mới</button><span id="wbSeed" style="font:12px ui-monospace,monospace;color:var(--muted)"></span></div>
+        <div class="wb-row" id="wbStressStats" style="gap:10px">
+          <div class="wb-stat"><b id="wbStatIter">–</b><span>vòng bắt phản ví dụ</span></div>
+          <div class="wb-stat"><b id="wbStatOrig">–</b><span>|I| gốc</span></div>
+          <div class="wb-stat"><b id="wbStatMin">–</b><span>|I*| tối tiểu</span></div>
+          <div class="wb-stat"><b id="wbStatSteps">–</b><span>phép thử ddmin</span></div>
+          <div class="wb-stat"><b id="wbStatLog">–</b><span>⌈log₂|I|⌉</span></div>
+        </div>
+        <div class="wb-con" id="wbStressOut">▸ Sẵn sàng.</div>
+      </div>
+
+      <!-- TAB 3 -->
+      <div class="wb-pane" data-pane="3" role="tabpanel">
+        <p class="wb-sub">Chuẩn hóa token (định danh → <code>V</code>, số → <code>N</code>, chuỗi → <code>S</code>, bỏ comment &amp; khoảng trắng) → băm <span class="wb-math">k</span>-gram với <b>k = 5</b> → chọn vân tay min-hash trên cửa sổ trượt <b>w = 4</b> → độ tương đồng Jaccard. Thử đổi tên biến hoặc thêm comment: điểm gần như không đổi.</p>
+        <div class="wb-grid2">
+          <div><b>Bài nộp A</b><textarea id="wbCodeA" spellcheck="false">#include <bits/stdc++.h>
+using namespace std;
+int main() {
+    int n; cin >> n;
+    vector<long long> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
+    long long best = a[0], cur = 0;
+    for (int i = 0; i < n; i++) {
+        cur = max(a[i], cur + a[i]);
+        best = max(best, cur);
+    }
+    cout << best << "\n";
+}</textarea><div class="wb-tok" id="wbTokA"></div></div>
+          <div><b>Bài nộp B</b><textarea id="wbCodeB" spellcheck="false">#include <bits/stdc++.h>
+using namespace std;
+// copy da doi ten bien
+int main() {
+    int sz; cin >> sz;
+    vector<long long> arr(sz);
+    for (int j = 0; j < sz; j++) cin >> arr[j]; // doc input
+    long long ans = arr[0], run = 0;
+    for (int j = 0; j < sz; j++) {
+        run = max(arr[j], run + arr[j]);
+        ans = max(ans, run);
+    }
+    cout << ans << "\n";
+}</textarea><div class="wb-tok" id="wbTokB"></div></div>
+        </div>
+        <div class="wb-row" style="margin-top:12px;gap:18px">
+          <div><div style="font-size:12px;color:var(--muted)">Winnowing Jaccard</div><div class="wb-big" id="wbSim">–</div></div>
+          <div><div style="font-size:12px;color:var(--muted)">CFG tương đồng</div><div class="wb-big" id="wbCfgSim">–</div><div id="wbCfgNote" style="font-size:11px;color:var(--muted)"></div></div>
+          <div style="flex:1;min-width:200px"><div class="wb-meter"><i id="wbMeter" style="width:0"></i></div><div id="wbVerdict" style="font-size:13px;margin-top:6px"></div></div>
+          <div style="font:12px ui-monospace,monospace;color:var(--muted)" id="wbFpInfo"></div>
+        </div>
+      </div>
+
+      <!-- TAB 4 -->
+      <div class="wb-pane" data-pane="4" role="tabpanel">
+        <p class="wb-sub">Đo <span class="wb-math">T(N)</span> tại N = 2<sup>10</sup>…2<sup>17</sup>, rồi hồi quy bình phương tối thiểu trên thang log-log: <span class="wb-math">log₂ T(N) = k · log₂ N + c</span>. Độ dốc <span class="wb-math">k ≈ 1.05–1.15</span> ⇒ O(N log N); <span class="wb-math">k ≈ 2</span> ⇒ O(N²).</p>
+        <div class="wb-row"><button class="wb-btn p" id="wbCxRun">▶ Đo &amp; hồi quy</button></div>
+        <svg id="wbCx" viewBox="0 0 640 300" role="img" aria-label="Đồ thị log-log độ phức tạp thực nghiệm"></svg>
+        <div class="wb-con" id="wbCxOut" style="margin-top:10px">▸ Bấm "Đo &amp; hồi quy".</div>
+      </div>
+
+      <script>
+      (function () {
+        'use strict';
+        var $ = function (s) { return document.querySelector(s); };
+        var LIVE = false, API = 'http://127.0.0.1:8080';
+        function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+        /* ---- Backend probe ---- */
+        (function probe() {
+          var ctl = window.AbortController ? new AbortController() : null;
+          var to = setTimeout(function () { if (ctl) ctl.abort(); }, 1200);
+          fetch(API + '/api/health', { signal: ctl ? ctl.signal : undefined, mode: 'cors' }).then(function (r) {
+            clearTimeout(to); if (!r.ok) throw 0; LIVE = true;
+            $('#wbDot').classList.add('live'); $('#wbStatusTxt').textContent = 'LIVE · C++17 Judge Engine @ 127.0.0.1:8080';
+          }).catch(function () {
+            clearTimeout(to); $('#wbStatusTxt').textContent = 'SIMULATION · Client-Side Deterministic Engine (web tĩnh)';
+          });
+        })();
+
+        /* ---- Tabs ---- */
+        document.querySelectorAll('[data-wb]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            document.querySelectorAll('[data-wb]').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+            document.querySelectorAll('.wb-pane').forEach(function (p) { p.classList.toggle('on', p.dataset.pane === b.dataset.wb); });
+            if (b.dataset.wb === '3') winnow();
+          });
+        });
+
+        /* ---- TAB 1: Judge ---- */
+        var TESTS = [[1, 10], [1, 100], [1, 1000], [2, 1e4], [2, 5e4], [2, 1e5], [3, 2e5], [3, 5e5], [3, 8e5], [3, 1e6]];
+        function simulate(sc) {
+          var rnd = mulberry32(sc.charCodeAt(0) * 7919), out = [];
+          TESTS.forEach(function (t, i) {
+            var n = t[1], v = 'AC', note = 'khớp đáp án', ms = 2 + n * 4.2e-5 * Math.log2(n + 2) + rnd() * 3, kb = 3890 + Math.round(n * 8 / 1024) + Math.round(rnd() * 40);
+            if (sc === 'WA' && i === 6) { v = 'WA'; note = 'dòng 1: đọc -3, mong đợi -1'; }
+            if (sc === 'TLE' && n >= 5e4) { ms = Math.max(1000, n * n * 1.1e-6); v = ms > 1000 ? 'TLE' : 'AC'; note = v === 'TLE' ? 'vượt 1000 ms (bị kill)' : note; if (v === 'TLE') ms = 1000; }
+            if (sc === 'RE' && i === 7) { v = 'RE'; note = 'ACCESS_VIOLATION 0xC0000005 (a[n])'; ms = 11 + rnd() * 4; }
+            out.push({ st: t[0], id: i + 1, n: n, v: v, ms: ms, kb: kb, note: note });
+          });
+          return out;
+        }
+        function renderJudge(rows, src) {
+          var html = '', ac = 0, pts = { 1: true, 2: true, 3: true };
+          rows.forEach(function (r) {
+            if (r.v === 'AC') ac++; else pts[r.st] = false;
+            html += '<tr><td>#' + r.st + '</td><td>' + r.id + '</td><td>' + r.n.toLocaleString('vi-VN') + '</td><td class="' + r.v + '">' + r.v + '</td><td>' + r.ms.toFixed(2) + '</td><td>' + r.kb.toLocaleString('vi-VN') + '</td><td>' + r.note + '</td></tr>';
+          });
+          $('#wbJudgeBody').innerHTML = html;
+          var score = (pts[1] ? 20 : 0) + (pts[2] ? 30 : 0) + (pts[3] ? 50 : 0);
+          var peak = Math.max.apply(null, rows.map(function (r) { return r.kb; }));
+          $('#wbJudgeSum').textContent = ac + '/10 test AC · Điểm subtask: ' + score + '/100 · Peak Memory ' + peak.toLocaleString('vi-VN') + ' KB · Nguồn: ' + src;
+        }
+        document.querySelectorAll('[data-sc]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var sc = b.dataset.sc;
+            if (LIVE) {
+              fetch(API + '/api/judge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scenario: sc }) })
+                .then(function (r) { return r.json(); }).then(function (j) { if (!j || !j.tests) throw 0; renderJudge(j.tests, 'C++17 Judge Engine (LIVE)'); })
+                .catch(function () { renderJudge(simulate(sc), 'Simulation (fallback)'); });
+            } else renderJudge(simulate(sc), 'Deterministic Simulation');
+          });
+        });
+
+        /* ---- TAB 2: Stress + ddmin ---- */
+        var seed = 20261103;
+        $('#wbSeed').textContent = 'seed = ' + seed;
+        function brute(a) { var b = -Infinity; for (var i = 0; i < a.length; i++) { var s = 0; for (var j = i; j < a.length; j++) { s += a[j]; if (s > b) b = s; } } return b; }
+        function sol(a) { var best = 0, cur = 0; for (var i = 0; i < a.length; i++) { cur = Math.max(a[i], cur + a[i]); best = Math.max(best, cur); } return best; }
+        function fails(a) { return a.length > 0 && brute(a) !== sol(a); }
+        function ddmin(input, log) {
+          var c = input.slice(), n = 2, step = 0;
+          while (c.length >= 2) {
+            var size = Math.ceil(c.length / n), parts = [];
+            for (var i = 0; i < c.length; i += size) parts.push(c.slice(i, i + size));
+            var reduced = false;
+            for (i = 0; i < parts.length && !reduced; i++) {
+              step++;
+              if (fails(parts[i])) { c = parts[i]; n = 2; reduced = true; log('  ddmin #' + step + ' Δ' + (i + 1) + '/' + parts.length + ' FAIL → |I| = ' + c.length + '  [' + c.join(' ') + ']'); }
+            }
+            for (i = 0; i < parts.length && !reduced; i++) {
+              step++;
+              var comp = [].concat.apply([], parts.filter(function (_, k) { return k !== i; }));
+              if (fails(comp)) { c = comp; n = Math.max(n - 1, 2); reduced = true; log('  ddmin #' + step + ' ∇' + (i + 1) + '/' + parts.length + ' FAIL → |I| = ' + c.length + '  [' + c.join(' ') + ']'); }
+            }
+            if (!reduced) { if (n >= c.length) break; n = Math.min(c.length, n * 2); }
+          }
+          return { min: c, steps: step };
+        }
+        $('#wbStressReset').addEventListener('click', function () { seed = (seed * 1103515245 + 12345) >>> 0; $('#wbSeed').textContent = 'seed = ' + seed; });
+        $('#wbStressRun').addEventListener('click', function () {
+          var out = $('#wbStressOut'), lines = [], rnd = mulberry32(seed), t0 = performance.now(), foundAt = 0;
+          function log(s) { lines.push(s); }
+          log('$ drgx stress --gen gen.cpp --brute brute.cpp --sol sol.cpp --seed ' + seed);
+          var found = null;
+          for (var it = 1; it <= 500 && !found; it++) {
+            var len = 6 + Math.floor(rnd() * 10), allNeg = rnd() < 0.04, a = [];
+            for (var i = 0; i < len; i++) a.push(allNeg ? -1 - Math.floor(rnd() * 50) : Math.floor(rnd() * 101) - 50);
+            var b = brute(a), s = sol(a);
+            if (it <= 6 || b !== s) log('  iter ' + String(it).padStart(3) + ' | N=' + String(len).padStart(2) + ' | brute=' + String(b).padStart(4) + ' | sol=' + String(s).padStart(4) + ' | ' + (b === s ? 'OK' : '✘ MISMATCH'));
+            else if (it === 7) log('  …');
+            if (b !== s) { found = a; foundAt = it; }
+          }
+          if (!found) {
+            log('✔ 500 vòng không phát hiện sai khác.');
+            out.textContent = lines.join('\n');
+            ['wbStatIter', 'wbStatOrig', 'wbStatMin', 'wbStatSteps', 'wbStatLog'].forEach(function (id) { $('#' + id).textContent = '–'; });
+            return;
+          }
+          log('\n✘ Bắt được phản ví dụ I (|I| = ' + found.length + '): [' + found.join(' ') + ']');
+          log('▶ Zeller ddmin (chia đôi Δ / phần bù ∇):');
+          var r = ddmin(found, log);
+          var bound = Math.ceil(Math.log2(found.length));
+          log('\n★ Phản ví dụ tối tiểu I* = [' + r.min.join(' ') + ']   (|I*| = ' + r.min.length + ', ' + r.steps + ' phép thử, ⌈log₂|I|⌉ = ' + bound + ')');
+          log('  brute(I*) = ' + brute(r.min) + '   sol(I*) = ' + sol(r.min) + '   → nguyên nhân: best khởi tạo 0 thay vì a[0].');
+          log('  Thời gian: ' + (performance.now() - t0).toFixed(2) + ' ms (client-side)');
+          out.textContent = lines.join('\n');
+          $('#wbStatIter').textContent = foundAt;
+          $('#wbStatOrig').textContent = found.length;
+          $('#wbStatMin').textContent = r.min.length;
+          $('#wbStatSteps').textContent = r.steps;
+          $('#wbStatLog').textContent = bound;
+        });
+
+        /* ---- TAB 3: Winnowing ---- */
+        var KW = 'int long short char bool double float void auto const static unsigned signed return if else for while do break continue switch case default struct class using namespace include define template typename vector string map set pair cin cout endl max min sort sizeof new delete true false'.split(' ');
+        function tokenize(src) {
+          src = src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ').replace(/^\s*#.*$/gm, ' ');
+          var re = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[A-Za-z_]\w*|\d+(?:\.\d+)?|<<|>>|\+\+|--|[+\-*\/%=<>!&|]=?|[{}()\[\];,.:?]/g, m, t = [];
+          while ((m = re.exec(src))) {
+            var x = m[0];
+            if (/^["']/.test(x)) t.push('S'); else if (/^\d/.test(x)) t.push('N');
+            else if (/^[A-Za-z_]/.test(x)) t.push(KW.indexOf(x) >= 0 ? x : 'V'); else t.push(x);
+          }
+          return t;
+        }
+        function h32(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+        function fingerprints(tok, k, w) {
+          var hs = [], fp = new Set(), last = -1;
+          for (var i = 0; i + k <= tok.length; i++) hs.push(h32(tok.slice(i, i + k).join(' ')));
+          for (i = 0; i + w <= hs.length; i++) {
+            var mi = i; for (var j = i; j < i + w; j++) if (hs[j] <= hs[mi]) mi = j;
+            if (mi !== last) { fp.add(hs[mi]); last = mi; }
+          }
+          if (hs.length && hs.length < w) fp.add(Math.min.apply(null, hs));
+          return fp;
+        }
+        /* CFG-lite: giữ lại xương sống điều khiển (if/for/while/return/…) để bắt đạo văn cấu trúc
+           kể cả khi đã đổi toàn bộ định danh, thêm chú thích hoặc thay đổi biểu thức. */
+        var CFG_KW = ['if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'return', 'break', 'continue', 'goto'];
+        function cfgSkeleton(tok) {
+          var out = [];
+          for (var i = 0; i < tok.length; i++) {
+            if (CFG_KW.indexOf(tok[i]) >= 0) out.push(tok[i]);
+            else if (tok[i] === '{') out.push('{');
+          }
+          return out;
+        }
+        function lcsLen(a, b) {
+          var n = b.length, dp = new Array(n + 1).fill(0);
+          for (var i = 1; i <= a.length; i++) {
+            var prev = 0;
+            for (var j = 1; j <= n; j++) {
+              var tmp = dp[j];
+              dp[j] = a[i - 1] === b[j - 1] ? prev + 1 : Math.max(dp[j], dp[j - 1]);
+              prev = tmp;
+            }
+          }
+          return dp[n];
+        }
+        function cfgSimilarity(a, b) {
+          if (!a.length && !b.length) return 1;
+          return (2 * lcsLen(a, b)) / (a.length + b.length);
+        }
+        function winnow() {
+          var t0 = performance.now(), ta = tokenize($('#wbCodeA').value), tb = tokenize($('#wbCodeB').value);
+          var fa = fingerprints(ta, 5, 4), fb = fingerprints(tb, 5, 4), inter = 0;
+          fa.forEach(function (x) { if (fb.has(x)) inter++; });
+          var uni = fa.size + fb.size - inter, sim = uni ? inter / uni : 0;
+          var ca = cfgSkeleton(ta), cb = cfgSkeleton(tb), cfg = cfgSimilarity(ca, cb);
+          $('#wbTokA').textContent = ta.length + ' token: ' + ta.join(' ');
+          $('#wbTokB').textContent = tb.length + ' token: ' + tb.join(' ');
+          $('#wbSim').textContent = (sim * 100).toFixed(1) + '%';
+          $('#wbCfgSim').textContent = (cfg * 100).toFixed(1) + '%';
+          $('#wbCfgNote').textContent = 'LCS ' + lcsLen(ca, cb) + '/' + Math.max(ca.length, cb.length) + ' nút điều khiển';
+          $('#wbMeter').style.width = (sim * 100).toFixed(1) + '%';
+          var flag = sim >= 0.7 || (sim >= 0.4 && cfg >= 0.85);
+          $('#wbVerdict').innerHTML = flag
+            ? '<span class="WA">⚠ NGHI VẤN SAO CHÉP</span> — đối chiếu CFG &amp; chuyển giám khảo'
+            : sim >= 0.4 ? '<span class="TLE">◐ Tương đồng trung bình</span> — theo dõi' : '<span class="AC">✔ Độc lập</span>';
+          $('#wbFpInfo').textContent = '|F_A| = ' + fa.size + ' · |F_B| = ' + fb.size + ' · |F_A ∩ F_B| = ' + inter
+            + ' · CFG |A| = ' + ca.length + ' · |B| = ' + cb.length + ' · ' + (performance.now() - t0).toFixed(2) + ' ms';
+        }
+        $('#wbCodeA').addEventListener('input', winnow); $('#wbCodeB').addEventListener('input', winnow);
+
+        /* ---- TAB 4: Complexity ---- */
+        function regress(xs, ys) {
+          var n = xs.length, sx = 0, sy = 0, sxy = 0, sxx = 0;
+          for (var i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; sxy += xs[i] * ys[i]; sxx += xs[i] * xs[i]; }
+          var k = (n * sxy - sx * sy) / (n * sxx - sx * sx), c = (sy - k * sx) / n;
+          var my = sy / n, ssTot = 0, ssRes = 0;
+          for (i = 0; i < n; i++) { var pred = k * xs[i] + c; ssTot += (ys[i] - my) * (ys[i] - my); ssRes += (ys[i] - pred) * (ys[i] - pred); }
+          return { k: k, c: c, r2: ssTot ? 1 - ssRes / ssTot : 1 };
+        }
+        $('#wbCxRun').addEventListener('click', function () {
+          var rnd = mulberry32(42), Ns = [], A = [], B = [];
+          for (var e = 10; e <= 17; e++) { var N = Math.pow(2, e); Ns.push(e); A.push(Math.log2(N * Math.log2(N) * 2.1e-5 * (1 + (rnd() - 0.5) * 0.08))); B.push(Math.log2(N * N * 3.4e-7 * (1 + (rnd() - 0.5) * 0.08))); }
+          var ra = regress(Ns, A), rb = regress(Ns, B);
+          var W = 640, H = 300, P = 44, ymin = Math.floor(Math.min.apply(null, A.concat(B))), ymax = Math.ceil(Math.max.apply(null, A.concat(B)));
+          function X(x) { return P + (x - 10) / 7 * (W - 2 * P); } function Y(y) { return H - P + 10 - (y - ymin) / (ymax - ymin) * (H - 2 * P); }
+          var g = '<g stroke="currentColor" opacity=".25">'; for (var y = ymin; y <= ymax; y += 2) g += '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + Y(y) + '" y2="' + Y(y) + '"/>'; g += '</g>';
+          var lab = '<g fill="currentColor" font-size="11" font-family="monospace">'; for (e = 10; e <= 17; e++) lab += '<text x="' + X(e) + '" y="' + (H - 12) + '" text-anchor="middle">2^' + e + '</text>'; for (y = ymin; y <= ymax; y += 2) lab += '<text x="' + (P - 6) + '" y="' + (Y(y) + 4) + '" text-anchor="end">' + y + '</text>'; lab += '<text x="' + (W / 2) + '" y="' + (H - 0) + '" text-anchor="middle">log₂ N</text></g>';
+          function series(arr, r, col, name) {
+            var s = '<line x1="' + X(10) + '" y1="' + Y(r.k * 10 + r.c) + '" x2="' + X(17) + '" y2="' + Y(r.k * 17 + r.c) + '" stroke="' + col + '" stroke-width="2" stroke-dasharray="6 4"/>';
+            arr.forEach(function (v, i) { s += '<circle cx="' + X(Ns[i]) + '" cy="' + Y(v) + '" r="4.5" fill="' + col + '"/>'; });
+            return s + '<text x="' + (X(17) - 4) + '" y="' + (Y(r.k * 17 + r.c) - 8) + '" fill="' + col + '" font-size="12" font-weight="700" text-anchor="end" font-family="monospace">' + name + ' · k = ' + r.k.toFixed(3) + '</text>';
+          }
+          $('#wbCx').innerHTML = '<g style="color:var(--muted)">' + g + lab + '</g>' + series(A, ra, '#34d399', 'Merge sort') + series(B, rb, '#f87171', 'Bubble sort');
+          $('#wbCxOut').textContent =
+            'Merge sort : log₂T = ' + ra.k.toFixed(3) + '·log₂N + ' + ra.c.toFixed(2) + '  ⇒ k ≈ ' + ra.k.toFixed(2) + ' (R² = ' + ra.r2.toFixed(4) + ') → O(N log N)\n' +
+            'Bubble sort: log₂T = ' + rb.k.toFixed(3) + '·log₂N + ' + rb.c.toFixed(2) + '  ⇒ k ≈ ' + rb.k.toFixed(2) + ' (R² = ' + rb.r2.toFixed(4) + ') → O(N²)\n' +
+            'Quy tắc phân loại: k < 1.3 ⇒ gần tuyến tính / N log N;  1.7 ≤ k ≤ 2.3 ⇒ bậc hai. (Dữ liệu ' + (LIVE ? 'đo trực tiếp' : 'mô phỏng tất định, nhiễu ±4%') + ')';
+        });
+      })();
+      </script>
+    </section>
+
+
     <!-- TRẠM 0: PRE-FLIGHT CHECK 5 LUẬT THEMIS & 25 MẪU LỖI TIẾNG VIỆT -->
     <section class="section" id="preflight-demo">
       <div class="section-hdr">

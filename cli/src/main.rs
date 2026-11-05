@@ -67,6 +67,8 @@ fn print_help() {
     println!("  {GREEN}tests{RESET} [file] [--tl ms] {BOLD}⚖️ DRGX JUDGE{RESET}: chấm toàn bộ tests/*.in → bảng AC/WA/RE/TLE");
     println!("  {GREEN}stress{RESET} <sol> <brute> <gen.py> [--n 500] [--tl 2000]");
     println!("                            {BOLD}🧪 Stress tester{RESET}: sinh test ngẫu nhiên, săn test làm WA");
+    println!("  {GOLD}profile{RESET} <file.cpp|py> [--n 250,500,...] [--tl ms] [--json]");
+    println!("                            {BOLD}📈 Đo độ phức tạp thực nghiệm O(N^k){RESET}: T(µs), Peak RAM, R², dự phóng TLE 10^5/10^6");
     println!("  {GREEN}cp{RESET}   <thuật toán>   Xuất template giải thuật CP (segtree, rmq, dsu, fenwick, pref...)");
     println!("  {GREEN}studio{RESET} / {GREEN}app{RESET}        {BOLD}🚀 Mở DrgX Studio App độc lập (:45280 - Thay thế 5 Extensions){RESET}");
     println!("  {GREEN}oj{RESET}                 Mở Void-bit C++17 Subtask Judge (:8080) & Web Học Tập (:8000)");
@@ -2595,6 +2597,7 @@ fn main() {
         "test" => cmd_test(&args[1..]),
         "tests" => cmd_tests(&args[1..]),
         "stress" => cmd_stress(&args[1..]),
+        "profile" => cmd_profile(&args[1..]),
         "cp" => cmd_cp(&args[1..]),
         "ide" => cmd_ide(&args[1..]),
         "studio" | "app" => cmd_studio(&args[1..]),
@@ -2611,6 +2614,838 @@ fn main() {
             std::process::exit(2);
         }
     }
+}
+
+// ============================================================================
+// 📈 drgx profile — Đo độ phức tạp thực nghiệm O(N^k) + Peak Working Set
+// ============================================================================
+const DRGX_PROFILE_HARNESS: &str = r####"#include <bits/stdc++.h>
+#include <chrono>
+#ifdef _WIN32
+#include <io.h>
+#endif
+using namespace std;
+extern int drgx_user_main();
+
+int main(int argc, char** argv) {
+    if (argc < 4) return 2;
+    int mode = atoi(argv[1]);
+    const char* inPath = argv[2];
+    const char* outPath = argv[3];
+    int forceReps = argc > 4 ? atoi(argv[4]) : 0;
+    string data;
+    {
+        ifstream f(inPath, ios::binary);
+        ostringstream ss;
+        ss << f.rdbuf();
+        data = ss.str();
+    }
+#ifdef _WIN32
+    freopen("NUL", "w", stdout);
+#else
+    freopen("/dev/null", "w", stdout);
+#endif
+    auto emit = [&](double us, int reps) {
+        char buf[256];
+        snprintf(buf, sizeof buf, "DRGX_PROFILE time_us=%.3f reps=%d\n", us, reps);
+        ofstream out(outPath, ios::binary | ios::trunc);
+        out << buf;
+    };
+    if (mode == 1) {
+        if (!freopen(inPath, "r", stdin)) return 3;
+        clearerr(stdin);
+        cin.clear();
+        drgx_user_main();
+        cout.flush();
+        double total = 0.0;
+        int reps = 0;
+        int cap = forceReps > 0 ? forceReps : 400;
+        do {
+            if (reps > 0) {
+                fseek(stdin, 0, SEEK_SET);
+                clearerr(stdin);
+                cin.clear();
+            }
+            auto t0 = chrono::steady_clock::now();
+            drgx_user_main();
+            auto t1 = chrono::steady_clock::now();
+            cout.flush();
+            total += chrono::duration<double, micro>(t1 - t0).count();
+            reps++;
+        } while (reps < cap && (forceReps > 0 ? reps < cap : total < 12000.0));
+        emit(total / reps, reps);
+    } else {
+        auto one = [&]() {
+            istringstream in(data);
+            streambuf* old = cin.rdbuf(in.rdbuf());
+            cin.clear();
+            drgx_user_main();
+            cout.flush();
+            cin.rdbuf(old);
+        };
+        one();
+        auto timeReps = [&](int reps) {
+            auto t0 = chrono::steady_clock::now();
+            for (int i = 0; i < reps; i++) one();
+            auto t1 = chrono::steady_clock::now();
+            return chrono::duration<double, micro>(t1 - t0).count() / reps;
+        };
+        double u1 = timeReps(1);
+        int reps = forceReps > 0 ? forceReps : (int)ceil(12000.0 / max(u1, 1.0));
+        if (reps < 1) reps = 1;
+        if (reps > 200) reps = 200;
+        double us = reps > 1 ? timeReps(reps) : u1;
+        emit(us, reps);
+    }
+    return 0;
+}
+"####;
+
+const DRGX_PROFILE_PY: &str = r####"import sys, io, os, time
+
+script = sys.argv[1]
+inp = sys.argv[2]
+outp = sys.argv[3]
+force = int(sys.argv[4]) if len(sys.argv) > 4 else 0
+
+src = open(script, 'rb').read()
+code = compile(src, script, 'exec')
+data = open(inp, 'rb').read()
+devnull = open(os.devnull, 'w', encoding='utf-8', errors='replace')
+real_out = sys.stdout
+
+class FakeStdin(io.TextIOWrapper):
+    pass
+
+def make_stdin():
+    return FakeStdin(io.BytesIO(data), encoding='utf-8', errors='replace', newline='')
+
+g = {'__name__': '__main__', '__file__': script}
+
+def one():
+    sys.stdin = make_stdin()
+    sys.stdout = devnull
+    try:
+        exec(code, g)
+    except SystemExit:
+        pass
+    finally:
+        sys.stdout = real_out
+
+try:
+    one()
+    def timed(reps):
+        t0 = time.perf_counter()
+        for _ in range(reps):
+            one()
+        t1 = time.perf_counter()
+        return (t1 - t0) * 1e6 / reps
+    u1 = timed(1)
+    reps = force if force > 0 else max(1, min(100, int(12000.0 / max(u1, 1.0) + 0.999)))
+    us = timed(reps) if reps > 1 else u1
+    with open(outp, 'w', encoding='utf-8') as f:
+        f.write('DRGX_PROFILE time_us=%.3f reps=%d\n' % (us, reps))
+except BaseException as e:
+    sys.stderr.write('DRGX_PROFILE_ERROR ' + type(e).__name__ + ': ' + str(e)[:300] + '\n')
+    sys.exit(3)
+"####;
+
+#[derive(Clone, Debug)]
+struct ProfilePoint {
+    n: u64,
+    time_us: f64,
+    peak_kb: Option<u64>,
+    verdict: String,
+    reps: u32,
+}
+
+#[derive(Clone, Debug)]
+struct ProfileRegression {
+    valid: bool,
+    k: f64,
+    c: f64,
+    r2: f64,
+    complexity: String,
+}
+
+fn profile_classify(k: f64) -> &'static str {
+    if !k.is_finite() {
+        "Không xác định"
+    } else if k < 0.25 {
+        "O(1)"
+    } else if k < 0.6 {
+        "O(log N)"
+    } else if k < 1.15 {
+        "O(N)"
+    } else if k < 1.55 {
+        "O(N log N)"
+    } else if k < 2.4 {
+        "O(N^2)"
+    } else {
+        "O(N^3)"
+    }
+}
+
+fn profile_regression(points: &[ProfilePoint]) -> ProfileRegression {
+    let valid: Vec<&ProfilePoint> = points
+        .iter()
+        .filter(|p| p.verdict == "OK" && p.time_us > 0.0 && p.n > 1)
+        .collect();
+    if valid.len() < 2 {
+        return ProfileRegression {
+            valid: false,
+            k: f64::NAN,
+            c: f64::NAN,
+            r2: 0.0,
+            complexity: "Không xác định".to_string(),
+        };
+    }
+    let xs: Vec<f64> = valid.iter().map(|p| (p.n as f64).log2()).collect();
+    let ys: Vec<f64> = valid.iter().map(|p| p.time_us.max(0.001).log2()).collect();
+    let n = xs.len() as f64;
+    let mx = xs.iter().sum::<f64>() / n;
+    let my = ys.iter().sum::<f64>() / n;
+    let mut num = 0.0;
+    let mut den = 0.0;
+    for i in 0..xs.len() {
+        num += (xs[i] - mx) * (ys[i] - my);
+        den += (xs[i] - mx) * (xs[i] - mx);
+    }
+    let k = if den == 0.0 { 0.0 } else { num / den };
+    let c = my - k * mx;
+    let mut ss_res = 0.0;
+    let mut ss_tot = 0.0;
+    for i in 0..xs.len() {
+        let pred = k * xs[i] + c;
+        ss_res += (ys[i] - pred) * (ys[i] - pred);
+        ss_tot += (ys[i] - my) * (ys[i] - my);
+    }
+    let r2 = if ss_tot == 0.0 {
+        1.0
+    } else {
+        (1.0 - ss_res / ss_tot).clamp(0.0, 1.0)
+    };
+    ProfileRegression {
+        valid: true,
+        k,
+        c,
+        r2,
+        complexity: profile_classify(k).to_string(),
+    }
+}
+
+fn profile_project_ms(k: f64, c: f64, n: f64) -> (f64, bool) {
+    let lg = k * n.log2() + c;
+    if !lg.is_finite() {
+        return (f64::INFINITY, true);
+    }
+    if lg > 60.0 {
+        return ((2f64.powi(60)) / 1000.0, true);
+    }
+    ((2f64.powf(lg)) / 1000.0, false)
+}
+
+fn profile_gen_input(n: u64) -> String {
+    let mut seed: u64 = 123_456_789u64.wrapping_add(n);
+    let mut out = String::with_capacity((n as usize) * 10 + 16);
+    out.push_str(&n.to_string());
+    out.push('\n');
+    for i in 0..n {
+        seed = seed.wrapping_mul(1_103_515_245).wrapping_add(12_345) % 2_147_483_648;
+        if i > 0 {
+            out.push(' ');
+        }
+        out.push_str(&(seed % 1_000_000_000).to_string());
+    }
+    out.push('\n');
+    out
+}
+
+fn parse_profile_time(path: &Path) -> Option<(f64, u32)> {
+    let text = fs::read_to_string(path).ok()?;
+    let idx = text.find("time_us=")?;
+    let rest = &text[idx + 8..];
+    let mut it = rest.split_whitespace();
+    let us: f64 = it.next()?.parse().ok()?;
+    let reps_part = it.next().unwrap_or("reps=1");
+    let reps: u32 = reps_part.trim_start_matches("reps=").parse().unwrap_or(1);
+    if us > 0.0 {
+        Some((us, reps))
+    } else {
+        None
+    }
+}
+
+#[cfg(windows)]
+fn profile_peak_ws(handle: *mut std::ffi::c_void) -> Option<u64> {
+    use windows_sys::Win32::System::ProcessStatus::{
+        K32GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS,
+    };
+    let mut info: PROCESS_MEMORY_COUNTERS = unsafe { std::mem::zeroed() };
+    info.cb = std::mem::size_of::<PROCESS_MEMORY_COUNTERS>() as u32;
+    let ok = unsafe {
+        K32GetProcessMemoryInfo(handle, &mut info, info.cb)
+    };
+    if ok != 0 && info.PeakWorkingSetSize > 0 {
+        Some(info.PeakWorkingSetSize as u64)
+    } else {
+        None
+    }
+}
+
+#[cfg(not(windows))]
+fn profile_peak_ws(_handle: ()) -> Option<u64> {
+    None
+}
+
+#[cfg(windows)]
+fn profile_spawn_no_window(cmd: &mut Command) {
+    use std::os::windows::process::CommandExt;
+    cmd.creation_flags(0x0800_0000);
+}
+
+#[cfg(not(windows))]
+fn profile_spawn_no_window(_cmd: &mut Command) {}
+
+fn profile_run_child(
+    exe: &Path,
+    args: &[String],
+    cwd: &Path,
+    timeout: std::time::Duration,
+) -> (Option<i32>, bool, Option<u64>) {
+    let mut cmd = Command::new(exe);
+    cmd.args(args)
+        .current_dir(cwd)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+    profile_spawn_no_window(&mut cmd);
+    let mut child = match cmd.spawn() {
+        Ok(c) => c,
+        Err(_) => return (None, false, None),
+    };
+    let start = Instant::now();
+    let mut peak: u64 = 0;
+    let mut timed_out = false;
+    let mut code: Option<i32> = None;
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                code = status.code();
+                break;
+            }
+            Ok(None) => {}
+            Err(_) => break,
+        }
+        #[cfg(windows)]
+        {
+            use std::os::windows::io::AsRawHandle;
+            let h = child.as_raw_handle() as *mut std::ffi::c_void;
+            if let Some(p) = profile_peak_ws(h) {
+                if p > peak {
+                    peak = p;
+                }
+            }
+        }
+        if start.elapsed() > timeout {
+            timed_out = true;
+            let _ = child.kill();
+            let _ = child.wait();
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(2));
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::io::AsRawHandle;
+        let h = child.as_raw_handle() as *mut std::ffi::c_void;
+        if let Some(p) = profile_peak_ws(h) {
+            if p > peak {
+                peak = p;
+            }
+        }
+    }
+    (code, timed_out, if peak > 0 { Some(peak) } else { None })
+}
+
+fn profile_fnvb(s: &str) -> u64 {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for b in s.bytes() {
+        h ^= b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    h
+}
+
+fn profile_gxx(
+    gxx: &Path,
+    args: &[String],
+    cwd: &Path,
+) -> Result<(), String> {
+    let mut cmd = Command::new(gxx);
+    setup_toolchain_env(&mut cmd, gxx);
+    profile_spawn_no_window(&mut cmd);
+    let out = cmd
+        .args(args)
+        .current_dir(cwd)
+        .output()
+        .map_err(|e| format!("không chạy được g++: {}", e))?;
+    if !out.status.success() {
+        return Err(String::from_utf8_lossy(&out.stderr).trim().to_string());
+    }
+    Ok(())
+}
+
+/// 📈 drgx profile <file.cpp|py> [--n 250,500,1000,2000,4000] [--gen gen.py] [--tl 5000] [--json]
+fn cmd_profile(args: &[String]) {
+    let mut file: Option<String> = None;
+    let mut sizes: Vec<u64> = vec![250, 500, 1000, 2000, 4000];
+    let mut generator: Option<String> = None;
+    let mut time_limit_ms: u64 = 5000;
+    let mut json_out = false;
+    let mut repeats: u32 = 2;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--json" => json_out = true,
+            "--n" => {
+                i += 1;
+                if let Some(v) = args.get(i) {
+                    let parsed: Vec<u64> = v
+                        .split(',')
+                        .filter_map(|x| x.trim().parse::<u64>().ok())
+                        .filter(|x| *x >= 1 && *x <= 10_000_000)
+                        .collect();
+                    if parsed.len() >= 2 {
+                        sizes = parsed;
+                    }
+                }
+            }
+            "--gen" => {
+                i += 1;
+                generator = args.get(i).cloned();
+            }
+            "--tl" => {
+                i += 1;
+                if let Some(v) = args.get(i) {
+                    time_limit_ms = v.parse().unwrap_or(5000).clamp(200, 20_000);
+                }
+            }
+            "--repeats" => {
+                i += 1;
+                if let Some(v) = args.get(i) {
+                    repeats = v.parse().unwrap_or(2).clamp(1, 5);
+                }
+            }
+            other if other.starts_with("--") => {}
+            other => file = Some(other.to_string()),
+        }
+        i += 1;
+    }
+
+    let file = match file {
+        Some(f) => f,
+        None => {
+            eprintln!("{RED}[!] Vui lòng chỉ định tệp: drgx profile <file.cpp|py> [--n 250,500,...]{RESET}");
+            std::process::exit(1);
+        }
+    };
+    let path = Path::new(&file);
+    if !path.is_file() {
+        eprintln!("{RED}[!] Tệp '{}' không tồn tại!{RESET}", file);
+        std::process::exit(1);
+    }
+    let ext = path
+        .extension()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    let is_py = ext == "py";
+    if !is_py && !matches!(ext.as_str(), "cpp" | "cc" | "cxx" | "c") {
+        eprintln!("{RED}[!] Profiler hỗ trợ .cpp/.cc/.cxx và .py{RESET}");
+        std::process::exit(1);
+    }
+    sizes.sort_unstable();
+    sizes.dedup();
+
+    let code = fs::read_to_string(path).unwrap_or_default();
+    if code.trim().is_empty() {
+        eprintln!("{RED}[!] Tệp mã nguồn đang trống.{RESET}");
+        std::process::exit(1);
+    }
+
+    let (run_dir, _guard) = match make_run_dir("profile") {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!("{RED}[!] {}{RESET}", e);
+            std::process::exit(1);
+        }
+    };
+
+    let force_reps: u32 = if code.contains("freopen(") || code.contains("os._exit") {
+        1
+    } else {
+        0
+    };
+
+    let exe_path: PathBuf;
+    let mut base_args: Vec<String> = Vec::new();
+    let mut harness_mode: u32 = 0;
+
+    if is_py {
+        let python = match find_python() {
+            Some(p) => p,
+            None => {
+                eprintln!("{RED}[!] Không tìm thấy Python 3 trong PATH.{RESET}");
+                std::process::exit(1);
+            }
+        };
+        let script = run_dir.join("solution.py");
+        if let Err(e) = fs::write(&script, &code) {
+            eprintln!("{RED}[!] Không ghi được tệp tạm: {}{RESET}", e);
+            std::process::exit(1);
+        }
+        let wrapper = run_dir.join("drgx_py_profile.py");
+        if let Err(e) = fs::write(&wrapper, DRGX_PROFILE_PY) {
+            eprintln!("{RED}[!] Không ghi được wrapper: {}{RESET}", e);
+            std::process::exit(1);
+        }
+        exe_path = python;
+        base_args = vec![
+            wrapper.display().to_string(),
+            script.display().to_string(),
+        ];
+    } else {
+        let gxx = match find_gxx() {
+            Some(g) => g,
+            None => {
+                eprintln!("{RED}[!] Không tìm thấy g++ (MSYS2 UCRT64 / MinGW).{RESET}");
+                std::process::exit(1);
+            }
+        };
+        let src = run_dir.join("solution.cpp");
+        if let Err(e) = fs::write(&src, &code) {
+            eprintln!("{RED}[!] Không ghi được tệp tạm: {}{RESET}", e);
+            std::process::exit(1);
+        }
+        let obj = run_dir.join("solution.o");
+        let sol_args = vec![
+            "-std=c++17".to_string(),
+            "-O2".to_string(),
+            "-pipe".to_string(),
+            "-c".to_string(),
+            src.display().to_string(),
+            "-Dmain=drgx_user_main".to_string(),
+            "-o".to_string(),
+            obj.display().to_string(),
+        ];
+        if let Err(e) = profile_gxx(&gxx, &sol_args, &run_dir) {
+            eprintln!("{RED}{BOLD}[CE] Biên dịch thất bại:{RESET}");
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
+        let cache = env::temp_dir().join("drgx-profile-cache");
+        let _ = fs::create_dir_all(&cache);
+        let harness_obj = cache.join(format!("harness-{:x}.o", profile_fnvb(DRGX_PROFILE_HARNESS)));
+        if !harness_obj.is_file() {
+            let hsrc = cache.join(format!("harness-{:x}.cpp", profile_fnvb(DRGX_PROFILE_HARNESS)));
+            if let Err(e) = fs::write(&hsrc, DRGX_PROFILE_HARNESS) {
+                eprintln!("{RED}[!] Không ghi được harness: {}{RESET}", e);
+                std::process::exit(1);
+            }
+            let h_args = vec![
+                "-std=c++17".to_string(),
+                "-O2".to_string(),
+                "-pipe".to_string(),
+                "-c".to_string(),
+                hsrc.display().to_string(),
+                "-o".to_string(),
+                harness_obj.display().to_string(),
+            ];
+            if let Err(e) = profile_gxx(&gxx, &h_args, &cache) {
+                eprintln!("{RED}[!] Không biên dịch được profiler harness:{RESET}\n{}", e);
+                std::process::exit(1);
+            }
+        }
+        let exe = run_dir.join("solution_profile.exe");
+        let link_args = vec![
+            "-std=c++17".to_string(),
+            "-O2".to_string(),
+            obj.display().to_string(),
+            harness_obj.display().to_string(),
+            "-o".to_string(),
+            exe.display().to_string(),
+        ];
+        if let Err(e) = profile_gxx(&gxx, &link_args, &run_dir) {
+            eprintln!("{RED}{BOLD}[CE] Liên kết thất bại:{RESET}");
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
+        exe_path = exe;
+        let uses_c_stdio = ["scanf(", "printf(", "gets(", "fgets(", "getchar(", "puts(", "freopen(", "fopen("]
+            .iter()
+            .any(|p| code.contains(p));
+        let uses_iostream = code.contains("cin") || code.contains("cout") || code.contains("cerr");
+        harness_mode = if uses_c_stdio && !uses_iostream { 1 } else { 0 };
+    }
+
+    let python_for_gen = find_python();
+    if !json_out {
+        println!();
+        println!("{GOLD}{BOLD}📈 DRGX EMPIRICAL COMPLEXITY PROFILER{RESET}");
+        println!(
+            "{DIM}File: {}{RESET} · {}{}",
+            file,
+            if is_py { "Python 3" } else { "C++17" },
+            if is_py { "" } else if harness_mode == 1 { " · stdio-loop harness" } else { " · iostream-loop harness" }
+        );
+    }
+
+    let mut points: Vec<ProfilePoint> = Vec::new();
+    let mut warnings: Vec<String> = Vec::new();
+    let mut generator_error: Option<String> = None;
+
+    for n in &sizes {
+        let input_path = run_dir.join(format!("input_{}.txt", n));
+        let input = if let Some(gen) = &generator {
+            match (python_for_gen.as_ref(), Path::new(gen).is_file()) {
+                (Some(py), true) => {
+                    let mut cmd = python_command(py);
+                    profile_spawn_no_window(&mut cmd);
+                    match cmd
+                        .arg(gen)
+                        .arg(n.to_string())
+                        .current_dir(&run_dir)
+                        .output()
+                    {
+                        Ok(o) if o.status.success() => String::from_utf8_lossy(&o.stdout).to_string(),
+                        Ok(o) => {
+                            generator_error = Some(format!(
+                                "Generator lỗi tại N={}: {}",
+                                n,
+                                String::from_utf8_lossy(&o.stderr).trim()
+                            ));
+                            break;
+                        }
+                        Err(e) => {
+                            generator_error = Some(format!("Không chạy được generator: {}", e));
+                            break;
+                        }
+                    }
+                }
+                _ => {
+                    generator_error = Some(format!("Không tìm thấy generator '{}'", gen));
+                    break;
+                }
+            }
+        } else {
+            profile_gen_input(*n)
+        };
+        if let Err(e) = fs::write(&input_path, &input) {
+            warnings.push(format!("Không ghi được input N={}: {}", n, e));
+            continue;
+        }
+
+        let mut best: Option<f64> = None;
+        let mut best_reps: u32 = 0;
+        let mut peak_kb: Option<u64> = None;
+        let mut last_code: Option<i32> = None;
+        let mut all_timeout = true;
+        for r in 0..repeats {
+            let time_file = run_dir.join(format!("time_{}_{}.txt", n, r));
+            let _ = fs::remove_file(&time_file);
+            let mut run_args: Vec<String> = if is_py {
+                base_args.clone()
+            } else {
+                vec![harness_mode.to_string()]
+            };
+            run_args.push(input_path.display().to_string());
+            run_args.push(time_file.display().to_string());
+            run_args.push(force_reps.to_string());
+            let (code, timed_out, peak) = profile_run_child(
+                &exe_path,
+                &run_args,
+                &run_dir,
+                std::time::Duration::from_millis(time_limit_ms),
+            );
+            if peak.is_some() {
+                peak_kb = Some(peak.unwrap() / 1024);
+            }
+            if !timed_out {
+                all_timeout = false;
+            }
+            if let Some((us, reps)) = parse_profile_time(&time_file) {
+                if best.map_or(true, |b| us < b) {
+                    best = Some(us);
+                    best_reps = reps;
+                }
+            }
+            last_code = code;
+        }
+
+        let verdict = if best.is_none() && all_timeout {
+            "TLE".to_string()
+        } else if last_code == Some(0) {
+            "OK".to_string()
+        } else if is_py && best.is_none() {
+            "RE".to_string()
+        } else {
+            "OK".to_string()
+        };
+        let time_us = best.unwrap_or(time_limit_ms as f64 * 1000.0);
+        points.push(ProfilePoint {
+            n: *n,
+            time_us,
+            peak_kb,
+            verdict,
+            reps: best_reps,
+        });
+        if !json_out {
+            println!(
+                "  {CYAN}N={:<7}{RESET} T={:<12} Peak={:<9} {}{}{RESET}",
+                n,
+                format!("{:.1} µs", time_us),
+                peak_kb
+                    .map(|k| format!("{} KB", k))
+                    .unwrap_or_else(|| "—".to_string()),
+                if best.is_some() { GREEN } else { RED },
+                points.last().map(|p| p.verdict.clone()).unwrap_or_default()
+            );
+        }
+    }
+
+    if let Some(err) = generator_error {
+        eprintln!("{RED}[!] {}{RESET}", err);
+        std::process::exit(1);
+    }
+    if points.is_empty() {
+        eprintln!("{RED}[!] Không thu được mẫu đo nào.{RESET}");
+        std::process::exit(1);
+    }
+
+    let reg = profile_regression(&points);
+    let ast_k = if code.contains("for") {
+        let mut depth = 0i32;
+        let mut max_depth = 0i32;
+        for line in code.lines() {
+            let opens = line.matches("for (").count() + line.matches("for(").count() + line.matches("while (").count();
+            depth += opens as i32;
+            max_depth = max_depth.max(depth);
+            depth -= line.matches('}').count() as i32;
+            depth = depth.max(0);
+        }
+        match max_depth {
+            0 => 0.0,
+            1 => 1.0,
+            2 => 2.0,
+            _ => 3.0,
+        }
+    } else {
+        0.0
+    };
+    let (k_use, c_use) = if reg.valid {
+        (reg.k, reg.c)
+    } else {
+        let k = ast_k;
+        let c = points[0].time_us.max(0.001).log2() - k * (points[0].n as f64).log2();
+        (k, c)
+    };
+    let (ms_1e5, of_1e5) = profile_project_ms(k_use, c_use, 100_000.0);
+    let (ms_1e6, of_1e6) = profile_project_ms(k_use, c_use, 1_000_000.0);
+    let tle_1e5 = ms_1e5 > 1000.0;
+    let tle_1e6 = ms_1e6 > 1000.0;
+    if tle_1e5 || tle_1e6 {
+        warnings.push("Dự phóng vượt 1000 ms (TLE) ở ít nhất một mốc N lớn — cần tối ưu thuật toán hoặc Fast I/O.".to_string());
+    }
+    if !reg.valid {
+        warnings.push("Không đủ mẫu OK để hồi quy; đang dùng heuristic từ AST.".to_string());
+    }
+    if reg.valid && reg.r2 < 0.9 {
+        warnings.push(format!("R² = {:.4} < 0.90: mô hình chưa ổn định.", reg.r2));
+    }
+    if points.iter().any(|p| p.verdict == "TLE") {
+        warnings.push("Có mẫu TLE bị loại khỏi hồi quy.".to_string());
+    }
+    if points.iter().any(|p| p.verdict == "RE") {
+        warnings.push("Có mẫu RE bị loại khỏi hồi quy.".to_string());
+    }
+
+    if json_out {
+        let pts: Vec<Value> = points
+            .iter()
+            .map(|p| {
+                json!({
+                    "n": p.n,
+                    "timeUs": (p.time_us * 1000.0).round() / 1000.0,
+                    "peakKb": p.peak_kb,
+                    "verdict": p.verdict,
+                    "harnessReps": if p.reps > 0 { json!(p.reps) } else { Value::Null }
+                })
+            })
+            .collect();
+        let out = json!({
+            "ok": true,
+            "file": file,
+            "lang": if is_py { "Python 3" } else { "C++17" },
+            "sizes": sizes,
+            "points": pts,
+            "regression": {
+                "model": "log2 T(N) = k · log2 N + c",
+                "k": (k_use * 1_000_000.0).round() / 1_000_000.0,
+                "c": (c_use * 1_000_000.0).round() / 1_000_000.0,
+                "r2": if reg.valid { (reg.r2 * 1_000_000.0).round() / 1_000_000.0 } else { 0.0 },
+                "complexity": if reg.valid { reg.complexity.clone() } else { profile_classify(ast_k).to_string() },
+                "confidence": if reg.valid {
+                    if reg.r2 >= 0.98 { "cao" } else if reg.r2 >= 0.9 { "trung bình" } else { "thấp" }
+                } else { "heuristic" }
+            },
+            "projections": {
+                "n1e5": { "n": 100000, "timeMs": (ms_1e5 * 1000.0).round() / 1000.0, "tle": tle_1e5, "overflow": of_1e5 },
+                "n1e6": { "n": 1000000, "timeMs": (ms_1e6 * 1000.0).round() / 1000.0, "tle": tle_1e6, "overflow": of_1e6 }
+            },
+            "warnings": warnings,
+            "ruleCount": 71,
+        });
+        println!("{}", serde_json::to_string_pretty(&out).unwrap_or_default());
+        return;
+    }
+
+    println!();
+    println!("{BOLD}HỒI QUY LOG-LOG:{RESET}");
+    if reg.valid {
+        println!(
+            "  log2 T(N) = {GOLD}{BOLD}{:.4}{RESET} · log2 N + {:.4}",
+            reg.k, reg.c
+        );
+        println!(
+            "  R² = {}{:.6}{RESET}  →  {GOLD}{BOLD}{}{RESET}",
+            if reg.r2 >= 0.98 { GREEN } else if reg.r2 >= 0.9 { YELLOW } else { RED },
+            reg.r2,
+            reg.complexity
+        );
+    } else {
+        println!("  {YELLOW}Không đủ dữ liệu — dùng heuristic AST: {}{RESET}", profile_classify(ast_k));
+    }
+    println!();
+    println!("{BOLD}DỰ PHÓNG TẠI N LỚN:{RESET}");
+    println!(
+        "  N = 10^5 : {}{}{RESET}  {}",
+        if tle_1e5 { RED } else { GREEN },
+        format!("{:.3} ms", ms_1e5),
+        if tle_1e5 { "⚠️ TLE" } else { "✅ OK" }
+    );
+    println!(
+        "  N = 10^6 : {}{}{RESET}  {}",
+        if tle_1e6 { RED } else { GREEN },
+        format!("{:.3} ms", ms_1e6),
+        if tle_1e6 { "⚠️ TLE" } else { "✅ OK" }
+    );
+    for w in &warnings {
+        println!("  {YELLOW}• {}{RESET}", w);
+    }
+    println!();
+    println!("{DIM}Mẹo: dùng --n 1000,2000,4000,8000,16000 để tăng độ chính xác; --json để lấy máy đọc.{RESET}");
+    println!();
 }
 
 #[cfg(test)]

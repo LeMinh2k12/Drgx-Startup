@@ -1160,3 +1160,228 @@ body.matrix-rain-on #matrixCanvas {
   .toolbar-actions .btn { padding: 5px 8px; }
   .brand-sub, #synthLabel, #skinLabel { display: none; }
 }
+
+/* ==========================================================================
+   📈 Empirical Complexity O(N^k) & AST Diagnostics Panel
+   ========================================================================== */
+#right-complex {
+  padding: 0;
+}
+
+.complex-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.complex-head {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--bg-2), var(--bg-1));
+  padding: 9px 10px;
+}
+
+.complex-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-0);
+  letter-spacing: 0.2px;
+}
+
+.complex-sub {
+  margin-top: 3px;
+  font-size: 10.8px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.complex-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.complex-chart-wrap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-1);
+  padding: 8px 8px 6px;
+}
+
+#complexChart {
+  width: 100%;
+  height: 168px;
+  display: block;
+}
+
+.complex-chart-legend {
+  margin-top: 3px;
+  font-size: 10.3px;
+  color: var(--text-2);
+}
+
+.complex-chart-grid { stroke: var(--border); stroke-width: 0.6; }
+.complex-chart-axis { stroke: var(--text-2); stroke-width: 0.9; }
+.complex-chart-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+.complex-chart-reg { fill: none; stroke: var(--success); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.complex-chart-dot { fill: var(--accent); stroke: var(--bg-0); stroke-width: 1.2; }
+.complex-chart-label { fill: var(--text-2); font-size: 7.5px; font-family: monospace; }
+.complex-chart-value { fill: var(--accent); font-size: 8px; font-family: monospace; }
+
+.complex-summary {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-2);
+  padding: 9px 10px;
+  font-size: 11.3px;
+  line-height: 1.55;
+  color: var(--text-1);
+}
+
+.complex-summary .complex-big {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 0.4px;
+}
+
+.complex-summary .complex-eq {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--text-0);
+}
+
+.complex-pill {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.3px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.complex-pill.good { background: rgba(34, 197, 94, 0.18); color: #4ade80; }
+.complex-pill.warn { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+.complex-pill.bad { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+
+.complex-projection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 10.8px;
+}
+
+.complex-proj-card {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-1);
+  padding: 7px 8px;
+}
+
+.complex-proj-card b { color: var(--text-0); font-size: 12.5px; }
+.complex-proj-card.tle { border-color: rgba(239, 68, 68, 0.45); }
+.complex-proj-card.ok { border-color: rgba(34, 197, 94, 0.4); }
+
+.complex-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-1);
+}
+
+.complex-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.7px;
+}
+
+.complex-table th,
+.complex-table td {
+  padding: 4px 7px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.complex-table th {
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.complex-table th:first-child,
+.complex-table td:first-child { text-align: left; }
+.complex-table tr:last-child td { border-bottom: 0; }
+.complex-table td.num { font-family: monospace; color: var(--text-0); }
+
+.complex-findings-head {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-1);
+  margin-top: 2px;
+}
+
+.complex-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.complex-empty {
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  padding: 10px;
+  font-size: 10.8px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.finding-card {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+  border-radius: 8px;
+  background: var(--bg-1);
+  padding: 7px 8px;
+}
+
+.finding-card.error { border-left-color: var(--danger); }
+.finding-card.info { border-left-color: var(--accent); }
+.finding-card .finding-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-0);
+  line-height: 1.4;
+}
+.finding-card .finding-detail {
+  margin-top: 3px;
+  font-size: 10.5px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+.finding-card .finding-patch {
+  margin-top: 4px;
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--success);
+  word-break: break-all;
+}
+.finding-card .finding-actions {
+  margin-top: 5px;
+  display: flex;
+  gap: 5px;
+}
+
+.complex-warn-list {
+  margin: 0;
+  padding-left: 16px;
+  color: var(--warning);
+  font-size: 10.5px;
+  line-height: 1.5;
+}

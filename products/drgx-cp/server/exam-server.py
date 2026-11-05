@@ -16,7 +16,7 @@ Cung cấp:
 """
 import csv
 import datetime
-import io
+import hashlib, hmac, io
 import json
 import os
 import random
@@ -96,6 +96,407 @@ def find_expected_file(test_in: Path):
 
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# CRYPTOGRAPHIC TAMPER-EVIDENT AUDIT CHAIN & SIGNED RECEIPTS (MIT 6.824 / 6.858)
+# ---------------------------------------------------------------------------
+GENESIS_PREV_HASH = '0' * 64
+RECEIPT_HMAC_SECRET = (
+    os.environ.get('DRGX_RECEIPT_SECRET')
+    or os.environ.get('DRGX_ADMIN_TOKEN')
+    or 'drgx-mit-6858-authoritative-exam-hmac-secret-v2'
+).encode('utf-8')
+
+
+def _sha256_hex(text: str) -> str:
+    return hashlib.sha256((text or '').encode('utf-8')).hexdigest()
+
+
+def _compute_submission_score(verdict: str, tests: list) -> float:
+    if tests:
+        ac_cnt = sum(1 for t in tests if t.get('verdict') == 'AC')
+        return round((100.0 * ac_cnt) / len(tests), 2)
+    return 100.0 if verdict == 'AC' else 0.0
+
+
+def compute_audit_hash(
+    exam_code: str,
+    sub_id: str,
+    student: str,
+    timestamp: int,
+    verdict: str,
+    score: float,
+    code_sha256: str,
+    audit_prev_hash: str,
+) -> str:
+    """
+    Tính mắt xích băm bất biến theo chuẩn MIT 6.824 / 6.858:
+    SHA256(f"{exam_code}|{sub_id}|{student}|{timestamp}|{verdict}|{score}|{sha256(code)}|{audit_prev_hash}")
+    """
+    canonical = f"{exam_code}|{sub_id}|{student}|{int(timestamp)}|{verdict}|{float(score):.2f}|{code_sha256}|{audit_prev_hash}"
+    return _sha256_hex(canonical)
+
+
+def sign_submission_receipt(
+    exam_code: str,
+    sub_id: str,
+    student: str,
+    timestamp: int,
+    verdict: str,
+    score: float,
+    code_sha256: str,
+    audit_prev_hash: str,
+    audit_hash: str,
+) -> str:
+    """Ký điện tử HMAC-SHA256 lên biên lai nộp bài để chống chối bỏ (Non-Repudiation)."""
+    msg = f"{exam_code}|{sub_id}|{student}|{int(timestamp)}|{verdict}|{float(score):.2f}|{code_sha256}|{audit_prev_hash}|{audit_hash}".encode('utf-8')
+    return hmac.new(RECEIPT_HMAC_SECRET, msg, hashlib.sha256).hexdigest()
+
+
+def compute_merkle_root(leaf_hashes: list[str]) -> str:
+    """Tính Merkle Root nhị phân trên tập các audit_hash của phòng thi."""
+    if not leaf_hashes:
+        return GENESIS_PREV_HASH
+    layer = list(leaf_hashes)
+    while len(layer) > 1:
+        next_layer = []
+        for i in range(0, len(layer), 2):
+            left = layer[i]
+            right = layer[i + 1] if (i + 1) < len(layer) else layer[i]
+            next_layer.append(_sha256_hex(f"{left}:{right}"))
+        layer = next_layer
+    return layer[0]
+
+
+def attach_audit_chain_record(exam: dict, record: dict) -> dict:
+    """
+    Gắn mắt xích SHA-256 Hash-Chain và Biên lai HMAC-SHA256 vào bản ghi bài nộp.
+    Hàm này bắt buộc được gọi bên trong DATA_LOCK để đảm bảo tính tuần tự tuyến tính (Linearizability).
+    """
+    exam_code = str(exam.get('code', '')).strip().upper()
+    subs = exam.setdefault('submissions', [])
+    seq_no = len(subs) + 1
+    sub_id = str(record.get('sub_id') or f"SUB-{seq_no:04d}")
+    student = str(record.get('student', 'anonymous'))
+    timestamp = int(record.get('timestamp', int(time.time())))
+    verdict = str(record.get('verdict', 'FAIL'))
+    score = _compute_submission_score(verdict, record.get('tests', []))
+    code_sha256 = _sha256_hex(record.get('code', ''))
+    audit_prev_hash = subs[-1].get('audit_hash', GENESIS_PREV_HASH) if subs else GENESIS_PREV_HASH
+    audit_hash = compute_audit_hash(
+        exam_code, sub_id, student, timestamp, verdict, score, code_sha256, audit_prev_hash
+    )
+    signature = sign_submission_receipt(
+        exam_code, sub_id, student, timestamp, verdict, score, code_sha256, audit_prev_hash, audit_hash
+    )
+    receipt = {
+        'receipt_id': f"DRGX-{exam_code}-{sub_id}-{audit_hash[:10].upper()}",
+        'exam_code': exam_code,
+        'sub_id': sub_id,
+        'student': student,
+        'timestamp': timestamp,
+        'verdict': verdict,
+        'score': score,
+        'code_sha256': code_sha256,
+        'audit_prev_hash': audit_prev_hash,
+        'audit_hash': audit_hash,
+        'signature': signature,
+        'algorithm': 'HMAC-SHA256',
+    }
+    record['sub_id'] = sub_id
+    record['score'] = score
+    record['code_sha256'] = code_sha256
+    record['audit_prev_hash'] = audit_prev_hash
+    record['audit_hash'] = audit_hash
+    record['submission_receipt'] = receipt
+    exam['head_hash'] = audit_hash
+    return record
+
+
+def verify_exam_audit_chain(exam: dict) -> dict:
+    """
+    Kiểm định toàn bộ chuỗi băm SHA-256 (audit_prev_hash -> audit_hash) của phòng thi.
+    Phát hiện ngay lập tức nếu bất kỳ điểm số, mã nguồn, thời gian hoặc thứ tự bài nộp nào trong exams.json bị chỉnh sửa trái phép.
+    """
+    exam_code = str(exam.get('code', '')).strip().upper()
+    subs = exam.get('submissions', [])
+    expected_prev = GENESIS_PREV_HASH
+    leaf_hashes = []
+    for idx, sub in enumerate(subs):
+        sub_id = str(sub.get('sub_id') or f"SUB-{idx + 1:04d}")
+        student = str(sub.get('student', 'anonymous'))
+        timestamp = int(sub.get('timestamp', 0))
+        verdict = str(sub.get('verdict', ''))
+        score = sub.get('score')
+        if score is None:
+            score = _compute_submission_score(verdict, sub.get('tests', []))
+        actual_code_sha = _sha256_hex(sub.get('code', ''))
+        stored_code_sha = str(sub.get('code_sha256') or actual_code_sha)
+        stored_prev = str(sub.get('audit_prev_hash') or '')
+        stored_hash = str(sub.get('audit_hash') or '')
+
+        if stored_prev != expected_prev:
+            return {
+                'valid': False,
+                'exam_code': exam_code,
+                'checked_records': idx,
+                'checked_submissions': idx,
+                'total_records': len(subs),
+                'total_submissions': len(subs),
+                'tampered_index': idx,
+                'tampered_sub_id': sub_id,
+                'tampered_student': student,
+                'reason': 'BROKEN_PREV_HASH_LINK',
+                'head_hash': expected_prev,
+                'merkle_root': compute_merkle_root(leaf_hashes),
+            }
+        if stored_code_sha != actual_code_sha:
+            return {
+                'valid': False,
+                'exam_code': exam_code,
+                'checked_records': idx,
+                'checked_submissions': idx,
+                'total_records': len(subs),
+                'total_submissions': len(subs),
+                'tampered_index': idx,
+                'tampered_sub_id': sub_id,
+                'tampered_student': student,
+                'reason': 'CODE_SHA256_MISMATCH',
+                'head_hash': expected_prev,
+                'merkle_root': compute_merkle_root(leaf_hashes),
+            }
+        expected_hash = compute_audit_hash(
+            exam_code, sub_id, student, timestamp, verdict, float(score), actual_code_sha, expected_prev
+        )
+        if not hmac.compare_digest(stored_hash, expected_hash):
+            return {
+                'valid': False,
+                'exam_code': exam_code,
+                'checked_records': idx,
+                'checked_submissions': idx,
+                'total_records': len(subs),
+                'total_submissions': len(subs),
+                'tampered_index': idx,
+                'tampered_sub_id': sub_id,
+                'tampered_student': student,
+                'reason': 'AUDIT_HASH_MISMATCH',
+                'head_hash': expected_prev,
+                'merkle_root': compute_merkle_root(leaf_hashes),
+            }
+        receipt = sub.get('submission_receipt')
+        if isinstance(receipt, dict) and receipt.get('signature'):
+            expected_sig = sign_submission_receipt(
+                exam_code, sub_id, student, timestamp, verdict, float(score), actual_code_sha,
+                expected_prev, expected_hash
+            )
+            if not hmac.compare_digest(str(receipt.get('signature', '')), expected_sig):
+                return {
+                    'valid': False,
+                    'exam_code': exam_code,
+                    'checked_records': idx,
+                    'checked_submissions': idx,
+                    'total_records': len(subs),
+                    'total_submissions': len(subs),
+                    'tampered_index': idx,
+                    'tampered_sub_id': sub_id,
+                    'tampered_student': student,
+                    'reason': 'RECEIPT_SIGNATURE_MISMATCH',
+                    'head_hash': expected_prev,
+                    'merkle_root': compute_merkle_root(leaf_hashes),
+                }
+        leaf_hashes.append(expected_hash)
+        expected_prev = expected_hash
+
+    return {
+        'valid': True,
+        'exam_code': exam_code,
+        'checked_records': len(subs),
+        'checked_submissions': len(subs),
+        'total_records': len(subs),
+        'total_submissions': len(subs),
+        'tampered_index': None,
+        'head_hash': expected_prev,
+        'merkle_root': compute_merkle_root(leaf_hashes),
+    }
+
+
+def verify_submission_receipt(payload: dict, data_snapshot: dict | None = None) -> dict:
+    """Xác thực chữ ký điện tử HMAC-SHA256 và mắt xích SHA-256 của biên lai học sinh."""
+    if isinstance(payload.get('submission_receipt'), dict):
+        rcpt = payload['submission_receipt']
+    elif isinstance(payload.get('receipt'), dict):
+        rcpt = payload['receipt']
+    else:
+        rcpt = payload if isinstance(payload, dict) else {}
+
+    exam_code = str(rcpt.get('exam_code', '')).strip().upper()
+    sub_id = str(rcpt.get('sub_id', '')).strip()
+    student = str(rcpt.get('student', '')).strip()
+    verdict = str(rcpt.get('verdict', '')).strip()
+    code_sha256 = str(rcpt.get('code_sha256', '')).strip()
+    audit_prev_hash = str(rcpt.get('audit_prev_hash', '')).strip()
+    audit_hash = str(rcpt.get('audit_hash', '')).strip()
+    signature = str(rcpt.get('signature', '')).strip()
+    try:
+        timestamp = int(rcpt.get('timestamp', 0))
+        score = float(rcpt.get('score', 0.0))
+    except (TypeError, ValueError):
+        return {'valid': False, 'error': 'Trường timestamp hoặc score trong biên lai không hợp lệ'}
+
+    if not all([exam_code, sub_id, student, verdict, code_sha256, audit_prev_hash, audit_hash, signature]):
+        return {'valid': False, 'error': 'Biên lai thiếu trường mật mã bắt buộc'}
+
+    expected_audit_hash = compute_audit_hash(
+        exam_code, sub_id, student, timestamp, verdict, score, code_sha256, audit_prev_hash
+    )
+    expected_sig = sign_submission_receipt(
+        exam_code, sub_id, student, timestamp, verdict, score, code_sha256, audit_prev_hash, expected_audit_hash
+    )
+    hash_ok = hmac.compare_digest(audit_hash, expected_audit_hash)
+    sig_ok = hmac.compare_digest(signature, expected_sig)
+    valid = bool(hash_ok and sig_ok)
+
+    in_chain = False
+    if valid and data_snapshot and exam_code in data_snapshot.get('exams', {}):
+        exam_obj = data_snapshot['exams'][exam_code]
+        for s in exam_obj.get('submissions', []):
+            if s.get('sub_id') == sub_id and hmac.compare_digest(str(s.get('audit_hash', '')), audit_hash):
+                in_chain = True
+                break
+
+    return {
+        'valid': valid,
+        'hash_valid': hash_ok,
+        'signature_valid': sig_ok,
+        'in_audit_chain': in_chain,
+        'receipt_id': rcpt.get('receipt_id', ''),
+        'exam_code': exam_code,
+        'sub_id': sub_id,
+        'student': student,
+        'timestamp': timestamp,
+        'verdict': verdict,
+        'score': score,
+        'audit_hash': audit_hash,
+    }
+
+
+def compute_dual_leaderboards(exam: dict) -> dict:
+    """
+    Tính toán Bảng Điểm Đa Thể Thức (Dual Contest Leaderboard):
+    1) IOI / HSG Việt Nam Mode: Tổng điểm subtask cao nhất mỗi bài, ưu tiên thời gian đạt điểm tối đa & tổng ms.
+    2) ICPC Quốc tế Mode: Số bài AC + Tổng thời gian phạt T_penalty = t_AC (phút) + 20 * số lần nộp sai trước khi AC.
+    """
+    exam_start = int(exam.get('createdAt', 0)) or int(time.time())
+    subs = exam.get('submissions', [])
+    participants = list(exam.get('participants', []))
+    all_students = set(participants)
+    for s in subs:
+        if s.get('student'):
+            all_students.add(s['student'])
+
+    # Cấu trúc tích lũy theo học sinh -> theo mã bài (mặc định P1)
+    ioi_state = {
+        st: {'problems': {}, 'attempts': 0, 'last_ts': exam_start}
+        for st in all_students
+    }
+    icpc_state = {
+        st: {'problems': {}, 'total_attempts': 0}
+        for st in all_students
+    }
+
+    for sub in subs:
+        st = sub.get('student', 'anonymous')
+        if st not in ioi_state:
+            ioi_state[st] = {'problems': {}, 'attempts': 0, 'last_ts': exam_start}
+            icpc_state[st] = {'problems': {}, 'total_attempts': 0}
+        prob = str(sub.get('problem') or sub.get('problem_id') or 'P1').strip().upper()
+        verdict = str(sub.get('verdict', 'FAIL'))
+        tests = sub.get('tests', [])
+        score = sub.get('score')
+        if score is None:
+            score = _compute_submission_score(verdict, tests)
+        score = float(score)
+        exec_ms = sum(int(t.get('ms', 0)) for t in tests)
+        ts = int(sub.get('timestamp', exam_start))
+
+        # --- IOI Subtask Mode ---
+        ioi_st = ioi_state[st]
+        ioi_st['attempts'] += 1
+        p_ioi = ioi_st['problems'].get(prob)
+        if (
+            p_ioi is None
+            or score > p_ioi['best_score']
+            or (score == p_ioi['best_score'] and exec_ms < p_ioi['best_ms'])
+        ):
+            ioi_st['problems'][prob] = {
+                'best_score': score,
+                'best_ms': exec_ms,
+                'best_ts': ts if (p_ioi is None or score > p_ioi['best_score']) else p_ioi['best_ts'],
+                'verdict': verdict,
+            }
+
+        # --- ICPC Penalty Mode ---
+        icpc_st = icpc_state[st]
+        icpc_st['total_attempts'] += 1
+        p_icpc = icpc_st['problems'].setdefault(prob, {
+            'solved': False,
+            'wrong_before_ac': 0,
+            'ac_time_min': 0,
+            'penalty_min': 0,
+            'exec_ms': 0,
+        })
+        if not p_icpc['solved']:
+            if verdict == 'AC':
+                p_icpc['solved'] = True
+                t_ac_min = max(0, ts - exam_start) // 60
+                p_icpc['ac_time_min'] = t_ac_min
+                p_icpc['penalty_min'] = t_ac_min + 20 * p_icpc['wrong_before_ac']
+                p_icpc['exec_ms'] = exec_ms
+            elif verdict not in ('CE', 'NO_TESTS', 'BAD_LANG'):
+                p_icpc['wrong_before_ac'] += 1
+
+    ioi_rows = []
+    for st, info in ioi_state.items():
+        probs = info['problems']
+        tot_score = round(sum(p['best_score'] for p in probs.values()), 2)
+        tot_ms = sum(p['best_ms'] for p in probs.values())
+        best_ts = max((p['best_ts'] for p in probs.values()), default=exam_start)
+        elapsed_sec = max(0, best_ts - exam_start) if probs else 0
+        full_ac = sum(1 for p in probs.values() if p['best_score'] >= 100.0)
+        ioi_rows.append({
+            'student': st,
+            'total_score': tot_score,
+            'solved_full': full_ac,
+            'attempts': info['attempts'],
+            'exec_ms': tot_ms,
+            'elapsed_sec': elapsed_sec,
+            'verdict': 'AC' if (probs and all(p['best_score'] >= 100.0 for p in probs.values())) else ('PARTIAL' if tot_score > 0 else 'FAIL'),
+        })
+    ioi_rows.sort(key=lambda r: (-r['total_score'], r['elapsed_sec'], r['exec_ms'], r['student']))
+    for idx, r in enumerate(ioi_rows, 1):
+        r['rank'] = idx
+
+    icpc_rows = []
+    for st, info in icpc_state.items():
+        probs = info['problems']
+        solved_cnt = sum(1 for p in probs.values() if p['solved'])
+        penalty_tot = sum(p['penalty_min'] for p in probs.values() if p['solved'])
+        wrong_tot = sum(p['wrong_before_ac'] for p in probs.values())
+        exec_tot = sum(p['exec_ms'] for p in probs.values() if p['solved'])
+        icpc_rows.append({
+            'student': st,
+            'solved': solved_cnt,
+            'penalty_minutes': penalty_tot,
+            'wrong_attempts': wrong_tot,
+            'total_attempts': info['total_attempts'],
+            'exec_ms': exec_tot,
+        })
+    icpc_rows.sort(key=lambda r: (-r['solved'], r['penalty_minutes'], r['exec_ms'], r['total_attempts'], r['student']))
+    for idx, r in enumerate(icpc_rows, 1):
+        r['rank'] = idx
+
+    return {'ioi': ioi_rows, 'icpc': icpc_rows}
+
+
 # WINNOWING K-GRAM ANTI-CHEAT ENGINE (Chuẩn hóa Token + Băm trượt k=5, w=4)
 # ---------------------------------------------------------------------------
 def normalize_code_tokens(code: str) -> str:
@@ -217,6 +618,7 @@ def scan_exam_plagiarism(exam: dict) -> dict:
 
     pairs = []
     max_sim_by_student = {s: 0.0 for s in students}
+    sim_grid = [[0.0] * len(students) for _ in students]
     for i in range(len(students)):
         sa = students[i]
         norm_a, fp_a, _, short_a = cached_fp[sa]
@@ -235,6 +637,8 @@ def scan_exam_plagiarism(exam: dict) -> dict:
                     shared += 1
                     counts_b[h] -= 1
             sim = round((200.0 * shared) / (len(fp_a) + len(fp_b)), 1)
+            sim_grid[i][j] = sim
+            sim_grid[j][i] = sim
             if sim > max_sim_by_student[sa]:
                 max_sim_by_student[sa] = sim
             if sim > max_sim_by_student[sb]:
@@ -262,6 +666,8 @@ def scan_exam_plagiarism(exam: dict) -> dict:
         'flagged_count': sum(1 for p in pairs if p['flagged']),
         'pairs': pairs,
         'max_sim_by_student': max_sim_by_student,
+        'matrix_students': students,
+        'matrix': sim_grid,
     }
 
 
@@ -842,6 +1248,14 @@ def generate_classroom_burst(exam: dict, count: int = 40):
             'message': '',
             'code': code_txt,
             'timestamp': now - (count - idx),
+            **attach_audit_chain_record(exam, {
+                'student': st_name,
+                'language': lang,
+                'verdict': 'FAIL' if verdict != 'AC' else 'AC',
+                'tests': tests,
+                'code': code_txt,
+                'timestamp': now - (count - idx),
+            }),
         })
 
 
@@ -924,6 +1338,7 @@ pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10p
     <select id="roomSelect" onchange="selectRoom(this.value)" style="min-width:180px"></select>
     <button class="btn primary" onclick="simulate40()">⚡ Giả lập 40 Học sinh Nộp bài Đồng thời</button>
     <button class="btn warn" onclick="runAntiCheat()">🔍 Quét Đạo Văn Winnowing Toàn Phòng (N×N)</button>
+    <button class="btn primary" style="background:linear-gradient(135deg,#059669,#0284c7)" onclick="verifyAuditChain()">🔐 Kiểm định Chuỗi Băm Chống Gian Lận (SHA-256 Audit Chain)</button>
   </div>
 
   <div class="kpis">
@@ -933,11 +1348,35 @@ pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10p
     <div class="kpi"><b id="kpiPlag" style="color:var(--good)">0 cặp</b><span>Gợi ý giáo viên đối chiếu (≥ 65%, ≥ 15 vân tay)</span></div>
   </div>
 
+  <div class="card" id="auditChainBanner" style="margin-bottom:20px;border-color:#059669;background:linear-gradient(135deg,rgba(5,150,105,0.12),rgba(14,22,40,0.95))">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <div style="font-weight:800;font-size:14px;color:var(--good)" id="auditStatusTitle">🔐 SHA-256 Tamper-Evident Audit Chain &amp; Merkle Log (MIT 6.824 / 6.858)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin-top:4px">
+          Head Hash: <b id="auditHeadHash" style="color:var(--accent)">0000000000000000...</b> &nbsp;|&nbsp;
+          Merkle Root: <b id="auditMerkleRoot" style="color:#c4b5fd">0000000000000000...</b> &nbsp;|&nbsp;
+          Bản ghi đã niêm phong: <b id="auditCheckedCount" style="color:#fff">0</b>
+        </div>
+      </div>
+      <span class="badge" id="auditBadge">✓ CHAIN VERIFIED</span>
+    </div>
+    <details style="margin-top:8px;font-size:10.5px;color:var(--muted);font-family:Consolas,monospace">
+      <summary style="cursor:pointer;color:var(--accent)">Xem đầy đủ head_hash &amp; merkle_root (64 hex)</summary>
+      <div style="margin-top:6px;word-break:break-all">head_hash: <code id="auditHeadFull">0000000000000000000000000000000000000000000000000000000000000000</code></div>
+      <div style="margin-top:2px;word-break:break-all">merkle_root: <code id="auditMerkleFull">0000000000000000000000000000000000000000000000000000000000000000</code></div>
+    </details>
+  </div>
+
   <div class="grid-2">
     <div class="card">
       <h2>
         <span>📊 Bảng Xếp Hạng & Nhật Ký Nộp Bài Trực Tiếp</span>
-        <span id="roomTitleLabel" style="font-size:12.5px;color:var(--muted)"></span>
+        <span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span id="roomTitleLabel" style="font-size:12.5px;color:var(--muted);margin-right:6px"></span>
+          <button class="btn primary" id="btnModeRaw" style="padding:4px 10px;font-size:11.5px" onclick="setRankMode('raw')">📜 Nhật ký Nộp bài</button>
+          <button class="btn" id="btnModeIoi" style="padding:4px 10px;font-size:11.5px" onclick="setRankMode('ioi')">🏆 Bảng điểm IOI / HSG</button>
+          <button class="btn" id="btnModeIcpc" style="padding:4px 10px;font-size:11.5px" onclick="setRankMode('icpc')">🎈 Bảng điểm ICPC (Penalty 20p)</button>
+        </span>
       </h2>
       <div style="max-height:520px;overflow-y:auto">
         <table>
@@ -964,6 +1403,7 @@ pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10p
         <div id="plagSummary" style="font-size:13px;color:var(--muted);margin-bottom:10px">
           Nhấn nút <b>“🔍 Quét Đạo Văn Winnowing Toàn Phòng (N×N)”</b> để đối chiếu dấu vân tay cấu trúc token giữa toàn bộ học sinh.
         </div>
+        <div id="plagMatrix" style="margin-bottom:12px"></div>
         <div id="plagList"></div>
       </div>
 
@@ -1051,6 +1491,9 @@ async function selectRoom(code) {
     </tr>`;
   }).join('');
   window._currentSubs = subs;
+  window._currentExam = exam;
+  if (exam.audit_chain) renderAuditBanner(exam.audit_chain);
+  if (window._rankMode && window._rankMode !== 'raw') renderRankTable(window._rankMode);
 }
 
 function viewSingleCode(idx) {
@@ -1099,6 +1542,7 @@ async function runAntiCheat() {
       <button class="btn" style="padding:5px 10px;font-size:12px" onclick="showPlagPair(${i})">So sánh 2 cột</button>
     </div>
   `).join('');
+  renderPlagMatrix(res);
   if (lastPlagPairs.length > 0) showPlagPair(0);
 }
 
@@ -1111,6 +1555,164 @@ function showPlagPair(i) {
   document.getElementById('diffCodeA').textContent = p.code_a;
   document.getElementById('diffLabelB').textContent = `${p.student_b} (Token: ${p.norm_b.slice(0, 45)}...)`;
   document.getElementById('diffCodeB').textContent = p.code_b;
+}
+
+window._rankMode = 'raw';
+
+function renderAuditBanner(chain) {
+  if (!chain) return;
+  const titleEl = document.getElementById('auditStatusTitle');
+  const headEl = document.getElementById('auditHeadHash');
+  const merkleEl = document.getElementById('auditMerkleRoot');
+  const cntEl = document.getElementById('auditCheckedCount');
+  const badgeEl = document.getElementById('auditBadge');
+  const banner = document.getElementById('auditChainBanner');
+  if (headEl) { headEl.textContent = (chain.head_hash || '0'.repeat(64)).slice(0, 20) + '...'; headEl.title = chain.head_hash || ''; }
+  if (merkleEl) { merkleEl.textContent = (chain.merkle_root || '0'.repeat(64)).slice(0, 20) + '...'; merkleEl.title = chain.merkle_root || ''; }
+  const headFull = document.getElementById('auditHeadFull');
+  const merkleFull = document.getElementById('auditMerkleFull');
+  if (headFull) headFull.textContent = chain.head_hash || '0'.repeat(64);
+  if (merkleFull) merkleFull.textContent = chain.merkle_root || '0'.repeat(64);
+  if (cntEl) cntEl.textContent = `${chain.checked_records || 0} / ${chain.total_records != null ? chain.total_records : (chain.checked_records || 0)}`;
+  if (chain.valid) {
+    if (titleEl) { titleEl.textContent = '🔐 SHA-256 Tamper-Evident Audit Chain & Merkle Log — Toàn vẹn 100%'; titleEl.style.color = 'var(--good)'; }
+    if (badgeEl) { badgeEl.textContent = '✓ CHAIN VERIFIED'; badgeEl.style.borderColor = 'var(--good)'; badgeEl.style.color = 'var(--good)'; }
+    if (banner) banner.style.borderColor = '#059669';
+  } else {
+    if (titleEl) { titleEl.textContent = `🚨 CẢNH BÁO CAN THIỆP DỮ LIỆU TRÁI PHÉP TẠI BẢN GHI #${chain.tampered_index} (${chain.tampered_sub_id || ''}) — ${chain.reason || 'TAMPERED'}`; titleEl.style.color = 'var(--bad)'; }
+    if (badgeEl) { badgeEl.textContent = '✗ TAMPER DETECTED'; badgeEl.style.borderColor = 'var(--bad)'; badgeEl.style.color = 'var(--bad)'; }
+    if (banner) banner.style.borderColor = 'var(--bad)';
+  }
+}
+
+async function verifyAuditChain() {
+  if (!currentCode) return;
+  const chain = await api(`/exam/${currentCode}/verify-chain`);
+  renderAuditBanner(chain);
+}
+
+function setRankMode(mode) {
+  window._rankMode = mode || 'raw';
+  ['Raw', 'Ioi', 'Icpc'].forEach(k => {
+    const btn = document.getElementById('btnMode' + k);
+    if (btn) btn.className = (k.toLowerCase() === window._rankMode) ? 'btn primary' : 'btn';
+  });
+  if (window._rankMode === 'raw') {
+    if (currentCode) selectRoom(currentCode);
+  } else {
+    renderRankTable(window._rankMode);
+  }
+}
+
+function renderRankTable(mode) {
+  const exam = window._currentExam || {};
+  const lbs = exam.leaderboards || { ioi: [], icpc: [] };
+  const tbody = document.getElementById('subTableBody');
+  const theadRow = tbody && tbody.parentElement ? tbody.parentElement.querySelector('thead tr') : null;
+  if (mode === 'ioi') {
+    if (theadRow) {
+      theadRow.innerHTML = '<th>Hạng</th><th>Học sinh</th><th>Chế độ</th><th>Điểm IOI / HSG</th><th>Tổng thời gian</th><th class="no-print">Số lần nộp</th>';
+    }
+    const rows = lbs.ioi || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">Chưa có dữ liệu xếp hạng IOI.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const cls = r.total_score >= 100 ? 'ac' : 'fail';
+      return `<tr>
+        <td><b>#${r.rank}</b></td>
+        <td><b>${r.student}</b></td>
+        <td>IOI Subtask</td>
+        <td><span class="tag ${cls}">${r.total_score.toFixed(1)} / 100.0</span></td>
+        <td>${r.exec_ms} ms (+${r.elapsed_sec}s)</td>
+        <td class="no-print">${r.attempts} lần</td>
+      </tr>`;
+    }).join('');
+  } else if (mode === 'icpc') {
+    if (theadRow) {
+      theadRow.innerHTML = '<th>Hạng</th><th>Học sinh</th><th>Chế độ</th><th>Số bài AC</th><th>Penalty (T_AC + 20×Sai)</th><th class="no-print">Lần nộp sai</th>';
+    }
+    const rows = lbs.icpc || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">Chưa có dữ liệu xếp hạng ICPC.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const cls = r.solved > 0 ? 'ac' : 'fail';
+      return `<tr>
+        <td><b>#${r.rank}</b></td>
+        <td><b>${r.student}</b></td>
+        <td>ICPC Penalty</td>
+        <td><span class="tag ${cls}">${r.solved} bài AC</span></td>
+        <td><b>${r.penalty_minutes} phút</b> (${r.exec_ms} ms)</td>
+        <td class="no-print">${r.wrong_attempts} lỗi / ${r.total_attempts} nộp</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function renderPlagMatrix(res) {
+  const box = document.getElementById('plagMatrix');
+  if (!box) return;
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+  const maxBySt = res.max_sim_by_student || {};
+  const students = Array.isArray(res.matrix_students) ? res.matrix_students : [];
+  const matrix = Array.isArray(res.matrix) ? res.matrix : null;
+
+  if (matrix && students.length) {
+    const order = students.slice()
+      .sort((a, b) => ((maxBySt[b] || 0) - (maxBySt[a] || 0)))
+      .slice(0, 12);
+    const idx = {};
+    students.forEach((s, i) => { idx[s] = i; });
+    const cellColor = (v) => v >= 65
+      ? 'rgba(220,38,38,0.82)'
+      : (v >= 50 ? 'rgba(217,119,6,0.78)' : (v > 0 ? 'rgba(22,163,74,0.26)' : 'transparent'));
+    let html = '<div style="font-size:11.5px;color:var(--muted);margin-bottom:6px">🧬 Ma trận tương đồng Winnowing N×N — Top ' +
+      Math.min(12, students.length) + '/' + students.length +
+      ' học sinh có tương đồng cao nhất (đỏ ≥ 65%, cam ≥ 50%, xanh &lt; 50%):</div>' +
+      '<div style="overflow:auto;border:1px solid var(--border);border-radius:10px"><table style="border-collapse:collapse;font-size:10.5px;width:100%">' +
+      '<thead><tr><th style="padding:5px;border:1px solid var(--border);background:var(--bg);position:sticky;left:0">#</th>' +
+      order.map((s, i) => '<th title="' + esc(s) + '" style="padding:5px;border:1px solid var(--border);background:var(--bg);max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (i + 1) + '</th>').join('') +
+      '</tr></thead><tbody>';
+    order.forEach((sa, ri) => {
+      html += '<tr><th title="' + esc(sa) + '" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg);text-align:left;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (ri + 1) + '. ' + esc(sa) + '</th>';
+      order.forEach((sb, ci) => {
+        if (ri === ci) {
+          html += '<td style="padding:4px;border:1px solid var(--border);text-align:center;color:var(--muted)">—</td>';
+        } else {
+          const v = Number(matrix[idx[sa]] && matrix[idx[sa]][idx[sb]]) || 0;
+          const fg = v >= 50 ? '#fff' : 'var(--text)';
+          html += '<td title="' + esc(sa) + ' ↔ ' + esc(sb) + ': ' + v.toFixed(1) + '%" style="padding:4px 5px;border:1px solid var(--border);text-align:center;background:' + cellColor(v) + ';color:' + fg + ';font-weight:' + (v >= 50 ? '800' : '500') + '">' + (v > 0 ? Math.round(v) : '·') + '</td>';
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    box.innerHTML = html;
+    return;
+  }
+
+  const entries = Object.entries(maxBySt).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  if (!entries.length) {
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = '<div style="font-size:11.5px;color:var(--muted);margin-bottom:6px">📊 Phổ tương đồng cấu trúc Winnowing cao nhất (Top 12 máy trạm):</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px">' +
+    entries.map(([st, sim]) => {
+      const col = sim >= 65 ? 'var(--bad)' : (sim >= 50 ? 'var(--warn)' : 'var(--good)');
+      return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px">
+        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700" title="${esc(st)}">${esc(st)}</div>
+        <div style="height:5px;background:#1e293b;border-radius:99px;margin:4px 0;overflow:hidden">
+          <div style="height:100%;width:${Math.min(100, sim)}%;background:${col}"></div>
+        </div>
+        <div style="color:${col};font-weight:800">${sim}%</div>
+      </div>`;
+    }).join('') + '</div>';
 }
 
 initDashboard();
@@ -1177,7 +1779,7 @@ class Handler(BaseHTTPRequestHandler):
                 'status': 'ready',
                 'version': '1.2.0',
                 'concurrency': 'ThreadingHTTPServer',
-                'features': ['dashboard', 'winnowing-anti-cheat', 'csv-export', 'burst-40']
+                'features': ['dashboard', 'winnowing-anti-cheat', 'winnowing-matrix', 'csv-export', 'burst-40', 'sha256-audit-chain', 'hmac-receipts', 'ioi-icpc-leaderboards']
             })
         if self.path == '/exams':
             if not self._is_admin_authorized():
@@ -1216,6 +1818,15 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(csv_bytes)
             return
+        if self.path.startswith('/exam/') and self.path.endswith('/verify-chain'):
+            code = self.path.split('/exam/', 1)[1].rsplit('/verify-chain', 1)[0].strip().upper()
+            with DATA_LOCK:
+                data = load_data()
+                exam = data['exams'].get(code)
+                if not exam:
+                    return self._send(404, {'error': 'Không tìm thấy phòng thi'})
+                chain_res = verify_exam_audit_chain(exam)
+            return self._send(200, chain_res)
         if self.path.startswith('/exam/'):
             if not self._is_admin_authorized():
                 return self._send(403, {'error': 'Cần quyền Admin (localhost hoặc X-DrgX-Admin-Token)'})
@@ -1225,7 +1836,12 @@ class Handler(BaseHTTPRequestHandler):
                 exam = data['exams'].get(code)
             if not exam:
                 return self._send(404, {'error': 'Không tìm thấy phòng thi'})
-            return self._send(200, exam)
+            enriched = dict(exam)
+            enriched['leaderboards'] = compute_dual_leaderboards(exam)
+            enriched['audit_chain'] = verify_exam_audit_chain(exam)
+            enriched['head_hash'] = enriched['audit_chain'].get('head_hash', GENESIS_PREV_HASH)
+            enriched['merkle_root'] = enriched['audit_chain'].get('merkle_root', GENESIS_PREV_HASH)
+            return self._send(200, enriched)
         self._send(404, {'error': 'Not found'})
 
     def do_POST(self):
@@ -1324,6 +1940,12 @@ class Handler(BaseHTTPRequestHandler):
             report = scan_exam_plagiarism(exam)
             return self._send(200, report)
 
+        if self.path == '/exam/verify-receipt':
+            with DATA_LOCK:
+                data = load_data()
+                res_verify = verify_submission_receipt(payload, data)
+            return self._send(200, res_verify)
+
         if self.path == '/submit':
             code = str(payload.get('examCode', '')).strip().upper()
             lang = str(payload.get('language', 'cpp')).strip().lower()
@@ -1360,6 +1982,7 @@ class Handler(BaseHTTPRequestHandler):
                 exam = data['exams'].get(code)
                 if not exam:
                     return self._send(404, {'error': 'Mã phòng không tồn tại'})
+                attach_audit_chain_record(exam, record)
                 exam['submissions'].append(record)
                 save_data(data)
             return self._send(200, record)

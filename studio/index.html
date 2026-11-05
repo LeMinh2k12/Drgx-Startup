@@ -38,6 +38,9 @@
         <button class="btn" onclick="aiAction('bugcheck')" title="Quét lỗi tràn số, I/O, logic & tự động vá code (Ctrl+Shift+B)">
           🔍 AI Tìm Bug & Vá
         </button>
+        <button class="btn" id="btnComplexityPanel" onclick="openComplexityPanel()" title="📈 Đo độ phức tạp thực nghiệm O(N^k) & Chẩn đoán 71 quy tắc AST/GCC 15 với autofix 1-click">
+          📈 Đo Độ Phức Tạp O(N^k)
+        </button>
         <button class="btn" onclick="formatCurrentCode()" title="Tự động căn chỉnh & làm đẹp code C++17 (Shift+Alt+F)">
           ✨ Format
         </button>
@@ -315,6 +318,7 @@
         <div class="right-tabs">
           <button class="tab-btn active" data-right="copilot" onclick="switchRight('copilot')">🤖 AI Copilot &amp; Tutor</button>
           <button class="tab-btn" data-right="vibe" onclick="switchRight('vibe')">🎧 Vibe &amp; Thi Đấu</button>
+          <button class="tab-btn" data-right="complex" onclick="switchRight('complex')">📈 Complexity &amp; AST</button>
         </div>
 
         <!-- Right Pane 1: AI Copilot -->
@@ -396,6 +400,44 @@
                 <div>Số test đã chạy: <b id="statTestsRun" style="color:var(--accent)">0</b></div>
                 <div>Phím đã gõ: <b id="statKeystrokes" style="color:var(--text-0)">0</b></div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Pane 3: 📈 Empirical Complexity O(N^k) & AST Diagnostics -->
+        <div class="right-pane" id="right-complex">
+          <div class="complex-scroll">
+            <div class="complex-head">
+              <div class="complex-title">📈 Đo Độ Phức Tạp O(N^k) &amp; Chẩn Đoán AST</div>
+              <div class="complex-sub" id="complexStatus">Sẵn sàng · N = 250 → 4000 · 71 quy tắc AST/GCC 15 · autofix 1-click</div>
+            </div>
+
+            <div class="complex-toolbar">
+              <button class="btn sm primary" id="btnProfileComplexity" onclick="runComplexityProfile()" title="Biên dịch, chạy N = 250/500/1000/2000/4000 và hồi quy log-log">
+                📈 Đo Độ Phức Tạp
+              </button>
+              <button class="btn sm" id="btnAstDiagnose" onclick="runAstDiagnostics()" title="Quét 71 quy tắc AST + GCC 15 + linker + NTSTATUS">
+                🩺 Chẩn Đoán AST
+              </button>
+              <button class="btn sm success" id="btnApplyComplexityFix" onclick="applyComplexityFix()" disabled title="Áp dụng toàn bộ bản vá đã sinh vào Editor">
+                ✨ Áp Dụng Bản Vá
+              </button>
+            </div>
+
+            <div class="complex-chart-wrap">
+              <svg id="complexChart" viewBox="0 0 340 190" preserveAspectRatio="none" aria-label="Biểu đồ T(N)"></svg>
+              <div class="complex-chart-legend" id="complexChartLegend">Chưa có dữ liệu — bấm “📈 Đo Độ Phức Tạp”.</div>
+            </div>
+
+            <div class="complex-summary" id="complexSummary"></div>
+            <div class="complex-projection" id="complexProjection"></div>
+            <div class="complex-table-wrap" id="complexTableWrap"></div>
+
+            <div class="complex-findings-head">
+              🩺 AST / GCC 15 / NTSTATUS · <span id="astFindingCount">0</span> phát hiện
+            </div>
+            <div class="complex-findings" id="astFindings">
+              <div class="complex-empty">Bấm “🩺 Chẩn Đoán AST” để quét lỗi cú pháp, kiểu dữ liệu, linker và runtime NTSTATUS.</div>
             </div>
           </div>
         </div>

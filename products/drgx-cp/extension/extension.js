@@ -19,6 +19,107 @@ let output;
 let homePanel = null;
 let lastTarget = null;
 let lastAction = 'local';
+let sessionStudentTokens = {};
+
+// ─── Tiền kiểm Quy chế Thi Themis & Phân tích Tĩnh (Themis + Static Complexity Guard) ───
+function runThemisAndStaticGuard(sourceText, filePath, lang) {
+  const warnings = [];
+  const raw = String(sourceText || '');
+  const baseName = path.basename(filePath || '', path.extname(filePath || '')).toUpperCase();
+  const lines = raw.split(/\r?\n/);
+
+  if (lang === 'cpp') {
+    // 1. Kiểm tra quy chế tệp tin Themis (TASK.INP / TASK.OUT)
+    const freopenRe = /freopen\s*\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,\s*(stdin|stdout)\s*\)/g;
+    let m;
+    while ((m = freopenRe.exec(raw)) !== null) {
+      const targetFile = m[1].trim();
+      const stream = m[3].trim();
+      const expectedExt = stream === 'stdin' ? '.INP' : '.OUT';
+      const expectedName = baseName + expectedExt;
+      if (baseName && targetFile.toUpperCase() !== expectedName) {
+        warnings.push(`[Themis File Guard] Phát hiện freopen("${targetFile}", ..., ${stream}) lệch tên bài "${expectedName}" — dễ bị 0 điểm trên Themis.`);
+      }
+    }
+
+    // 2. Kiểm tra biến đếm tổng/tích kiểu int 32-bit trong vòng lặp (nguy cơ tràn số Integer Overflow)
+    const intAccumDeclRe = /\bint\s+([a-zA-Z_]\w*(?:\s*=\s*[^,;]+)?(?:\s*,\s*[a-zA-Z_]\w*(?:\s*=\s*[^,;]+)?)*)\s*;/g;
+    const intVars = new Set();
+    let dm;
+    while ((dm = intAccumDeclRe.exec(raw)) !== null) {
+      const declPart = dm[1];
+      for (const chunk of declPart.split(',')) {
+        const vMatch = chunk.trim().match(/^([a-zA-Z_]\w*)/);
+        if (vMatch && vMatch[1] !== 'main' && vMatch[1] !== 'i' && vMatch[1] !== 'j' && vMatch[1] !== 'k') {
+          intVars.add(vMatch[1]);
+        }
+      }
+    }
+
+    let loopDepth = 0;
+    let maxLoopDepth = 0;
+    let endlInLoopLine = 0;
+    const overflowRiskVars = new Set();
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const cleanLine = lines[idx].replace(/\/\/.*$/, '').trim();
+      if (!cleanLine) continue;
+      if (/\b(for|while)\s*\(/.test(cleanLine)) {
+        loopDepth++;
+        if (loopDepth > maxLoopDepth) maxLoopDepth = loopDepth;
+      }
+      if (loopDepth > 0) {
+        if (/\bendl\b/.test(cleanLine) && !endlInLoopLine) {
+          endlInLoopLine = idx + 1;
+        }
+        const accumMatch = cleanLine.match(/\b([a-zA-Z_]\w*)\s*(\+=|\*=|=\s*\1\s*[+*])/);
+        if (accumMatch && intVars.has(accumMatch[1])) {
+          overflowRiskVars.add(accumMatch[1]);
+        }
+      }
+      const opens = (cleanLine.match(/\{/g) || []).length;
+      const closes = (cleanLine.match(/\}/g) || []).length;
+      if (closes > opens && loopDepth > 0) {
+        loopDepth = Math.max(0, loopDepth - (closes - opens));
+      }
+    }
+
+    if (overflowRiskVars.size > 0) {
+      const varList = Array.from(overflowRiskVars).join(', ');
+      warnings.push(`[Static Complexity Guard] Biến tích lũy (${varList}) trong vòng lặp đang dùng kiểu 'int' 32-bit (~2.14×10^9) có nguy cơ tràn số (Overflow) -> Gợi ý đổi sang 'long long'.`);
+    } else if (/\bint\b/.test(raw) && !/\blong\s+long\b|\bll\b|\bint64_t\b/.test(raw) && maxLoopDepth >= 1) {
+      warnings.push(`[Static Complexity Guard] Code chỉ dùng kiểu 'int' 32-bit trong bài có vòng lặp -> Gợi ý dùng 'long long' cho biến tổng/kết quả.`);
+    }
+
+    // 3. Kiểm tra dùng endl trong vòng lặp lớn gây TLE
+    if (endlInLoopLine > 0) {
+      warnings.push(`[Static Complexity Guard] Phát hiện dùng 'endl' trong vòng lặp (dòng ${endlInLoopLine}) gây flush bộ đệm liên tục dẫn đến TLE -> Gợi ý thay bằng '\\n'.`);
+    }
+  } else if (lang === 'python') {
+    // Kiểm tra tên file .INP/.OUT trong Python open(...)
+    const pyOpenRe = /open\s*\(\s*['"]([^'"]+\.(?:inp|out))['"]/gi;
+    let pm;
+    while ((pm = pyOpenRe.exec(raw)) !== null) {
+      const fname = pm[1].trim();
+      const stem = path.basename(fname, path.extname(fname)).toUpperCase();
+      if (baseName && stem !== baseName) {
+        warnings.push(`[Themis File Guard] Tệp "${fname}" trong open() không khớp tên bài "${baseName}.INP/.OUT".`);
+      }
+    }
+  }
+
+  return warnings;
+}
+
+function formatReceiptShort(resOrReceipt) {
+  const r = (resOrReceipt && resOrReceipt.submission_receipt) ? resOrReceipt.submission_receipt : resOrReceipt;
+  if (!r) return '';
+  if (typeof r === 'string') return r;
+  const id = r.receipt_id || `${r.exam_code || ''}-${r.sub_id || ''}`;
+  const sig = (r.signature || '').slice(0, 10);
+  const h = (r.audit_hash || '').slice(0, 10);
+  return `${id} [HMAC:${sig}… | SHA256:${h}…]`;
+}
 
 function buildExecEnv() {
   const env = Object.assign({}, process.env);
@@ -119,6 +220,13 @@ function formatSummary(state) {
   if (state.summary && state.summary.verdict) {
     lines.push(`Verdict: ${state.summary.verdict} (${state.summary.ac || 0}/${state.summary.total || 0}) · ${state.summary.totalMs || 0} ms`);
   }
+  if (state.receiptShort) {
+    lines.push(`Cryptographic Receipt: ${state.receiptShort}`);
+  }
+  if (Array.isArray(state.guardWarnings) && state.guardWarnings.length) {
+    lines.push('', 'Themis & Static Complexity Guard:');
+    for (const w of state.guardWarnings) lines.push(`  ! ${w}`);
+  }
   if (state.compile && state.compile.status === 'error' && state.compile.message) {
     lines.push('', 'Compile error:', state.compile.message.trim());
   }
@@ -128,7 +236,7 @@ function formatSummary(state) {
   return lines.join('\n');
 }
 
-function mapServerResult(res, target, code) {
+function mapServerResult(res, target, code, guardWarnings = []) {
   const rawTests = Array.isArray(res && res.tests) ? res.tests : [];
   const tests = rawTests.map(t => ({
     name: t.name || 'test',
@@ -142,6 +250,13 @@ function mapServerResult(res, target, code) {
   const ac = tests.filter(t => t.verdict === 'AC').length;
   const totalMs = tests.reduce((sum, t) => sum + (Number(t.ms) || 0), 0);
   const verdict = (res && res.verdict) || (tests.length && ac === tests.length ? 'AC' : 'FAIL');
+  const receiptShort = formatReceiptShort(res);
+  const baseMsg = (res && res.message) || '';
+  const fullMsg = [
+    baseMsg,
+    receiptShort ? `🔐 Biên lai nộp bài (HMAC-SHA256): ${receiptShort}` : '',
+    ...guardWarnings
+  ].filter(Boolean).join(' · ');
   return {
     phase: 'done',
     mode: 'server',
@@ -155,7 +270,10 @@ function mapServerResult(res, target, code) {
     progress: { completed: tests.length, total: tests.length },
     tests,
     summary: { verdict, ac, total: tests.length, totalMs },
-    message: (res && res.message) || ''
+    receipt: (res && res.submission_receipt) || null,
+    receiptShort,
+    guardWarnings,
+    message: fullMsg
   };
 }
 
@@ -253,6 +371,15 @@ async function judge(preferredTarget) {
   const tests = readTests(testsDir);
   output.clear();
   output.appendLine(`[DrgX CP] Bắt đầu chấm: ${src}`);
+
+  const sourceText = target.doc ? target.doc.getText() : fs.readFileSync(src, 'utf8');
+  const guardWarnings = runThemisAndStaticGuard(sourceText, src, lang);
+  for (const w of guardWarnings) {
+    output.appendLine(`⚠️ ${w}`);
+  }
+  if (guardWarnings.length) {
+    vscode.window.showWarningMessage(`DrgX CP Guard: ${guardWarnings[0]}`);
+  }
 
   const cfg = vscode.workspace.getConfiguration('drgxCp');
   const examCode = cfg.get('examCode') || '';
@@ -403,7 +530,9 @@ async function judge(preferredTarget) {
     compile: { status: 'ok', message: '', ms: compMs },
     progress: { completed: tests.length, total: tests.length },
     tests: pendingTests.slice(),
-    summary: { verdict: finalVerdict, ac, total: tests.length, totalMs }
+    summary: { verdict: finalVerdict, ac, total: tests.length, totalMs },
+    guardWarnings,
+    message: guardWarnings.join(' · ')
   });
   vscode.window.showInformationMessage(`DrgX CP Judge: ${summary}`);
 }
@@ -417,6 +546,9 @@ async function joinExam() {
   if (!name) return;
   try {
     const res = await postJson(srv + '/exam/join', { code: code.trim().toUpperCase(), name });
+    if (res.studentToken && res.exam && res.exam.code) {
+      sessionStudentTokens[res.exam.code] = res.studentToken;
+    }
     await cfg.update('examCode', res.exam.code, vscode.ConfigurationTarget.Global);
     await cfg.update('studentName', name, vscode.ConfigurationTarget.Global);
     updateStatus();
@@ -465,6 +597,7 @@ async function submit(preferredTarget) {
   }
   const student = cfg.get('studentName') || 'hoc-sinh';
   const sourceText = target.doc ? target.doc.getText() : fs.readFileSync(target.file, 'utf8');
+  const guardWarnings = runThemisAndStaticGuard(sourceText, target.file, lang);
   judgeView.show({
     phase: 'running',
     mode: 'server',
@@ -477,24 +610,40 @@ async function submit(preferredTarget) {
     progress: { completed: 0, total: 0 },
     tests: [],
     summary: { verdict: 'PENDING', ac: 0, total: 0, totalMs: 0 },
-    message: ''
+    guardWarnings,
+    message: guardWarnings.join(' · ')
   });
   try {
-    const res = await postJson(srv + '/submit', {
+    const payload = {
       examCode: code,
       student,
       language: lang,
       code: sourceText
-    });
+    };
+    if (sessionStudentTokens[code]) {
+      payload.studentToken = sessionStudentTokens[code];
+    }
+    const res = await postJson(srv + '/submit', payload);
+    const receiptShort = formatReceiptShort(res);
     output.clear();
     output.appendLine(`[Exam Server · ${code}] Verdict: ${res.verdict}`);
+    if (receiptShort) {
+      output.appendLine(`[Cryptographic Receipt · HMAC-SHA256] ${receiptShort}`);
+    }
+    for (const w of guardWarnings) {
+      output.appendLine(`⚠️ ${w}`);
+    }
     if (res.compile_error) output.appendLine(res.compile_error);
     if (res.message) output.appendLine(res.message);
     for (const t of (res.tests || [])) {
       output.appendLine(`  Test ${t.name}: ${t.verdict} (${t.ms} ms)`);
     }
-    judgeView.update(mapServerResult(res, target, code));
-    vscode.window.showInformationMessage(`Server Verdict [${code}]: ${res.verdict}`);
+    judgeView.update(mapServerResult(res, target, code, guardWarnings));
+    vscode.window.showInformationMessage(
+      receiptShort
+        ? `Server Verdict [${code}]: ${res.verdict} · 🔐 Biên lai: ${receiptShort}`
+        : `Server Verdict [${code}]: ${res.verdict}`
+    );
   } catch (e) {
     judgeView.update({
       phase: 'done',
@@ -786,4 +935,9 @@ function activate(context) {
 
 function deactivate() {}
 
-module.exports = { activate, deactivate };
+module.exports = {
+  activate,
+  deactivate,
+  runThemisAndStaticGuard,
+  formatReceiptShort
+};
