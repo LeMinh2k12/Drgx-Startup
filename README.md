@@ -25,6 +25,21 @@
 
 ---
 
+## Classroom — Dashboard giáo viên & Local OJ
+
+```sh
+python scripts/classroom.py --doctor
+python scripts/classroom.py
+```
+
+Tạo phòng và theo dõi điểm tại `http://127.0.0.1:8765/dashboard`; học sinh nhập mã và nộp C++17/Python tại `/oj`. Hỗ trợ đóng/mở phòng, phiên học sinh, CSV và bảng điểm IOI/ICPC. CP Studio có lệnh mở cả hai trang.
+
+- [Hướng dẫn LAN, bộ test và bảo mật](products/drgx-cp/server/CLASSROOM.md)
+- [Trang web Classroom](web/classroom.html)
+- [Phạm vi cập nhật và các giới hạn còn lại](docs/CLASSROOM-UPDATE.md)
+
+Chỉ triển khai trong mạng tin cậy; không công khai bộ chấm ra Internet. Classroom độc lập với Void-bit OJ (:8080).
+
 ## DrgX IDE là gì?
 
 DrgX IDE gộp **editor, terminal, AI Agent, judge đa testcase, stress tester, contest timer, web lab và Hệ sinh thái học tập** vào một môi trường nhẹ, tiếng Việt, chạy được cả khi mất mạng. Học sinh không cần cài 6–8 công cụ rời rạc trước khi viết dòng code đầu tiên.

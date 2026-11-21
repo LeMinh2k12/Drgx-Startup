@@ -16,7 +16,22 @@ Việc làm của launcher:
 2. Chạy `server/exam-server.py` (cổng 8765). Nếu server đã chạy thì dùng lại, không tạo trùng.
 3. Mở DrgX Workbench với profile cách ly trong `profile/` (có sẵn cấu hình của riêng CP).
 
-Phòng **`DEMO`** có sẵn 4 testcase mẫu trong `server/tests/DEMO/`. Vào phòng `DEMO`, mở `examples/demo-cp/solution.cpp` rồi nộp bài để kiểm tra toàn bộ luồng client → server.
+## Classroom: Dashboard giáo viên + Local OJ
+
+```sh
+python scripts/classroom.py --doctor
+python scripts/classroom.py
+```
+
+Chạy từ thư mục gốc repository, hoặc Windows mở `products\drgx-cp\run-classroom.cmd`.
+
+- `/dashboard`: tạo/mở phòng bằng mã, đóng/mở nhận bài, bảng điểm, nhật ký, xuất CSV, chia sẻ link học sinh.
+- `/oj`: nhập mã 6 ký tự + họ tên/SBD, nộp C++17/Python và xem kết quả từng test.
+- `/oj?code=ABC123`: điền sẵn mã phòng.
+- Phiên học sinh là bắt buộc khi nộp; tên đã đăng ký chỉ vào lại bằng đúng token. Trình duyệt giữ token trong sessionStorage của tab; CP Studio dùng SecretStorage.
+- Nếu mất phiên, liên hệ giáo viên; hiện chưa có giao diện đặt lại phiên cho SBD.
+
+Hướng dẫn LAN, quyền quản trị, bộ test và giới hạn triển khai: [server/CLASSROOM.md](server/CLASSROOM.md). Trang web giới thiệu/kết nối: `web/classroom.html`. Classroom dùng cổng 8765, độc lập với Void-bit 8080.
 
 ## Sử dụng lệnh
 
@@ -25,6 +40,8 @@ Phòng **`DEMO`** có sẵn 4 testcase mẫu trong `server/tests/DEMO/`. Vào ph
 | **DrgX CP: Chấm testcase** (F9) | Judge **cục bộ**: g++ biên dịch, chạy `tests/*.in`, so với `tests/*.out`; mở **bảng Judge** với diff từng test |
 | DrgX CP: Mở bảng chấm bài | Mở lại bảng Judge gần nhất (kết quả local hoặc server) |
 | DrgX CP: Trang chủ | Bảng webview tổng quan (server URL, hướng dẫn, trạng thái phòng) |
+| DrgX CP: Dashboard giáo viên Local | Mở dashboard trong trình duyệt |
+| DrgX CP: Mở Local OJ / Nhập mã phòng | Vào phòng và nộp bài trên web |
 | DrgX CP: Tạo phòng thi | Server sinh mã phòng (6 ký tự) — không client tự đặt |
 | DrgX CP: Tham gia phòng thi | Nhập mã phòng + tên thí sinh |
 | DrgX CP: Nộp bài lên server | Gửi source lên server, server tự chấm và trả verdict |
@@ -49,16 +66,13 @@ Server chấm bài trong `server/tests/<MÃ_PHÒNG>/<n>.in` và `<n>.out`:
 
 ```
 server/tests/
-  DEMO/          # phòng mẫu, tự nạp khi server khởi động
-    01.in  01.out
-    02.in  02.out
   C8YGPD/        # phòng do "Tạo phòng thi" sinh mã
     01.in  01.out
 ```
 
 - Mã phòng được chuẩn hoá hoa/thường và khoảng trắng khi join/submit.
 - Thư mục có `.in` nhưng thiếu `.out` trả `NO_OUT` cho test đó, không AC oan.
-- Server nạp lại danh sách phòng từ các thư mục trong `server/tests/` sau khi khởi động lại.
+- Tạo phòng qua dashboard trước, sau đó đặt bộ test vào thư mục đúng mã phòng. Danh sách phòng và nhật ký được lưu trong `server/exams.json` (không đưa vào Git).
 
 Verdict server trả về: `AC` (đạt tất cả), `FAIL` (có WA/NO_OUT), `CE` (lỗi biên dịch), `TLE`, `NO_TESTS`, `NO_OUT`, `BAD_LANG`.
 
@@ -66,7 +80,7 @@ Verdict server trả về: `AC` (đạt tất cả), `FAIL` (có WA/NO_OUT), `CE
 
 - Mã phòng do **server sinh**, không client nào tự đặt được.
 - Chấm bài **chỉ trên server** — client không được quyết định kết quả.
-- Nhật ký nộp bài lưu trong bộ nhớ server kèm timestamp.
+- Nhật ký nộp bài lưu vào `exams.json` kèm timestamp và chuỗi băm kiểm tra toàn vẹn.
 - Kênh judge tách bạch giữa máy thí sinh và máy chấm.
 
 ## Sự cố thường gặp

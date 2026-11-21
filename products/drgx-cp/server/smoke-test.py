@@ -16,12 +16,25 @@ BASE = os.environ.get('DRGX_CP_SERVER_URL', 'http://127.0.0.1:8765')
 TESTS_ROOT = str(Path(__file__).resolve().parent / 'tests')
 
 
+SESSIONS = {}
+
 def req(path, payload=None, method='GET'):
+    if path == '/submit' and payload and 'studentToken' not in payload:
+        payload = dict(payload)
+        student = payload.setdefault('student', 'tester')
+        key = (payload['examCode'], student)
+        if key not in SESSIONS:
+            joined = req('/exam/join', {'code': key[0], 'name': student}, 'POST')
+            SESSIONS[key] = joined['studentToken']
+        payload['studentToken'] = SESSIONS[key]
     data = json.dumps(payload).encode('utf-8') if payload is not None else None
     r = urllib.request.Request(BASE + path, data=data, method=method,
                                headers={'Content-Type': 'application/json'})
     with urllib.request.urlopen(r, timeout=60) as resp:
-        return json.loads(resp.read().decode('utf-8'))
+        result = json.loads(resp.read().decode('utf-8'))
+        if path == '/exam/join' and result.get('studentToken'):
+            SESSIONS[(payload['code'], payload['name'])] = result['studentToken']
+        return result
 
 
 def fail(name, detail=''):
