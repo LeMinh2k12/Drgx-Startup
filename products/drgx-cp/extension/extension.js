@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFile } = require('child_process');
 const http = require('http');
+const https = require('https');
 const judgeView = require('./judge-view');
 
 const SKINS = ['DrgX Ion', 'DrgX Nebula', 'DrgX Tokyo', 'DrgX Matrix', 'DrgX Dawn'];
@@ -20,6 +21,7 @@ let homePanel = null;
 let lastTarget = null;
 let lastAction = 'local';
 let sessionStudentTokens = {};
+let classroomSecrets;
 
 // ─── Tiền kiểm Quy chế Thi Themis & Phân tích Tĩnh (Themis + Static Complexity Guard) ───
 function runThemisAndStaticGuard(sourceText, filePath, lang) {
@@ -281,9 +283,11 @@ function postJson(urlStr, payload) {
   return new Promise((resolve, reject) => {
     const u = new URL(urlStr);
     const data = Buffer.from(JSON.stringify(payload), 'utf8');
-    const req = http.request({
+    if (!['http:', 'https:'].includes(u.protocol)) return reject(new Error('Server URL phải dùng HTTP hoặc HTTPS'));
+    const transport = u.protocol === 'https:' ? https : http;
+    const req = transport.request({
       hostname: u.hostname,
-      port: u.port,
+      port: u.port || (u.protocol === 'https:' ? 443 : 80),
       path: u.pathname,
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': data.length }
@@ -298,6 +302,7 @@ function postJson(urlStr, payload) {
         } catch (e) { reject(e); }
       });
     });
+    req.setTimeout(120000, () => req.destroy(new Error('Exam Server không phản hồi trong 120 giây')));
     req.on('error', reject);
     req.write(data);
     req.end();
@@ -537,6 +542,16 @@ async function judge(preferredTarget) {
   vscode.window.showInformationMessage(`DrgX CP Judge: ${summary}`);
 }
 
+async function openClassroomPage(page) {
+  const server = vscode.workspace.getConfiguration('drgxCp').get('serverUrl');
+  try {
+    const url = new URL(server);
+    if (!['http:', 'https:'].includes(url.protocol)) throw new Error('URL phải dùng HTTP hoặc HTTPS');
+    url.pathname = page; url.search = ''; url.hash = '';
+    await vscode.env.openExternal(vscode.Uri.parse(url.toString()));
+  } catch (e) { vscode.window.showErrorMessage('Không mở được Exam Server: ' + e.message); }
+}
+
 async function joinExam() {
   const cfg = vscode.workspace.getConfiguration('drgxCp');
   const srv = cfg.get('serverUrl');
@@ -545,9 +560,10 @@ async function joinExam() {
   const name = await vscode.window.showInputBox({ prompt: 'Tên hoặc SBD của bạn', value: cfg.get('studentName') || 'hoc-sinh' });
   if (!name) return;
   try {
-    const res = await postJson(srv + '/exam/join', { code: code.trim().toUpperCase(), name });
+    const res = await postJson(srv + '/exam/join', { code: code.trim().toUpperCase(), name, studentToken: (classroomSecrets && await classroomSecrets.get(`classroom:${srv}:${code.trim().toUpperCase()}:${name}`)) || '' });
     if (res.studentToken && res.exam && res.exam.code) {
       sessionStudentTokens[res.exam.code] = res.studentToken;
+      if (classroomSecrets) await classroomSecrets.store(`classroom:${srv}:${res.exam.code}:${name}`, res.studentToken);
     }
     await cfg.update('examCode', res.exam.code, vscode.ConfigurationTarget.Global);
     await cfg.update('studentName', name, vscode.ConfigurationTarget.Global);
@@ -620,9 +636,8 @@ async function submit(preferredTarget) {
       language: lang,
       code: sourceText
     };
-    if (sessionStudentTokens[code]) {
-      payload.studentToken = sessionStudentTokens[code];
-    }
+    payload.studentToken = (classroomSecrets && await classroomSecrets.get(`classroom:${srv}:${code}:${student}`)) || sessionStudentTokens[code] || '';
+    if (!payload.studentToken) throw new Error('Hãy vào phòng bằng mã để lấy phiên học sinh trước khi nộp.');
     const res = await postJson(srv + '/submit', payload);
     const receiptShort = formatReceiptShort(res);
     output.clear();
@@ -778,6 +793,8 @@ function renderHomeHtml(webview, showIntro = true) {
       <h3>📤 Nộp bài lên Exam Server</h3>
       <p>Server chấm độc lập (C++ / Python) và lưu biên bản chống gian lận.</p>
     </div>
+    <div class="card" onclick="cmd('dashboard')"><h3>🏫 Dashboard giáo viên Local</h3><p>Quản lý phòng thi, bảng điểm và chia sẻ mã phòng.</p></div>
+    <div class="card" onclick="cmd('oj')"><h3>💻 Local OJ trên trình duyệt</h3><p>Nhập mã phòng và nộp bài C++17 / Python.</p></div>
     <div class="card" onclick="cmd('createExam')">
       <h3>🏫 Tạo phòng thi mới (Giáo viên)</h3>
       <p>Sinh mã phòng 6 ký tự trên Exam Server nội bộ.</p>
@@ -893,6 +910,8 @@ function openHome(context, showIntro = true) {
   homePanel.webview.onDidReceiveMessage(msg => {
     if (msg.command === 'judge') vscode.commands.executeCommand('drgxCp.judge');
     if (msg.command === 'judgePanel') vscode.commands.executeCommand('drgxCp.judgePanel');
+    if (msg.command === 'dashboard') vscode.commands.executeCommand('drgxCp.dashboard');
+    if (msg.command === 'oj') vscode.commands.executeCommand('drgxCp.oj');
     if (msg.command === 'joinExam') vscode.commands.executeCommand('drgxCp.joinExam');
     if (msg.command === 'submit') vscode.commands.executeCommand('drgxCp.submit');
     if (msg.command === 'createExam') vscode.commands.executeCommand('drgxCp.createExam');
@@ -903,6 +922,7 @@ function openHome(context, showIntro = true) {
 }
 
 function activate(context) {
+  classroomSecrets = context.secrets;
   output = vscode.window.createOutputChannel('DrgX CP Judge');
   statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   judgeView.init(context, {
@@ -921,6 +941,8 @@ function activate(context) {
     statusItem,
     vscode.commands.registerCommand('drgxCp.judge', () => judge()),
     vscode.commands.registerCommand('drgxCp.judgePanel', () => judgeView.reveal()),
+    vscode.commands.registerCommand('drgxCp.dashboard', () => openClassroomPage('/dashboard')),
+    vscode.commands.registerCommand('drgxCp.oj', () => openClassroomPage('/oj')),
     vscode.commands.registerCommand('drgxCp.joinExam', joinExam),
     vscode.commands.registerCommand('drgxCp.createExam', createExam),
     vscode.commands.registerCommand('drgxCp.submit', () => submit()),

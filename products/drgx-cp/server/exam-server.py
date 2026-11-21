@@ -20,6 +20,8 @@ import hashlib, hmac, io
 import json
 import os
 import random
+import secrets
+from urllib.parse import urlsplit
 import re
 import shutil
 import string
@@ -84,7 +86,7 @@ def save_data(data):
 
 
 def random_code():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
 
 
 def find_expected_file(test_in: Path):
@@ -1065,7 +1067,11 @@ def judge_submission(exam_code: str, language: str, code_text: str):
         overall = 'AC'
         for test in inputs:
             out_file = find_expected_file(test)
-            expected = out_file.read_text(encoding='utf-8').strip() if out_file else ''
+            if out_file is None:
+                overall = 'FAIL'
+                results.append({'name': test.stem, 'verdict': 'NO_OUT', 'ms': 0})
+                continue
+            expected = out_file.read_text(encoding='utf-8').strip()
             inp_data = test.read_text(encoding='utf-8')
             t0 = time.perf_counter()
             rc, stdout_str, stderr_str, timed_out = _run_in_low_integrity_sandbox(
@@ -1305,7 +1311,7 @@ input, select {
 .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 18px; }
 .card h2 { font-size: 17px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+th, td { overflow-wrap:anywhere; padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
 th { background: var(--card); color: var(--accent); font-size: 11.5px; text-transform: uppercase; }
 .tag { padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; }
 .tag.ac { background: rgba(52,211,153,0.18); color: var(--good); }
@@ -1326,6 +1332,7 @@ pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10p
     <span class="badge">● LAN ONLINE · Queue=256 · Winnowing k-gram</span>
   </div>
   <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap">
+    <a class="btn" href="/oj">💻 Local OJ / Nhập mã phòng</a>
     <button class="btn" onclick="window.print()">🖨️ In Biên Bản Điểm (A4)</button>
     <a class="btn" id="csvExportBtn" href="#">📥 Xuất Excel (.CSV)</a>
   </div>
@@ -1333,7 +1340,7 @@ pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10p
 
 <main class="container">
   <div class="toolbar no-print">
-    <input id="roomTitle" value="Kiểm tra 45 phút Tin học 11 — C++17 & Python" style="min-width:280px" />
+    <input aria-label="Tên phòng thi" id="roomTitle" value="Kiểm tra 45 phút Tin học 11 — C++17 & Python" style="min-width:0;max-width:100%;width:320px" />
     <button class="btn primary" onclick="createRoom()">➕ Tạo Phòng Thi Mới</button>
     <select id="roomSelect" onchange="selectRoom(this.value)" style="min-width:180px"></select>
     <button class="btn primary" onclick="simulate40()">⚡ Giả lập 40 Học sinh Nộp bài Đồng thời</button>
@@ -1341,6 +1348,18 @@ pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10p
     <button class="btn primary" style="background:linear-gradient(135deg,#059669,#0284c7)" onclick="verifyAuditChain()">🔐 Kiểm định Chuỗi Băm Chống Gian Lận (SHA-256 Audit Chain)</button>
   </div>
 
+  <div class="toolbar no-print">
+    <label>Mở phòng bằng mã <input id="lookupCode" maxlength="6" placeholder="AB12CD" style="text-transform:uppercase;min-width:0" /></label>
+    <button class="btn" onclick="openRoomCode()">Mở phòng</button>
+    <a class="btn" id="studentLink" href="/oj">Trang học sinh</a>
+    <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('studentLink').href).catch(() => alert('Hãy sao chép liên kết Trang học sinh.'))">Sao chép link vào phòng</button>
+    <button class="btn" onclick="setRoomClosed(true)">Đóng phòng</button>
+    <button class="btn" onclick="setRoomClosed(false)">Mở lại phòng</button>
+    <label>Admin token <input id="adminToken" type="password" autocomplete="off" placeholder="Nếu server yêu cầu" style="min-width:0"></label>
+    <button class="btn" onclick="initDashboard().catch(showError)">Kết nối / Làm mới</button>
+    <span id="roomState"></span>
+    <span id="dashboardStatus" role="status" aria-live="polite"></span>
+  </div>
   <div class="kpis">
     <div class="kpi"><b id="kpiRoom">—</b><span>Mã Phòng Thi LAN (6 ký tự)</span></div>
     <div class="kpi"><b id="kpiStudents">0</b><span>Học sinh trong phòng</span></div>
@@ -1430,20 +1449,52 @@ let currentCode = '';
 let lastPlagPairs = [];
 
 async function api(path, payload) {
-  const opts = payload ? { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) } : {};
+  const headers = {'X-DrgX-Admin-Token': document.getElementById('adminToken').value};
+  const opts = payload ? { method: 'POST', headers: {...headers, 'Content-Type': 'application/json'}, body: JSON.stringify(payload) } : {headers};
   const r = await fetch(path, opts);
-  return r.json();
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+  return data;
 }
 
+function showError(e) { document.getElementById('dashboardStatus').textContent = e.message; }
+window.addEventListener('unhandledrejection', event => { event.preventDefault(); showError(event.reason); });
+async function setRoomClosed(closed) {
+  if (!currentCode) return showError(new Error('Chọn phòng trước'));
+  await api('/exam/state', {code:currentCode, closed});
+  await selectRoom(currentCode);
+}
+async function downloadCsv(event) {
+  event.preventDefault();
+  if (!currentCode) return;
+  const r = await fetch(`/exam/${currentCode}/export.csv`, {headers:{'X-DrgX-Admin-Token':document.getElementById('adminToken').value}});
+  if (!r.ok) throw new Error('Không xuất được CSV. Kiểm tra quyền quản trị.');
+  const url = URL.createObjectURL(await r.blob());
+  const a = document.createElement('a'); a.href = url; a.download = `Bang-diem-${currentCode}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+document.getElementById('csvExportBtn').onclick = downloadCsv;
+async function openRoomCode() {
+  const code = document.getElementById('lookupCode').value.trim().toUpperCase();
+  try {
+    if (!/^[A-Z0-9]{6}$/.test(code)) throw new Error('Mã phòng phải gồm 6 chữ cái hoặc chữ số');
+    await selectRoom(code);
+    document.getElementById('roomSelect').value = code;
+    document.getElementById('dashboardStatus').textContent = 'Đã mở phòng ' + code;
+  } catch (e) { document.getElementById('dashboardStatus').textContent = e.message; }
+}
+function escapeHtml(value) {
+  const el = document.createElement('span'); el.textContent = String(value ?? ''); return el.innerHTML;
+}
 async function initDashboard() {
   const data = await api('/exams');
   const codes = Object.keys(data.exams || {});
   const sel = document.getElementById('roomSelect');
-  sel.innerHTML = codes.map(c => `<option value="${c}">${c} — ${data.exams[c].title}</option>`).join('');
+  sel.innerHTML = codes.map(c => `<option value="${c}">${c} — ${escapeHtml(data.exams[c].title)}</option>`).join('');
   if (codes.length > 0) {
     await selectRoom(codes[codes.length - 1]);
   } else {
-    await createRoom();
+    document.getElementById('dashboardStatus').textContent = 'Chưa có phòng. Hãy tạo phòng thi mới.';
   }
 }
 
@@ -1454,7 +1505,7 @@ async function createRoom() {
     const data = await api('/exams');
     const codes = Object.keys(data.exams || {});
     const sel = document.getElementById('roomSelect');
-    sel.innerHTML = codes.map(c => `<option value="${c}">${c} — ${data.exams[c].title}</option>`).join('');
+    sel.innerHTML = codes.map(c => `<option value="${c}">${c} — ${escapeHtml(data.exams[c].title)}</option>`).join('');
     sel.value = res.code;
     await selectRoom(res.code);
   }
@@ -1462,12 +1513,16 @@ async function createRoom() {
 
 async function selectRoom(code) {
   if (!code) return;
-  currentCode = code;
-  document.getElementById('csvExportBtn').href = `/exam/${code}/export.csv`;
   const exam = await api(`/exam/${code}`);
+  currentCode = code;
+  document.getElementById('studentLink').href = `/oj?code=${encodeURIComponent(code)}`;
+  document.getElementById('csvExportBtn').href = `/exam/${code}/export.csv`;
   document.getElementById('kpiRoom').textContent = exam.code || code;
   document.getElementById('roomTitleLabel').textContent = exam.title || '';
+  document.getElementById('roomState').textContent = exam.closed ? '● Phòng đã đóng' : '● Đang nhận bài';
   const subs = exam.submissions || [];
+  window._currentSubs = subs; window._currentExam = exam;
+  if (exam.audit_chain) renderAuditBanner(exam.audit_chain);
   document.getElementById('kpiStudents').textContent = (exam.participants || []).length;
   const acCount = subs.filter(s => s.verdict === 'AC').length;
   document.getElementById('kpiAc').textContent = `${acCount} / ${subs.length}`;
@@ -1483,9 +1538,9 @@ async function selectRoom(code) {
     const subTests = (s.tests || []).map(t => `${t.name}:${t.verdict}`).join(' ');
     return `<tr>
       <td>${idx + 1}</td>
-      <td><b>${s.student}</b></td>
-      <td>${(s.language || 'cpp').toUpperCase()}</td>
-      <td><span class="tag ${cls}">${s.verdict}</span> <span style="font-size:11px;color:var(--muted)">(${subTests})</span></td>
+      <td><b>${escapeHtml(s.student)}</b></td>
+      <td>${escapeHtml((s.language || 'cpp').toUpperCase())}</td>
+      <td><span class="tag ${cls}">${escapeHtml(s.verdict)}</span> <span style="font-size:11px;color:var(--muted)">(${escapeHtml(subTests)})</span></td>
       <td>${totalMs} ms</td>
       <td class="no-print"><button class="btn" style="padding:3px 8px;font-size:11px" onclick="viewSingleCode(${idx})">Xem code</button></td>
     </tr>`;
@@ -1535,7 +1590,7 @@ async function runAntiCheat() {
     <div style="padding:10px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;gap:8px">
       <div>
         <div style="font-weight:800;color:${p.flagged ? 'var(--bad)' : 'var(--warn)'}">
-          🚨 ${p.student_a} ↔ ${p.student_b} — Tương đồng: ${p.similarity}%
+          🚨 ${escapeHtml(p.student_a)} ↔ ${escapeHtml(p.student_b)} — Tương đồng: ${p.similarity}%
         </div>
         <div style="font-size:11.5px;color:var(--muted)">Trùng ${p.shared_fingerprints} dấu vân tay k-gram (k=5, w=4) dù đã đổi tên biến/chú thích</div>
       </div>
@@ -1622,7 +1677,7 @@ function renderRankTable(mode) {
       const cls = r.total_score >= 100 ? 'ac' : 'fail';
       return `<tr>
         <td><b>#${r.rank}</b></td>
-        <td><b>${r.student}</b></td>
+        <td><b>${escapeHtml(r.student)}</b></td>
         <td>IOI Subtask</td>
         <td><span class="tag ${cls}">${r.total_score.toFixed(1)} / 100.0</span></td>
         <td>${r.exec_ms} ms (+${r.elapsed_sec}s)</td>
@@ -1642,7 +1697,7 @@ function renderRankTable(mode) {
       const cls = r.solved > 0 ? 'ac' : 'fail';
       return `<tr>
         <td><b>#${r.rank}</b></td>
-        <td><b>${r.student}</b></td>
+        <td><b>${escapeHtml(r.student)}</b></td>
         <td>ICPC Penalty</td>
         <td><span class="tag ${cls}">${r.solved} bài AC</span></td>
         <td><b>${r.penalty_minutes} phút</b> (${r.exec_ms} ms)</td>
@@ -1715,7 +1770,14 @@ function renderPlagMatrix(res) {
     }).join('') + '</div>';
 }
 
-initDashboard();
+let refreshing = false;
+setInterval(async () => {
+  if (!currentCode || refreshing || document.hidden) return;
+  refreshing = true;
+  try { await selectRoom(currentCode); } catch (e) { showError(e); }
+  finally { refreshing = false; }
+}, 5000);
+initDashboard().catch(e => { document.getElementById('dashboardStatus').textContent = e.message; });
 </script>
 </body>
 </html>
@@ -1728,7 +1790,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Content-Length', str(len(body)))
-        self.send_header('Access-Control-Allow-Origin', '*')
+        # Same-origin web clients only; native Studio clients do not need CORS.
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Referrer-Policy', 'same-origin')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.end_headers()
         self.wfile.write(body)
@@ -1738,13 +1802,15 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.send_header('Content-Length', str(len(body)))
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Referrer-Policy', 'same-origin')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.end_headers()
         self.wfile.write(body)
 
     def do_OPTIONS(self):
         self.send_response(204)
-        self.send_header('Access-Control-Allow-Origin', '*')
+        # Same-origin web clients only; native Studio clients do not need CORS.
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-DrgX-Admin-Token')
         self.end_headers()
@@ -1754,7 +1820,7 @@ class Handler(BaseHTTPRequestHandler):
         if env_token:
             hdr_token = (self.headers.get('X-DrgX-Admin-Token') or '').strip()
             auth_hdr = (self.headers.get('Authorization') or '').strip()
-            return hdr_token == env_token or auth_hdr == f'Bearer {env_token}'
+            return hmac.compare_digest(hdr_token.encode(), env_token.encode()) or hmac.compare_digest(auth_hdr.encode(), f'Bearer {env_token}'.encode())
         client_ip = self.client_address[0] if self.client_address else ''
         return client_ip in ('127.0.0.1', '::1', 'localhost')
 
@@ -1769,6 +1835,9 @@ class Handler(BaseHTTPRequestHandler):
         return json.loads(raw or '{}')
 
     def do_GET(self):
+        self.path = urlsplit(self.path).path
+        if self.path in ('/oj', '/join'):
+            return self._send_html(200, (BASE_DIR / 'student.html').read_text(encoding='utf-8'))
         if self.path == '/dashboard':
             return self._send_html(200, DASHBOARD_HTML)
         if self.path == '/' and 'text/html' in (self.headers.get('Accept') or ''):
@@ -1777,9 +1846,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {
                 'service': 'DrgX CP Exam Server',
                 'status': 'ready',
-                'version': '1.2.0',
+                'version': '1.3.0',
                 'concurrency': 'ThreadingHTTPServer',
-                'features': ['dashboard', 'winnowing-anti-cheat', 'winnowing-matrix', 'csv-export', 'burst-40', 'sha256-audit-chain', 'hmac-receipts', 'ioi-icpc-leaderboards']
+                'features': ['student-oj', 'room-state', 'student-session-auth', 'dashboard', 'winnowing-anti-cheat', 'winnowing-matrix', 'csv-export', 'burst-40', 'sha256-audit-chain', 'hmac-receipts', 'ioi-icpc-leaderboards']
             })
         if self.path == '/exams':
             if not self._is_admin_authorized():
@@ -1803,13 +1872,15 @@ class Handler(BaseHTTPRequestHandler):
             writer.writerow(['STT', 'Mã phòng', 'Họ và tên học sinh', 'Ngôn ngữ', 'Kết quả (Verdict)', 'Số test đạt', 'Tổng thời gian (ms)', 'Độ tương đồng Winnowing cao nhất (%)', 'Cờ gợi ý rà soát kỹ thuật', 'Thời điểm nộp'])
             for idx, sub in enumerate(exam.get('submissions', []), 1):
                 st = sub.get('student', 'anonymous')
+                # Prevent spreadsheet formula execution when CSV is opened in Excel.
+                csv_student = "'" + st if st.lstrip().startswith(('=', '+', '-', '@')) else st
                 tests = sub.get('tests', [])
                 ac_cnt = sum(1 for t in tests if t.get('verdict') == 'AC')
                 tot_ms = sum(t.get('ms', 0) for t in tests)
                 sim = max_sim.get(st, 0.0)
                 flag_txt = 'CẦN GIÁO VIÊN ĐỐI CHIẾU' if sim >= 65.0 else 'Bình thường'
                 ts_str = datetime.datetime.fromtimestamp(sub.get('timestamp', int(time.time()))).strftime('%Y-%m-%d %H:%M:%S')
-                writer.writerow([idx, code, st, sub.get('language', 'cpp').upper(), sub.get('verdict', ''), f'{ac_cnt}/{len(tests)}', tot_ms, f'{sim}%', flag_txt, ts_str])
+                writer.writerow([idx, code, csv_student, sub.get('language', 'cpp').upper(), sub.get('verdict', ''), f'{ac_cnt}/{len(tests)}', tot_ms, f'{sim}%', flag_txt, ts_str])
             csv_bytes = ('\ufeff' + buf.getvalue()).encode('utf-8')
             self.send_response(200)
             self.send_header('Content-Type', 'text/csv; charset=utf-8')
@@ -1819,6 +1890,8 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(csv_bytes)
             return
         if self.path.startswith('/exam/') and self.path.endswith('/verify-chain'):
+            if not self._is_admin_authorized():
+                return self._send(403, {'error': 'Cần quyền Admin'})
             code = self.path.split('/exam/', 1)[1].rsplit('/verify-chain', 1)[0].strip().upper()
             with DATA_LOCK:
                 data = load_data()
@@ -1854,6 +1927,29 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             return self._send(400, {'error': 'Body JSON không hợp lệ'})
 
+        if not isinstance(payload, dict):
+            return self._send(400, {'error': 'Body JSON phải là object'})
+
+        origin = self.headers.get('Origin')
+        if origin and urlsplit(origin).netloc != self.headers.get('Host'):
+            return self._send(403, {'error': 'Origin không được phép'})
+
+        if self.path == '/exam/state':
+            if not self._is_admin_authorized():
+                return self._send(403, {'error': 'Cần quyền Admin'})
+            code = str(payload.get('code', '')).strip().upper()
+            closed = payload.get('closed')
+            if not isinstance(closed, bool):
+                return self._send(400, {'error': 'closed phải là boolean'})
+            with DATA_LOCK:
+                data = load_data()
+                exam = data['exams'].get(code)
+                if not exam:
+                    return self._send(404, {'error': 'Mã phòng không tồn tại'})
+                exam['closed'] = closed
+                save_data(data)
+            return self._send(200, {'code': code, 'closed': closed})
+
         if self.path == '/exam/create':
             if not self._is_admin_authorized():
                 return self._send(403, {'error': 'Cần quyền Admin (localhost hoặc X-DrgX-Admin-Token)'})
@@ -1875,7 +1971,11 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == '/exam/join':
             code = str(payload.get('code', '')).strip().upper()
-            name = str(payload.get('name', 'hoc-sinh')).strip()[:64] or 'hoc-sinh'
+            if not re.fullmatch(r'[A-Z0-9]{6}', code):
+                return self._send(400, {'error': 'Mã phòng phải gồm 6 chữ cái hoặc chữ số'})
+            name = str(payload.get('name', '')).strip()[:64]
+            if not name:
+                return self._send(400, {'error': 'Vui lòng nhập họ tên / SBD'})
             client_ip = self.client_address[0] if self.client_address else ''
             req_token = str(payload.get('studentToken', '')).strip()
             with DATA_LOCK:
@@ -1883,17 +1983,16 @@ class Handler(BaseHTTPRequestHandler):
                 exam = data['exams'].get(code)
                 if not exam:
                     return self._send(404, {'error': 'Mã phòng không tồn tại'})
+                if exam.get('closed'):
+                    return self._send(403, {'error': 'Phòng thi đã đóng'})
                 tokens = exam.setdefault('studentTokens', {})
                 ips = exam.setdefault('studentIps', {})
                 if name in tokens:
-                    # Nếu học sinh đã đăng ký từ một máy khác và không gửi đúng studentToken thì từ chối giả mạo
-                    if req_token and req_token != tokens[name]:
-                        return self._send(403, {'error': 'Sai mã phiên học sinh (studentToken)'})
-                    if not req_token and ips.get(name) and ips.get(name) != client_ip and client_ip not in ('127.0.0.1', '::1'):
-                        return self._send(403, {'error': 'Tên học sinh này đã được đăng ký từ một máy trạm khác trong phòng thi'})
+                    if not req_token or not hmac.compare_digest(req_token.encode(), str(tokens[name]).encode()):
+                        return self._send(403, {'error': 'Tên/SBD đã được đăng ký. Dùng đúng phiên trước hoặc liên hệ giáo viên.'})
                     st_token = tokens[name]
                 else:
-                    st_token = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+                    st_token = secrets.token_urlsafe(24)
                     tokens[name] = st_token
                     ips[name] = client_ip
                 if name not in exam['participants']:
@@ -1911,7 +2010,10 @@ class Handler(BaseHTTPRequestHandler):
             if not self._is_admin_authorized():
                 return self._send(403, {'error': 'Cần quyền Admin'})
             code = str(payload.get('code', '')).strip().upper()
-            count = min(max(int(payload.get('count', 40)), 5), 60)
+            try:
+                count = min(max(int(payload.get('count', 40)), 5), 60)
+            except (TypeError, ValueError):
+                return self._send(400, {'error': 'count phải là số nguyên'})
             with DATA_LOCK:
                 data = load_data()
                 if not code or code not in data['exams']:
@@ -1951,6 +2053,8 @@ class Handler(BaseHTTPRequestHandler):
             lang = str(payload.get('language', 'cpp')).strip().lower()
             src = str(payload.get('code', ''))
             student = str(payload.get('student', 'anonymous')).strip()[:64] or 'anonymous'
+            if lang not in ('cpp', 'python') or not src.strip():
+                return self._send(400, {'error': 'Chọn C++17 / Python và nhập mã nguồn trước khi nộp'})
             req_token = str(payload.get('studentToken', '')).strip()
             client_ip = self.client_address[0] if self.client_address else ''
             with DATA_LOCK:
@@ -1958,15 +2062,16 @@ class Handler(BaseHTTPRequestHandler):
                 exam = data['exams'].get(code)
                 if not exam:
                     return self._send(404, {'error': 'Mã phòng không tồn tại'})
+                if exam.get('closed'):
+                    return self._send(403, {'error': 'Phòng thi đã đóng'})
                 tokens = exam.get('studentTokens', {})
-                ips = exam.get('studentIps', {})
-                if student != 'anonymous' and student in tokens:
-                    if req_token and not __import__('hmac').compare_digest(str(req_token), str(tokens[student])):
-                        return self._send(403, {'error': 'Mã phiên học sinh (studentToken) không hợp lệ'})
-                    if not req_token and ips.get(student) and ips.get(student) != client_ip and client_ip not in ('127.0.0.1', '::1'):
-                        return self._send(403, {'error': 'Không được nộp bài mạo danh học sinh ở máy trạm khác'})
-            with GRADE_SLOTS:
-                res = judge_submission(code, lang, src)
+                if student not in tokens or not req_token or not hmac.compare_digest(req_token.encode(), str(tokens[student]).encode()):
+                    return self._send(403, {'error': 'Hãy vào phòng bằng mã và dùng đúng phiên học sinh trước khi nộp'})
+            try:
+                with GRADE_SLOTS:
+                    res = judge_submission(code, lang, src)
+            except Exception:
+                return self._send(500, {'error': 'Bộ chấm gặp lỗi. Liên hệ giáo viên để kiểm tra toolchain và bộ test.'})
             record = {
                 'student': student,
                 'language': lang,

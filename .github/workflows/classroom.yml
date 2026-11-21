@@ -1,0 +1,26 @@
+name: Classroom regression tests
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+jobs:
+  classroom:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Classroom components
+        run: python scripts/classroom.py --doctor
+      - name: Test HTTP, authentication and real judging
+        run: python -m unittest discover -s products/drgx-cp/server/test_suite -v
+      - name: Check JavaScript syntax
+        run: python scripts/check_classroom_js.py

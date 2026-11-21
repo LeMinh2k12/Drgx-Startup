@@ -11,6 +11,8 @@
   "main": "./extension.js",
   "contributes": {
     "commands": [
+      { "command": "drgxCp.dashboard", "title": "DrgX CP: Dashboard giáo viên Local" },
+      { "command": "drgxCp.oj", "title": "DrgX CP: Mở Local OJ / Nhập mã phòng" },
       { "command": "drgxCp.judge", "title": "DrgX CP: Chấm toàn bộ tests/ (F9 / Ctrl+Alt+J)" },
       { "command": "drgxCp.judgePanel", "title": "DrgX CP: Mở bảng chấm bài (Judge UI)" },
       { "command": "drgxCp.submit", "title": "DrgX CP: Nộp bài lên Exam Server" },
